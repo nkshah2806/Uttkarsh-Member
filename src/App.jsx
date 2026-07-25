@@ -10,6 +10,7 @@ import User from "./pages/User";
 import UserEdit from "./pages/User/create";
 import UserDetails from "./pages/User/UserDetails";
 import { DashboardOverview, ClientManagement, ReportEntry, ReportDesigner } from "./pages/HealthAnalysis";
+import MemberProfilePage from "./pages/MemberProfile";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
 
           <Route element={<PrivateRoute />}>
             <Route path="/dashboard" element={<DashboardOverview />} />
+            <Route path="/member/profile" element={<MemberProfilePage />} />
             <Route path="/health-dashboard" element={<DashboardOverview />} />
             <Route path="/clients" element={<ClientManagement />} />
             <Route path="/report-entry" element={<ReportEntry />} />
@@ -40,5 +42,6 @@ function App() {
     </>
   );
 }
+
 
 export default App;
