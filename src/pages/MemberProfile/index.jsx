@@ -128,11 +128,12 @@ export default function MemberProfilePage() {
       if (res.success) {
         toast.success("✅ Profile completed and saved successfully!");
         localStorage.setItem("isProfileCompleted", "true");
+        window.dispatchEvent(new Event("profileCompleted"));
 
-        // Short timeout then redirect to dashboard
+        // Redirect smoothly to dashboard
         setTimeout(() => {
-          navigate("/dashboard");
-        }, 800);
+          navigate("/dashboard", { replace: true });
+        }, 400);
       }
     } catch (err) {
       console.error("Save profile error:", err);

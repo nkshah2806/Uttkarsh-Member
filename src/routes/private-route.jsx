@@ -12,29 +12,40 @@ function PrivateRoute() {
     return localStorage.getItem("isProfileCompleted") === "true";
   });
 
+  const checkStatus = async () => {
+    try {
+      const res = await memberProfileService.getProfile();
+      if (res.success && res.data) {
+        const completed = !!res.data.profile_completed;
+        setIsProfileCompleted(completed);
+        localStorage.setItem("isProfileCompleted", completed ? "true" : "false");
+      }
+    } catch (err) {
+      console.warn("Could not verify member profile completion status:", err);
+    } finally {
+      setCheckingProfile(false);
+    }
+  };
+
   useEffect(() => {
     if (!isLoggedIn) {
       setCheckingProfile(false);
       return;
     }
 
-    const checkStatus = async () => {
-      try {
-        const res = await memberProfileService.getProfile();
-        if (res.success && res.data) {
-          const completed = !!res.data.profile_completed;
-          setIsProfileCompleted(completed);
-          localStorage.setItem("isProfileCompleted", completed ? "true" : "false");
-        }
-      } catch (err) {
-        console.warn("Could not verify member profile completion status:", err);
-      } finally {
-        setCheckingProfile(false);
-      }
+    checkStatus();
+
+    // Listen for instant profile update events from MemberProfile page
+    const handleProfileUpdated = () => {
+      setIsProfileCompleted(true);
+      localStorage.setItem("isProfileCompleted", "true");
     };
 
-    checkStatus();
-  }, [isLoggedIn]);
+    window.addEventListener("profileCompleted", handleProfileUpdated);
+    return () => {
+      window.removeEventListener("profileCompleted", handleProfileUpdated);
+    };
+  }, [isLoggedIn, location.pathname]);
 
   if (!isLoggedIn) {
     return <Navigate to="/" replace />;
@@ -52,10 +63,12 @@ function PrivateRoute() {
   }
 
   // Mandatory Profile Completion Redirect Guard:
-  // If profile is incomplete AND current route is NOT '/member/profile', redirect immediately to '/member/profile'
+  // Re-check both React state and localStorage so newly saved profiles pass instantly
+  const currentCompleted =
+    isProfileCompleted || localStorage.getItem("isProfileCompleted") === "true";
   const isProfileRoute = location.pathname === "/member/profile";
 
-  if (!isProfileCompleted && !isProfileRoute) {
+  if (!currentCompleted && !isProfileRoute) {
     return <Navigate to="/member/profile" replace />;
   }
 
