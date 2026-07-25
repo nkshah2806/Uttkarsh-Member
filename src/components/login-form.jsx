@@ -33,10 +33,6 @@ export function LoginForm({ className, ...props }) {
       });
       const userData = response.data.data;
 
-      if (!userData.isAdmin) {
-        toast.error("Access denied. Admins only.");
-        return;
-      }
       localStorage.setItem("token", response.data.data.jwtToken);
       localStorage.setItem("UserDetails", JSON.stringify(response.data.data));
       localStorage.setItem("isAuthenticated", "true");
