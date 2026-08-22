@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Activity, FileText, HeartPulse, User2Icon, UserCheck } from "lucide-react";
+import { Activity, FileText, HeartPulse, User2Icon, UserCheck, Users, Stethoscope, ClipboardList } from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -19,14 +19,13 @@ export function AppSidebar({ ...props }) {
     return data ? JSON.parse(data) : null;
   });
 
-  // Optional: Automatically re-check for updates in localStorage every few seconds
   React.useEffect(() => {
     const interval = setInterval(() => {
       const data = JSON.parse(localStorage.getItem("UserDetails"));
       setUserDetails((prev) =>
         JSON.stringify(prev) !== JSON.stringify(data) ? data : prev,
       );
-    }, 1000); // Check every 1 second
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -46,13 +45,17 @@ export function AppSidebar({ ...props }) {
     navMain: [
       { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
       { title: "Personal Details", url: "/member/profile", icon: UserCheck },
-      // { title: "Health Dashboard", url: "/health-dashboard", icon: HeartPulse },
-      // { title: "Client Management", url: "/clients", icon: User2Icon },
-      // { title: "Report Entry", url: "/report-entry", icon: FileText },
-      // { title: "PDF Designer", url: "/report-designer", icon: Activity },
+      {
+        title: "Quantum Health",
+        url: "#",
+        icon: Stethoscope,
+        items: [
+          { title: "Patient Registration", url: "/patients", icon: Users },
+          { title: "Report History", url: "/clients", icon: ClipboardList },
+        ],
+      },
     ],
   };
-
 
   return (
     <Sidebar collapsible="icon" {...props}>

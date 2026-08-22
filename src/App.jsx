@@ -9,13 +9,22 @@ import PrivateRoute from "./routes/private-route";
 import User from "./pages/User";
 import UserEdit from "./pages/User/create";
 import UserDetails from "./pages/User/UserDetails";
-import { DashboardOverview, ClientManagement, ReportEntry, ReportDesigner } from "./pages/HealthAnalysis";
+import {
+  DashboardOverview,
+  ClientManagement,
+  ReportEntry,
+  ReportDesigner,
+  PatientRegistration,
+  QuantumDataEntry,
+  ReportReviewOverride,
+  PDFReportViewer,
+} from "./pages/HealthAnalysis";
 import MemberProfilePage from "./pages/MemberProfile";
+import { LanguageProvider } from "./context/LanguageContext";
 
 function App() {
   return (
-    <>
-      {/* <FCMToken /> */}
+    <LanguageProvider>
       <Toaster position="top-right" />
       <BrowserRouter>
         <Routes>
@@ -26,10 +35,19 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/dashboard" element={<DashboardOverview />} />
             <Route path="/member/profile" element={<MemberProfilePage />} />
+
+            {/* === Quantum Health Module === */}
+            <Route path="/patients" element={<PatientRegistration />} />
+            <Route path="/quantum-scan/:visitId" element={<QuantumDataEntry />} />
+            <Route path="/report-review/:visitId" element={<ReportReviewOverride />} />
+            <Route path="/report-pdf/:visitId" element={<PDFReportViewer />} />
+
+            {/* Legacy / other routes */}
             <Route path="/health-dashboard" element={<DashboardOverview />} />
             <Route path="/clients" element={<ClientManagement />} />
             <Route path="/report-entry" element={<ReportEntry />} />
             <Route path="/report-designer" element={<ReportDesigner />} />
+
             <Route path="/user">
               <Route index element={<User />} />
               <Route path="edit/:id" element={<UserEdit />} />
@@ -39,9 +57,8 @@ function App() {
           <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
       </BrowserRouter>
-    </>
+    </LanguageProvider>
   );
 }
-
 
 export default App;

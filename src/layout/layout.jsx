@@ -5,7 +5,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Bell, Moon, Sun } from "lucide-react";
+import { Bell, Moon, Sun, UserCheck } from "lucide-react";
 import { useTheme } from "@/components/theme-context";
 import { useEffect, useState } from "react";
 import { useApiMutation } from "@/hooks/useApiMutation";
@@ -73,10 +73,15 @@ export default function Layout(props) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="flex flex-col min-h-screen">
+        <div className="h-1 w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-800 shrink-0" />
         <header className="px-4 bg-sidebar border-b flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-extrabold bg-emerald-100/90 text-emerald-900 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 rounded-full shadow-2xs">
+              <UserCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              MEMBER PORTAL
+            </span>
           </div>
 
           <div className="relative ml-auto">
@@ -89,7 +94,7 @@ export default function Layout(props) {
               <Bell />
               {/* Show dot if there are unread notifications */}
               {notificationList.some((n) => !n.isRead) && (
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-indigo-500 z-10"></span>
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 z-10"></span>
               )}
             </Button>
             {/* Notification Dropdown */}
@@ -114,12 +119,12 @@ export default function Layout(props) {
                               !notifi.isRead
                                 ? {
                                     backgroundColor:
-                                      theme === "dark" ? "#3730a3" : "#eef2ff", // indigo-900/dark, indigo-50/light
+                                      theme === "dark" ? "#064e3b" : "#ecfdf5", // emerald tint
                                     "&:hover": {
                                       backgroundColor:
                                         theme === "dark"
-                                          ? "#312e81"
-                                          : "#e0e7ff", // darker on hover
+                                          ? "#022c22"
+                                          : "#d1fae5",
                                     },
                                   }
                                 : {}
@@ -174,7 +179,7 @@ export default function Layout(props) {
             {theme === "dark" ? <Sun /> : <Moon />}
           </Button>
         </header>
-        <div className="p-4 bg-[#FAF6FF] dark:bg-[#1A1A1A] h-full">
+        <div className="p-4 bg-emerald-50/40 dark:bg-[#061812] flex-1">
           {props.children}
         </div>
       </SidebarInset>
