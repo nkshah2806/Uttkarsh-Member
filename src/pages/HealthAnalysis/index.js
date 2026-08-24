@@ -3,6 +3,7 @@ export { default as ClientManagement } from "./ClientManagement";
 export { default as ReportEntry } from "./ReportEntry";
 export { default as ReportDesigner } from "./ReportDesigner";
 export { default as PatientRegistration } from "./PatientRegistration";
+export { default as PatientDetails } from "./PatientDetails";
 export { default as QuantumDataEntry } from "./QuantumDataEntry";
 export { default as ReportReviewOverride } from "./ReportReviewOverride";
 export { default as PDFReportViewer } from "./PDFReportViewer";

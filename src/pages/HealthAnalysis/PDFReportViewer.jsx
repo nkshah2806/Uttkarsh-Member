@@ -36,10 +36,27 @@ export default function PDFReportViewer() {
 
   const handlePrint = () => {
     const win = window.open("", "_blank");
+    if (!win) return;
     win.document.write(reportHtml);
     win.document.close();
+
+    // Inject print-friendly styles to reduce large white margins and set page size
+    const injectPrintStyles = () => {
+      try {
+        const style = win.document.createElement("style");
+        style.innerHTML = `@page { size: A4; margin: 10mm; } body { margin: 0; } .report-container, .report { width: 190mm; margin: 0 auto; }`;
+        win.document.head && win.document.head.appendChild(style);
+      } catch (e) {
+        // ignore if injection fails
+      }
+    };
+
     win.focus();
-    setTimeout(() => win.print(), 350);
+    // give the window a short moment to render, then inject styles and print
+    setTimeout(() => {
+      injectPrintStyles();
+      setTimeout(() => win.print(), 200);
+    }, 350);
   };
 
   const handleWhatsApp = async () => {
@@ -116,7 +133,7 @@ export default function PDFReportViewer() {
             title="Report Preview"
             srcDoc={reportHtml}
             className="w-full border-0"
-            style={{ height: "900px" }}
+            style={{ height: "80vh", minHeight: 600 }}
           />
         </div>
       )}

@@ -15,6 +15,7 @@ import {
   ReportEntry,
   ReportDesigner,
   PatientRegistration,
+  PatientDetails,
   QuantumDataEntry,
   ReportReviewOverride,
   PDFReportViewer,
@@ -38,6 +39,7 @@ function App() {
 
             {/* === Quantum Health Module === */}
             <Route path="/patients" element={<PatientRegistration />} />
+            <Route path="/patients/:patientId" element={<PatientDetails />} />
             <Route path="/quantum-scan/:visitId" element={<QuantumDataEntry />} />
             <Route path="/report-review/:visitId" element={<ReportReviewOverride />} />
             <Route path="/report-pdf/:visitId" element={<PDFReportViewer />} />

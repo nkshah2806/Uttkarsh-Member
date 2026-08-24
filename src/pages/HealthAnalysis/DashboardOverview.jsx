@@ -32,7 +32,7 @@ const recentReports = [
 export default function DashboardOverview() {
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-violet-200 bg-gradient-to-br from-violet-600 via-fuchsia-600 to-sky-600 p-6 text-white shadow-lg">
+      {/* <div className="rounded-3xl border border-violet-200 bg-gradient-to-br from-violet-600 via-fuchsia-600 to-sky-600 p-6 text-white shadow-lg">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.35em] text-violet-100">UTKARSH Quantum Health Analysis Software</p>
@@ -46,7 +46,7 @@ export default function DashboardOverview() {
             <p className="mt-1 font-semibold">Dashboard → Client Entry → Report Entry → PDF Preview</p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => {

@@ -2,10 +2,31 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/context/LanguageContext";
-import { UserPlus, ArrowRight, Activity, Search, X, Scale, Ruler, MapPin, Calendar, Plus, Pencil, Trash2, AlertTriangle } from "lucide-react";
+import {
+  UserPlus,
+  ArrowRight,
+  Activity,
+  X,
+  Scale,
+  Ruler,
+  MapPin,
+  Calendar,
+  Plus,
+  Pencil,
+  Trash2,
+  AlertTriangle,
+  Eye,
+  CheckCircle2,
+  Clock,
+  FileText,
+  User,
+  Phone,
+  Mail,
+} from "lucide-react";
 import { toast } from "sonner";
+import ReusableTable from "@/components/ReusableTable";
 
 export default function PatientRegistration() {
   const { t, lang } = useLanguage();
@@ -14,8 +35,7 @@ export default function PatientRegistration() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  
+
   // Modals state
   const [showModal, setShowModal] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
@@ -26,6 +46,8 @@ export default function PatientRegistration() {
     age: "",
     gender: "Male",
     mobile: "",
+    dob: "",
+    email: "",
     weight: "",
     weight_unit: "kg",
     height: "",
@@ -56,6 +78,8 @@ export default function PatientRegistration() {
       age: "",
       gender: "Male",
       mobile: "",
+      dob: "",
+      email: "",
       weight: "",
       weight_unit: "kg",
       height: "",
@@ -72,6 +96,8 @@ export default function PatientRegistration() {
       age: patient.age || "",
       gender: patient.gender || "Male",
       mobile: patient.mobile || "",
+      dob: patient.dob ? new Date(patient.dob).toISOString().split("T")[0] : "",
+      email: patient.email || "",
       weight: patient.weight !== null && patient.weight !== undefined ? patient.weight : "",
       weight_unit: patient.weight_unit || "kg",
       height: patient.height !== null && patient.height !== undefined ? patient.height : "",
@@ -93,7 +119,7 @@ export default function PatientRegistration() {
         setShowModal(false);
         fetchPatients();
       } else {
-        // Create Patient with Weight, Height, Address
+        // Create Patient
         const patientRes = await axiosInstance.post("v1/patients", form);
         const newPatient = patientRes.data.data;
         toast.success(`Patient Registered: ${newPatient.patient_code}`);
@@ -138,15 +164,156 @@ export default function PatientRegistration() {
     }
   };
 
-  const filteredPatients = patients.filter((p) => {
-    const q = searchQuery.toLowerCase();
-    return (
-      p.name?.toLowerCase().includes(q) ||
-      p.patient_code?.toLowerCase().includes(q) ||
-      p.mobile?.includes(q) ||
-      p.address?.toLowerCase().includes(q)
-    );
-  });
+  // Clean, focused table columns
+  const headers = [
+    {
+      key: "patient_code",
+      label: "Patient ID",
+      render: (row) => (
+        <span className="font-mono font-bold text-xs bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 px-2 py-1 rounded-md border border-indigo-200/60 dark:border-indigo-800">
+          {row.patient_code}
+        </span>
+      ),
+    },
+    {
+      key: "name",
+      label: "Patient Name",
+      render: (row) => (
+        <button
+          onClick={() => navigate(`/patients/${row._id}`)}
+          className="text-left font-semibold text-slate-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors"
+        >
+          {row.name}
+        </button>
+      ),
+    },
+    {
+      key: "age",
+      label: "Age / Gender",
+      render: (row) => (
+        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+          {row.age} Yrs / {row.gender}
+        </span>
+      ),
+    },
+    {
+      key: "mobile",
+      label: "Mobile Number",
+      render: (row) => (
+        <span className="text-xs font-mono text-slate-700 dark:text-slate-300 font-medium">
+          {row.mobile}
+        </span>
+      ),
+    },
+    {
+      key: "createdAt",
+      label: "Registration Date",
+      render: (row) => (
+        <span className="flex items-center gap-1.5 text-xs text-slate-500">
+          <Calendar className="h-3.5 w-3.5 text-slate-400" />
+          {new Date(row.createdAt).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </span>
+      ),
+    },
+    {
+      key: "registered_by",
+      label: "Consultant Name",
+      render: (row) => (
+        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          {row.registered_by?.fullName || row.registered_by?.username || "Franchise Consultant"}
+        </span>
+      ),
+    },
+    {
+      key: "latest_status",
+      label: "Status",
+      render: (row) => {
+        const st = row.latest_status;
+        if (st === "SHARED") {
+          return (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <CheckCircle2 className="h-3 w-3" /> Report Shared
+            </span>
+          );
+        }
+        if (st === "REPORT_READY") {
+          return (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+              <FileText className="h-3 w-3" /> Report Ready
+            </span>
+          );
+        }
+        if (st === "DATA_ENTRY") {
+          return (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+              <Clock className="h-3 w-3" /> In Progress
+            </span>
+          );
+        }
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            Registered
+          </span>
+        );
+      },
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      filterable: false,
+      render: (row) => (
+        <div className="flex items-center justify-end gap-1.5">
+          {/* Eye / View Details Button */}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate(`/patients/${row._id}`)}
+            className="h-8 px-2.5 text-xs font-semibold text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:text-indigo-300 dark:border-indigo-800 dark:hover:bg-indigo-950"
+            title="View Complete Patient Profile & History"
+          >
+            <Eye className="h-3.5 w-3.5 mr-1" /> View Details
+          </Button>
+
+          {/* New Scan Button */}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => startNewScan(row._id)}
+            className="h-8 px-2 text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/50 dark:text-slate-300 dark:hover:text-indigo-400"
+            title="Start New Scan Session"
+          >
+            <Activity className="h-3.5 w-3.5 mr-1 text-indigo-500" /> New Scan
+          </Button>
+
+          {/* Edit Patient */}
+          <Button
+            size="sm"
+            variant="ghost"
+            title="Edit Patient"
+            onClick={() => openEditModal(row)}
+            className="h-8 w-8 p-0 text-slate-500 hover:text-indigo-600"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+
+          {/* Delete Patient */}
+          <Button
+            size="sm"
+            variant="ghost"
+            title="Delete Patient Record"
+            onClick={() => setDeletingPatient(row)}
+            className="h-8 w-8 p-0 text-slate-500 hover:text-rose-600"
+          >
+            <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -157,8 +324,8 @@ export default function PatientRegistration() {
           <h1 className="text-2xl font-bold mt-1">{t("patientReg")}</h1>
           <p className="text-sm text-indigo-100 mt-1">
             {lang === "hi"
-              ? "रोगी पंजीकृत करें, विवरण संपादित करें और क्वांटम मशीन रिपोर्ट स्कैन शुरू करें।"
-              : "Register and manage patients with full details (Weight, Height, Address) & start scan sessions."}
+              ? "रोगी पंजीकरण सूची देखें, नए रोगी जोड़ें और संपूर्ण रोगी इतिहास देखने के लिए विवरण देखें।"
+              : "Clean patient directory overview. Click View Details on any patient to see their full profile and report history."}
           </p>
         </div>
         <Button
@@ -170,126 +337,25 @@ export default function PatientRegistration() {
         </Button>
       </div>
 
-      {/* Patient Directory Card */}
-      <Card className="shadow-sm border-0">
-        <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800">
-          <CardTitle className="text-lg font-bold">
-            Patient Directory ({filteredPatients.length})
-          </CardTitle>
-          <div className="relative max-w-xs w-full">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search name, code, mobile, address..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto min-h-[350px]">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-slate-50 dark:bg-slate-800 text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">
-                <tr>
-                  <th className="px-4 py-3">Patient Code</th>
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Age / Gender</th>
-                  <th className="px-4 py-3">Mobile</th>
-                  <th className="px-4 py-3">Weight & Height</th>
-                  <th className="px-4 py-3">Address</th>
-                  <th className="px-4 py-3">Registered</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {loading ? (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-slate-400 text-sm animate-pulse">
-                      Loading patient records...
-                    </td>
-                  </tr>
-                ) : filteredPatients.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-slate-400 text-sm">
-                      No patients found. Click <strong>Register New Patient</strong> above to add one.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredPatients.map((p) => (
-                    <tr key={p._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="px-4 py-3 font-mono font-bold text-indigo-600 dark:text-indigo-400 text-xs">
-                        {p.patient_code}
-                      </td>
-                      <td className="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">{p.name}</td>
-                      <td className="px-4 py-3 text-slate-500">{p.age} Yrs / {p.gender}</td>
-                      <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">{p.mobile}</td>
-                      <td className="px-4 py-3 text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="flex items-center gap-1 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300">
-                            <Scale className="h-3 w-3 text-indigo-500" />
-                            {p.weight ? `${p.weight} ${p.weight_unit || "kg"}` : "-"}
-                          </span>
-                          <span className="flex items-center gap-1 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300">
-                            <Ruler className="h-3 w-3 text-violet-500" />
-                            {p.height ? `${p.height} ${p.height_unit || "cm"}` : "-"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-500 max-w-xs" title={p.address}>
-                        {p.address ? (
-                          <span className="flex items-center gap-1 whitespace-pre-line">
-                            <MapPin className="h-3 w-3 text-slate-400 shrink-0" />
-                            {p.address}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400">-</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3 text-slate-400" />
-                          {new Date(p.createdAt).toLocaleDateString("en-IN")}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => startNewScan(p._id)}
-                            className="text-xs text-indigo-600 border-indigo-200 hover:bg-indigo-50 font-semibold"
-                          >
-                            <Activity className="mr-1 h-3.5 w-3.5" /> New Scan
-                          </Button>
-
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            title="Edit Patient Details"
-                            onClick={() => openEditModal(p)}
-                            className="h-8 w-8 p-0 text-slate-500 hover:text-indigo-600"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            title="Delete Patient Record"
-                            onClick={() => setDeletingPatient(p)}
-                            className="h-8 w-8 p-0 text-slate-500 hover:text-rose-600"
-                          >
-                            <Trash2 className="h-4 w-4 text-rose-500" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+      {/* Patient Directory Table Card */}
+      <Card className="shadow-xs border border-slate-200/80 dark:border-slate-800">
+        <CardContent className="p-6">
+          <ReusableTable
+            headers={headers}
+            data={patients}
+            loading={loading}
+            Search="Search by Patient ID, Name, Mobile, Email..."
+            CreateExportRender={() => (
+              <Button
+                onClick={openRegisterModal}
+                className="bg-indigo-600 text-white hover:bg-indigo-700 font-semibold px-4 py-2 rounded-xl shadow-xs shrink-0 flex items-center gap-2 text-xs"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add Patient</span>
+              </Button>
+            )}
+            pagination={true}
+          />
         </CardContent>
       </Card>
 
@@ -359,17 +425,43 @@ export default function PatientRegistration() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    {t("mobile")} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="10-digit mobile number"
+                    maxLength={10}
+                    value={form.mobile}
+                    onChange={(e) => setForm({ ...form, mobile: e.target.value.replace(/\D/g, "") })}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="patient@example.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                  {t("mobile")} *
+                  Date of Birth
                 </label>
                 <input
-                  type="text"
-                  required
-                  placeholder="10-digit mobile number"
-                  maxLength={10}
-                  value={form.mobile}
-                  onChange={(e) => setForm({ ...form, mobile: e.target.value.replace(/\D/g, "") })}
+                  type="date"
+                  value={form.dob}
+                  onChange={(e) => setForm({ ...form, dob: e.target.value })}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
