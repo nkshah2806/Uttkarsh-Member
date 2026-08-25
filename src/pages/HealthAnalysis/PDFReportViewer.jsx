@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
-import { Printer, Share2, Globe, Download } from "lucide-react";
+import { Printer, Download, Share2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  openReportForPdfSave,
+  prepareWhatsAppPdfShare,
+} from "./reportPdfUtils";
 
 export default function PDFReportViewer() {
   const { visitId } = useParams();
@@ -14,25 +18,45 @@ export default function PDFReportViewer() {
   const [reportHtml, setReportHtml] = useState("");
   const [reportId, setReportId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const generateReport = useCallback(
+    async (selectedLang) => {
+      try {
+        setLoading(true);
+        const res = await axiosInstance.post(
+          `v1/visits/${visitId}/generate-pdf`,
+          {
+            lang: selectedLang,
+          }
+        );
+        if (!isMountedRef.current) return;
+        setReportHtml(res.data.html);
+        setReportId(res.data.report_id);
+      } catch (err) {
+        if (isMountedRef.current) {
+          toast.error("Failed to compile report. Please try again.");
+        }
+      } finally {
+        if (isMountedRef.current) {
+          setLoading(false);
+        }
+      }
+    },
+    [visitId]
+  );
 
   useEffect(() => {
     generateReport(reportLang);
-  }, [visitId, reportLang]);
-
-  const generateReport = async (selectedLang) => {
-    try {
-      setLoading(true);
-      const res = await axiosInstance.post(`v1/visits/${visitId}/generate-pdf`, {
-        lang: selectedLang,
-      });
-      setReportHtml(res.data.html);
-      setReportId(res.data.report_id);
-    } catch (err) {
-      toast.error("Failed to compile report. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [generateReport, reportLang]);
 
   const handlePrint = () => {
     const win = window.open("", "_blank");
@@ -59,13 +83,68 @@ export default function PDFReportViewer() {
     }, 350);
   };
 
-  const handleWhatsApp = async () => {
-    if (!reportId) return;
+  const reportTitle = visitId
+    ? `Quantum-Health-Report-${visitId.slice(-6).toUpperCase()}`
+    : "Quantum-Health-Report";
+
+  // Single source of truth: the compiled report HTML (same as the preview).
+  const handleDownloadPdf = async () => {
+    if (pdfBusy) return; // prevent duplicate clicks while generating
+    if (loading || !reportHtml) {
+      toast.error("Report is not ready yet. Please wait for it to compile.");
+      return;
+    }
+    setPdfBusy(true);
     try {
-      const res = await axiosInstance.post(`v1/visits/reports/${reportId}/share/whatsapp`);
-      window.open(res.data.whatsappUrl, "_blank");
+      const win = openReportForPdfSave(reportHtml, reportTitle);
+      if (!win) {
+        toast.error(
+          "Could not open the print window. Please allow pop-ups for this site and try again."
+        );
+      } else {
+        toast.success(
+          "Choose \u201CSave as PDF\u201D as the destination to download the report."
+        );
+      }
+    } catch (err) {
+      toast.error("Failed to open PDF download. Please try again.");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
+  // Same complete PDF + predefined WhatsApp message (preserved from backend).
+  const handleWhatsApp = async () => {
+    if (pdfBusy) return; // prevent duplicate clicks while generating
+    if (loading || !reportId || !reportHtml) {
+      toast.error("Report is not ready yet. Please wait for it to compile.");
+      return;
+    }
+    setPdfBusy(true);
+    try {
+      const started = await prepareWhatsAppPdfShare({
+        reportHtml,
+        docTitle: reportTitle,
+        getWhatsAppUrl: async () => {
+          const res = await axiosInstance.post(
+            `v1/visits/reports/${reportId}/share/whatsapp`
+          );
+          return res.data.whatsappUrl;
+        },
+      });
+      if (started) {
+        toast.success(
+          "PDF generated. Save it, attach it to the WhatsApp chat, and send it with the message."
+        );
+      } else {
+        toast.error(
+          "Could not open WhatsApp. Please allow pop-ups for this site and try again."
+        );
+      }
     } catch (err) {
       toast.error("Failed to generate WhatsApp link");
+    } finally {
+      setPdfBusy(false);
     }
   };
 
@@ -86,21 +165,19 @@ export default function PDFReportViewer() {
           <div className="flex items-center rounded-lg border bg-slate-100 dark:bg-slate-800 p-1 text-xs">
             <button
               onClick={() => setReportLang("en")}
-              className={`px-3 py-1 rounded font-semibold transition-all ${
-                reportLang === "en"
-                  ? "bg-white dark:bg-indigo-600 dark:text-white text-indigo-600 shadow"
-                  : "text-slate-500"
-              }`}
+              className={`px-3 py-1 rounded font-semibold transition-all ${reportLang === "en"
+                ? "bg-white dark:bg-indigo-600 dark:text-white text-indigo-600 shadow"
+                : "text-slate-500"
+                }`}
             >
               English
             </button>
             <button
               onClick={() => setReportLang("hi")}
-              className={`px-3 py-1 rounded font-semibold transition-all ${
-                reportLang === "hi"
-                  ? "bg-white dark:bg-indigo-600 dark:text-white text-indigo-600 shadow"
-                  : "text-slate-500"
-              }`}
+              className={`px-3 py-1 rounded font-semibold transition-all ${reportLang === "hi"
+                ? "bg-white dark:bg-indigo-600 dark:text-white text-indigo-600 shadow"
+                : "text-slate-500"
+                }`}
             >
               हिंदी
             </button>
@@ -109,8 +186,31 @@ export default function PDFReportViewer() {
           <Button variant="outline" size="sm" onClick={handlePrint}>
             <Printer className="mr-1.5 h-4 w-4" /> Print
           </Button>
-          <Button size="sm" onClick={handleWhatsApp} className="bg-emerald-600 hover:bg-emerald-700">
-            <Share2 className="mr-1.5 h-4 w-4" /> WhatsApp
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownloadPdf}
+            disabled={pdfBusy || loading || !reportHtml}
+          >
+            {pdfBusy ? (
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-1.5 h-4 w-4" />
+            )}
+            Download PDF
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleWhatsApp}
+            disabled={pdfBusy || loading || !reportId || !reportHtml}
+            className="bg-emerald-600 hover:bg-emerald-700"
+          >
+            {pdfBusy ? (
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <Share2 className="mr-1.5 h-4 w-4" />
+            )}
+            Share on WhatsApp
           </Button>
         </div>
       </div>

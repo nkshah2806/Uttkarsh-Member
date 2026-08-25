@@ -2,6 +2,18 @@ import axiosInstance from "@/lib/axios";
 
 const ENDPOINT = "dashboard";
 
+export const getDashboardOverview = async () => {
+  try {
+    const response = await axiosInstance.get(`${ENDPOINT}/overview`);
+    return {
+      data: response.data.data,
+    };
+  } catch (error) {
+    console.error("Error fetching dashboard overview:", error);
+    throw error;
+  }
+};
+
 export const getTotalCount = async () => {
   try {
     const response = await axiosInstance.get(`${ENDPOINT}/getTotalCount`);
@@ -101,8 +113,8 @@ export const getNotificationUserWise = async (data) => {
       `notification/getNotificationByUserId`,
       data
         ? {
-            params: data,
-          }
+          params: data,
+        }
         : {}
     );
     return {
