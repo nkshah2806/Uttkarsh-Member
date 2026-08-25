@@ -367,7 +367,7 @@ export default function PatientDetails() {
       key: "actions",
       label: "Actions",
       render: (v) => (
-        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <Button
             size="sm"
             variant="outline"

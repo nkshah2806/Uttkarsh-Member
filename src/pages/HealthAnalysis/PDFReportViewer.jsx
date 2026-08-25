@@ -124,11 +124,7 @@ export default function PDFReportViewer() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-lg border overflow-hidden max-w-4xl mx-auto">
-          <div className="bg-indigo-600 text-white text-xs font-semibold px-4 py-2 flex items-center gap-2">
-            <Globe className="h-3.5 w-3.5" />
-            Report Language: {reportLang === "hi" ? "हिंदी (Hindi)" : "English"}
-          </div>
+        <div className="bg-white p-4 rounded-2xl shadow-lg border overflow-hidden max-w-4xl mx-auto">
           <iframe
             title="Report Preview"
             srcDoc={reportHtml}
