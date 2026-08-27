@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   Card,
   CardContent,
@@ -69,24 +70,24 @@ const fmtDateTime = (iso) => {
   })}, ${d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`;
 };
 
-const timeAgo = (iso) => {
+const timeAgo = (iso, t) => {
   if (!iso) return "";
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t("justNow");
+  if (mins < 60) return `${mins} ${t("minShort")} ${t("agoSuffix")}`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return `${hrs} ${t("hrShort")} ${t("agoSuffix")}`;
   const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
+  if (days < 30) return `${days} ${t("dayShort")} ${t("agoSuffix")}`;
   return fmtDate(iso);
 };
 
-const greeting = () => {
+const greeting = (t) => {
   const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
+  if (h < 12) return t("goodMorning");
+  if (h < 17) return t("goodAfternoon");
+  return t("goodEvening");
 };
 
 const getCurrentUser = () => {
@@ -165,11 +166,14 @@ const STATUS_STYLES = {
   SHARED: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
 };
 
-const STATUS_LABELS = {
-  DATA_ENTRY: "Data Entry",
-  REPORT_READY: "Report Ready",
-  SHARED: "Report Shared",
-  REGISTERED: "Registered",
+const getStatusLabel = (status, t) => {
+  const labels = {
+    DATA_ENTRY: t("dataEntry"),
+    REPORT_READY: t("reportReady"),
+    SHARED: t("reportShared"),
+    REGISTERED: t("registered"),
+  };
+  return labels[status] || status;
 };
 
 /* ------------------------------------------------------------------ */
@@ -178,6 +182,7 @@ const STATUS_LABELS = {
 
 export default function DashboardOverview() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const {
     data,
@@ -219,21 +224,21 @@ export default function DashboardOverview() {
 
   /* ---------------- Quick actions ---------------- */
   const quickActions = [
-    { label: "Register New Patient", icon: UserPlus, to: "/patients", accent: "from-emerald-500 to-green-500" },
-    { label: "Enter Machine Data", icon: ScanLine, to: null, needsVisit: "DATA_ENTRY", accent: "from-sky-500 to-cyan-500" },
-    { label: "Generate Report", icon: FileText, to: null, needsVisit: "REPORT_READY", accent: "from-violet-500 to-fuchsia-500" },
-    { label: "View Patients", icon: Eye, to: "/patients", accent: "from-rose-500 to-pink-500" },
-    { label: "Previous Reports", icon: History, to: "/clients", accent: "from-amber-500 to-orange-500" },
+    { label: t("registerPatient"), icon: UserPlus, to: "/patients", accent: "from-emerald-500 to-green-500" },
+    { label: t("enterMachineData"), icon: ScanLine, to: null, needsVisit: "DATA_ENTRY", accent: "from-sky-500 to-cyan-500" },
+    { label: t("generateReport"), icon: FileText, to: null, needsVisit: "REPORT_READY", accent: "from-violet-500 to-fuchsia-500" },
+    { label: t("viewPatients"), icon: Eye, to: "/patients", accent: "from-rose-500 to-pink-500" },
+    { label: t("previousReports"), icon: History, to: "/clients", accent: "from-amber-500 to-orange-500" },
   ];
 
   /* ---------------- Workflow strip ---------------- */
   const workflow = [
-    { label: "Patient", desc: "Register", icon: UserPlus },
-    { label: "Machine Data", desc: "Scan entry", icon: ScanLine },
-    { label: "Parameter Review", desc: "Verify values", icon: ClipboardList },
-    { label: "Report Generation", desc: "PDF output", icon: FileText },
-    { label: "Previous Reports", desc: "History", icon: History },
-    { label: "Follow-up", desc: "Next visit", icon: CalendarClock },
+    { label: t("patient"), desc: t("register"), icon: UserPlus },
+    { label: t("machineData"), desc: t("scanEntry"), icon: ScanLine },
+    { label: t("parameterReview"), desc: t("verifyValues"), icon: ClipboardList },
+    { label: t("reportGeneration"), desc: t("pdfOutput"), icon: FileText },
+    { label: t("previousReports"), desc: t("history"), icon: History },
+    { label: t("followUp"), desc: t("nextVisit"), icon: CalendarClock },
   ];
 
   const handleQuickAction = (action) => {
@@ -268,13 +273,13 @@ export default function DashboardOverview() {
               <AlertTriangle className="h-7 w-7" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">Unable to load dashboard</h2>
+              <h2 className="text-lg font-semibold">{t("unableToLoadDashboard")}</h2>
               <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                {error?.response?.data?.message || error?.message || "Something went wrong while fetching dashboard data."}
+                {error?.response?.data?.message || error?.message || t("dashboardFetchError")}
               </p>
             </div>
             <Button onClick={() => refetch()}>
-              <RefreshCw className="mr-2 h-4 w-4" /> Retry
+              <RefreshCw className="mr-2 h-4 w-4" /> {t("retry")}
             </Button>
           </CardContent>
         </Card>
@@ -289,13 +294,13 @@ export default function DashboardOverview() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-emerald-100">
-              Uttkarsh Member Panel · Quantum Health
+              {t("memberPanelQuantumHealth")}
             </p>
             <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">
-              {greeting()}{currentUser ? `, ${currentUser}` : ""} 👋
+              {greeting(t)}{currentUser ? `, ${currentUser}` : ""} 👋
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-emerald-50">
-              Track your patients, complete scans, generate reports, and never miss a follow-up.
+              {t("dashboardHeroMsg")}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -306,13 +311,13 @@ export default function DashboardOverview() {
               disabled={isFetching}
             >
               <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-              Refresh
+              {t("refresh")}
             </Button>
             <Button
               className="bg-white text-emerald-700 hover:bg-emerald-50"
               onClick={() => navigate("/patients")}
             >
-              Register New Patient <UserPlus className="ml-2 h-4 w-4" />
+              {t("registerPatient")} <UserPlus className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -338,7 +343,7 @@ export default function DashboardOverview() {
       <div>
         <div className="mb-2 flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-muted-foreground" />
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Quick Actions</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t("quickActions")}</h2>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {quickActions.map((action) => {
@@ -367,7 +372,7 @@ export default function DashboardOverview() {
                     : "text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
                     }`}
                 >
-                  {disabled ? "Nothing pending" : <><span className="flex items-center gap-1">Open <ArrowRight className="h-3 w-3" /></span></>}
+                  {disabled ? t("nothingPending") : <><span className="flex items-center gap-1">{t("open")} <ArrowRight className="h-3 w-3" /></span></>}
                 </span>
               </button>
             );
@@ -377,19 +382,19 @@ export default function DashboardOverview() {
 
       {/* ============ Stat cards ============ */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
-        <StatCard loading={isLoading} title="Total Patients" value={summary.totalPatients ?? "—"} icon={Users} accent="from-emerald-500 to-green-500" hint={`${summary.patientsThisMonth ?? 0} this month`} />
-        <StatCard loading={isLoading} title="New Patients" value={summary.patientsToday ?? "—"} icon={UserPlus} accent="from-teal-500 to-emerald-500" hint="today" />
-        <StatCard loading={isLoading} title="Total Reports" value={summary.totalReports ?? "—"} icon={FileText} accent="from-sky-500 to-cyan-500" hint={`${summary.reportsToday ?? 0} today`} />
-        <StatCard loading={isLoading} title="Reports This Month" value={summary.reportsThisMonth ?? "—"} icon={Activity} accent="from-violet-500 to-fuchsia-500" hint={`${summary.reportsThisWeek ?? 0} this week`} />
-        <StatCard loading={isLoading} title="Pending Reports" value={(summary.pendingVisits ?? 0) + (summary.reportReadyVisits ?? 0)} icon={Clock} accent="from-amber-500 to-orange-500" hint="need data entry or review" />
+        <StatCard loading={isLoading} title={t("totalPatients")} value={summary.totalPatients ?? "—"} icon={Users} accent="from-emerald-500 to-green-500" hint={`${summary.patientsThisMonth ?? 0} ${t("thisMonth")}`} />
+        <StatCard loading={isLoading} title={t("newPatients")} value={summary.patientsToday ?? "—"} icon={UserPlus} accent="from-teal-500 to-emerald-500" hint={t("today")} />
+        <StatCard loading={isLoading} title={t("totalReports")} value={summary.totalReports ?? "—"} icon={FileText} accent="from-sky-500 to-cyan-500" hint={`${summary.reportsToday ?? 0} ${t("today")}`} />
+        <StatCard loading={isLoading} title={t("reportsThisMonth")} value={summary.reportsThisMonth ?? "—"} icon={Activity} accent="from-violet-500 to-fuchsia-500" hint={`${summary.reportsThisWeek ?? 0} ${t("thisWeek")}`} />
+        <StatCard loading={isLoading} title={t("pendingReports")} value={(summary.pendingVisits ?? 0) + (summary.reportReadyVisits ?? 0)} icon={Clock} accent="from-amber-500 to-orange-500" hint={t("needDataEntryReview")} />
       </div>
 
       {/* ============ Charts row 1 ============ */}
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="border-0 shadow-sm lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-lg">Your Activity</CardTitle>
-            <CardDescription>Patient registrations & reports over the last 7 days</CardDescription>
+            <CardTitle className="text-lg">{t("yourActivity")}</CardTitle>
+            <CardDescription>{t("activityChartDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -411,20 +416,20 @@ export default function DashboardOverview() {
                   <XAxis dataKey="label" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                   <Tooltip content={<ChartTooltip />} />
-                  <Area type="monotone" dataKey="patients" name="Patients" stroke="#10b981" fill="url(#gradPatients)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="reports" name="Reports" stroke="#0ea5e9" fill="url(#gradReports)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="patients" name={t("patients")} stroke="#10b981" fill="url(#gradPatients)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="reports" name={t("reports")} stroke="#0ea5e9" fill="url(#gradReports)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyState icon={TrendingUp} title="No activity yet" description="Your registrations and report trends will appear here." />
+              <EmptyState icon={TrendingUp} title={t("noActivityYet")} description={t("activityEmptyMsg")} />
             )}
           </CardContent>
         </Card>
 
         <Card className="border-0 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Scan Results</CardTitle>
-            <CardDescription>Parameter distribution across your scans</CardDescription>
+            <CardTitle className="text-lg">{t("scanResults")}</CardTitle>
+            <CardDescription>{t("scanResultsDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -459,7 +464,7 @@ export default function DashboardOverview() {
                 </div>
               </div>
             ) : (
-              <EmptyState icon={HeartPulse} title="No scan results yet" description="Scan results across your patients will appear here." />
+              <EmptyState icon={HeartPulse} title={t("noScanResultsYet")} description={t("scanResultsEmptyMsg")} />
             )}
           </CardContent>
         </Card>
@@ -469,8 +474,8 @@ export default function DashboardOverview() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-0 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Monthly Registrations</CardTitle>
-            <CardDescription>Last 6 months</CardDescription>
+            <CardTitle className="text-lg">{t("monthlyRegistrations")}</CardTitle>
+            <CardDescription>{t("last6Months")}</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -482,19 +487,19 @@ export default function DashboardOverview() {
                   <XAxis dataKey="month" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                   <Tooltip content={<ChartTooltip />} />
-                  <Bar dataKey="count" name="Patients" fill="#10b981" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="count" name={t("patients")} fill="#10b981" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <EmptyState icon={TrendingUp} title="No monthly data yet" description="Monthly registration trends will appear here." />
+              <EmptyState icon={TrendingUp} title={t("noMonthlyDataYet")} description={t("monthlyDataEmptyMsg")} />
             )}
           </CardContent>
         </Card>
 
         <Card className="border-0 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
-            <CardDescription>Latest actions in your workspace</CardDescription>
+            <CardTitle className="text-lg">{t("recentActivity")}</CardTitle>
+            <CardDescription>{t("recentActivityDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="max-h-[300px] space-y-0 overflow-y-auto pr-1">
             {isLoading ? (
@@ -526,7 +531,7 @@ export default function DashboardOverview() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                           <p className="truncate text-sm font-medium">{act.title}</p>
-                          <span className="shrink-0 text-xs text-muted-foreground">{timeAgo(act.timestamp)}</span>
+                          <span className="shrink-0 text-xs text-muted-foreground">{timeAgo(act.timestamp, t)}</span>
                         </div>
                         <p className="truncate text-xs text-muted-foreground">{act.description}</p>
                       </div>
@@ -535,7 +540,7 @@ export default function DashboardOverview() {
                 ))}
               </ul>
             ) : (
-              <EmptyState icon={Activity} title="No recent activity" description="New actions will appear here in real time." />
+              <EmptyState icon={Activity} title={t("noRecentActivity")} description={t("recentActivityEmptyMsg")} />
             )}
           </CardContent>
         </Card>
@@ -547,11 +552,11 @@ export default function DashboardOverview() {
         <Card className="border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-lg">Recent Patients</CardTitle>
-              <CardDescription>Latest patients you registered</CardDescription>
+              <CardTitle className="text-lg">{t("recentPatients")}</CardTitle>
+              <CardDescription>{t("latestPatientsDesc")}</CardDescription>
             </div>
             <Button variant="ghost" size="sm" onClick={() => navigate("/patients")}>
-              View all <ArrowRight className="ml-1 h-4 w-4" />
+              {t("viewAll")} <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </CardHeader>
           <CardContent>
@@ -579,14 +584,14 @@ export default function DashboardOverview() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-muted-foreground">{timeAgo(p.createdAt)}</p>
+                      <p className="text-xs text-muted-foreground">{timeAgo(p.createdAt, t)}</p>
                       <ArrowRight className="ml-auto mt-1 h-4 w-4 text-muted-foreground" />
                     </div>
                   </button>
                 ))}
               </div>
             ) : (
-              <EmptyState icon={Users} title="No patients yet" description="Register your first patient to see them here." />
+              <EmptyState icon={Users} title={t("noPatientsYet")} description={t("noPatientsMsg")} />
             )}
           </CardContent>
         </Card>
@@ -595,11 +600,11 @@ export default function DashboardOverview() {
         <Card className="border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-lg">Recent Generated Reports</CardTitle>
-              <CardDescription>Latest reports you generated</CardDescription>
+              <CardTitle className="text-lg">{t("recentGeneratedReports")}</CardTitle>
+              <CardDescription>{t("latestReportsDesc")}</CardDescription>
             </div>
             <Button variant="ghost" size="sm" onClick={() => navigate("/clients")}>
-              View all <ArrowRight className="ml-1 h-4 w-4" />
+              {t("viewAll")} <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </CardHeader>
           <CardContent>
@@ -620,9 +625,9 @@ export default function DashboardOverview() {
                         <FileText className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{r.patient?.name || "Unknown patient"}</p>
+                        <p className="text-sm font-medium">{r.patient?.name || t("unknownPatient")}</p>
                         <p className="text-xs text-muted-foreground">
-                          {r.patient?.patient_code || "—"} · {r.language === "hi" ? "Hindi" : "English"}
+                          {r.patient?.patient_code || "—"} · {r.language === "hi" ? t("hindi") : t("english")}
                         </p>
                       </div>
                     </div>
@@ -634,7 +639,7 @@ export default function DashboardOverview() {
                 ))}
               </div>
             ) : (
-              <EmptyState icon={FileText} title="No reports generated yet" description="Generated reports will appear here." />
+              <EmptyState icon={FileText} title={t("noReportsYet")} description={t("noReportsMsg")} />
             )}
           </CardContent>
         </Card>
@@ -646,11 +651,11 @@ export default function DashboardOverview() {
         <Card className="border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-lg">Pending Reports & Scans</CardTitle>
-              <CardDescription>Records that need machine data or report review</CardDescription>
+              <CardTitle className="text-lg">{t("pendingReportsScans")}</CardTitle>
+              <CardDescription>{t("pendingRecordsDesc")}</CardDescription>
             </div>
             <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-              {(summary.pendingVisits ?? 0) + (summary.reportReadyVisits ?? 0)} pending
+              {(summary.pendingVisits ?? 0) + (summary.reportReadyVisits ?? 0)} {t("pending")}
             </Badge>
           </CardHeader>
           <CardContent>
@@ -671,7 +676,7 @@ export default function DashboardOverview() {
                         {v.status === "DATA_ENTRY" ? <ScanLine className="h-4 w-4" /> : <Stethoscope className="h-4 w-4" />}
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{v.patient?.name || "Unknown patient"}</p>
+                        <p className="text-sm font-medium">{v.patient?.name || t("unknownPatient")}</p>
                         <p className="text-xs text-muted-foreground">
                           {v.patient?.patient_code || "—"} · {fmtDate(v.visit_date || v.createdAt)}
                         </p>
@@ -679,7 +684,7 @@ export default function DashboardOverview() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLES[v.status] || "bg-slate-100 text-slate-600"}`}>
-                        {STATUS_LABELS[v.status] || v.status}
+                        {getStatusLabel(v.status, t)}
                       </span>
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
                     </div>
@@ -687,7 +692,7 @@ export default function DashboardOverview() {
                 ))}
               </div>
             ) : (
-              <EmptyState icon={CheckCircle2} title="Nothing pending" description="All records are complete. New scans or report reviews will appear here." />
+              <EmptyState icon={CheckCircle2} title={t("nothingPending")} description={t("nothingPendingMsg")} />
             )}
           </CardContent>
         </Card>
@@ -696,11 +701,11 @@ export default function DashboardOverview() {
         <Card className="border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-lg">Upcoming Follow-ups</CardTitle>
-              <CardDescription>Patients due for their next visit</CardDescription>
+              <CardTitle className="text-lg">{t("upcomingFollowUps")}</CardTitle>
+              <CardDescription>{t("followUpsDesc")}</CardDescription>
             </div>
             <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-              {summary.upcomingFollowUps ?? 0} scheduled
+              {summary.upcomingFollowUps ?? 0} {t("scheduled")}
             </Badge>
           </CardHeader>
           <CardContent>
@@ -721,7 +726,7 @@ export default function DashboardOverview() {
                         <CalendarClock className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{v.patient?.name || "Unknown patient"}</p>
+                        <p className="text-sm font-medium">{v.patient?.name || t("unknownPatient")}</p>
                         <p className="text-xs text-muted-foreground">
                           {v.patient?.patient_code || "—"} · {v.patient?.mobile || "—"}
                         </p>
@@ -737,7 +742,7 @@ export default function DashboardOverview() {
                 ))}
               </div>
             ) : (
-              <EmptyState icon={CalendarClock} title="No upcoming follow-ups" description="Visits with next visit dates will appear here." />
+              <EmptyState icon={CalendarClock} title={t("noUpcomingFollowUps")} description={t("followUpsEmptyMsg")} />
             )}
           </CardContent>
         </Card>

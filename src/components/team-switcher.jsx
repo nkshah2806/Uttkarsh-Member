@@ -6,8 +6,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import logo from "../assets/logo.png";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function TeamSwitcher() {
+  const { t } = useLanguage();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -17,13 +19,13 @@ export function TeamSwitcher() {
           </div>
           <div className="flex flex-col flex-1 text-left leading-tight ml-1">
             <div className="flex items-center gap-1.5">
-              <span className="truncate font-bold text-sm tracking-tight text-emerald-950 dark:text-emerald-100">Uttkarsh</span>
+              <span className="truncate font-bold text-sm tracking-tight text-emerald-950 dark:text-emerald-100">{t("appName")}</span>
               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 text-[9px] font-extrabold uppercase tracking-wider bg-emerald-600 text-white rounded dark:bg-emerald-500 shadow-2xs">
                 <UserCheck className="size-2.5" />
-                MEMBER
+                {t("memberBadge")}
               </span>
             </div>
-            <span className="truncate text-[11px] font-medium text-emerald-600/80 dark:text-emerald-300/80">Corporation Portal</span>
+            <span className="truncate text-[11px] font-medium text-emerald-600/80 dark:text-emerald-300/80">{t("corporationPortal")}</span>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>

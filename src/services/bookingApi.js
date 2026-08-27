@@ -106,36 +106,3 @@ export const isShowApp = async (bookingId, bookingReviewId) => {
   }
 };
 
-// function generateDummyData(count = 20) {
-//   const dummyArray = [];
-
-//   for (let i = 0; i < count; i++) {
-//     const serialNumber = i + 1;
-//     const now = new Date();
-//     const dropoff = new Date(now.getTime() + 1000 * 60 * 60 * 24 * i); // i days from now
-//     const pickup = new Date(dropoff.getTime() + 1000 * 60 * 60 * 2); // 2 hours later
-//     const createdAt = new Date(now.getTime() - 1000 * 60 * 60 * 24 * i); // i days ago
-
-//     const data = {
-//       _id: `dummy_id_${i}`,
-//       name: `Dummy Name ${i}`,
-//       dropoffDateTime: dropoff.toISOString(),
-//       pickupDateTime: pickup.toISOString(),
-//       createdAt: createdAt.toISOString(),
-//       otherField: `Some data ${i}` // Additional dummy fields if needed
-//     };
-
-//     dummyArray.push({
-//       ...data,
-//       sNo: serialNumber,
-//       id: data._id,
-//       dropoffDateTime: new Date(data.dropoffDateTime).toDateString(),
-//       pickupDateTime: new Date(data.pickupDateTime).toDateString(),
-//       createdAt: data.createdAt
-//         ? `${new Date(data.createdAt).toLocaleString()}`
-//         : "N/A",
-//     });
-//   }
-
-//   return dummyArray;
-// }

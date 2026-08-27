@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import {
   SidebarInset,
@@ -7,6 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Bell, Moon, Sun, UserCheck } from "lucide-react";
 import { useTheme } from "@/components/theme-context";
+import { useLanguage } from "@/context/LanguageContext";
 import { useEffect, useState } from "react";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import MenuItem from "@mui/material/MenuItem";
@@ -15,9 +17,35 @@ import ClickAwayListener from "@mui/material/ClickAwayListener";
 
 export default function Layout(props) {
   const { theme, toggleTheme } = useTheme();
+  const { t } = useLanguage();
   const [notificationUserWise, setNotificationUserWise] = useState();
   const [notificationList, setNotificationList] = useState([]);
   const [notificationOpen, setNotificationOpen] = useState(false);
+
+  // A member whose profile is not yet complete+approved is restricted to the
+  // profile page + logout only. Hide the notification bell in that state.
+  const [isApproved, setIsApproved] = useState(
+    () =>
+      localStorage.getItem("isProfileCompleted") === "true" &&
+      localStorage.getItem("memberApprovalStatus") === "approved"
+  );
+
+  useEffect(() => {
+    const sync = () => {
+      setIsApproved(
+        localStorage.getItem("isProfileCompleted") === "true" &&
+        localStorage.getItem("memberApprovalStatus") === "approved"
+      );
+    };
+    const interval = setInterval(sync, 1000);
+    window.addEventListener("profileCompleted", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("profileCompleted", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
 
   // useEffect(() => {
   //   getNotificationUserMutation.mutate();
@@ -80,96 +108,102 @@ export default function Layout(props) {
             <SidebarTrigger className="-ml-1" />
             <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-extrabold bg-emerald-100/90 text-emerald-900 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 rounded-full shadow-2xs">
               <UserCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-              MEMBER PORTAL
+              {t("memberPortal")}
             </span>
           </div>
 
           <div className="relative ml-auto">
-            <Button
-              size="icon"
-              variant={theme === "dark" ? "default" : "secondary"}
-              onClick={() => setNotificationOpen((prev) => !prev)}
-              className="relative"
-            >
-              <Bell />
-              {/* Show dot if there are unread notifications */}
-              {notificationList.some((n) => !n.isRead) && (
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 z-10"></span>
-              )}
-            </Button>
-            {/* Notification Dropdown */}
-            {notificationOpen && (
-              <ClickAwayListener onClickAway={() => setNotificationOpen(false)}>
-                <div
-                  className="absolute right-0 left-auto mt-2 min-w-sm shadow-lg rounded z-50 overflow-y-auto max-h-96 bg-white text-black dark:bg-black dark:text-white flex flex-col"
-                  style={{ maxWidth: "400px", minHeight: "200px" }}
+            {isApproved && (
+              <>
+                <Button
+                  size="icon"
+                  variant={theme === "dark" ? "default" : "secondary"}
+                  onClick={() => setNotificationOpen((prev) => !prev)}
+                  className="relative"
                 >
-                  <div className="flex-1 overflow-y-auto">
-                    {notificationList.length === 0 ? (
-                      <div className="p-4 text-center">No notifications</div>
-                    ) : (
-                      <>
-                        {notificationList.map((notifi, i) => (
-                          <MenuItem
-                            key={notifi._id}
-                            onClick={() => HandleNotificationRedirect(notifi)}
-                            className="transition-all px-3 py-2 flex items-center gap-3 relative"
-                            style={{ cursor: "pointer" }}
-                            sx={
-                              !notifi.isRead
-                                ? {
-                                    backgroundColor:
-                                      theme === "dark" ? "#064e3b" : "#ecfdf5", // emerald tint
-                                    "&:hover": {
-                                      backgroundColor:
-                                        theme === "dark"
-                                          ? "#022c22"
-                                          : "#d1fae5",
-                                    },
-                                  }
-                                : {}
-                            }
-                          >
-                            {/* Remove the unread dot here */}
-                            <div className="notification_box flex items-center gap-3 w-full">
-                              <img
-                                src={"/favicon.svg" || "/default-avatar.png"}
-                                alt=""
-                                className="flex-none w-8 h-8 rounded-full border border-gray-200"
-                              />
-                              <div className="notification_msg whitespace-break-spaces w-full">
-                                <div className="font-semibold text-sm mb-0.5">
-                                  {notifi.notificationType}
-                                </div>
-                                <div className="text-xs mb-1">
-                                  {notifi.notificationText}
-                                </div>
-                                <div className="text-xs">
-                                  {new Date(notifi.createdAt).toLocaleString()}
-                                </div>
-                              </div>
-                            </div>
-                          </MenuItem>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                  {notificationList.filter((x) => !x.isRead).length > 0 && (
-                    <div className="sticky bottom-0 bg-white dark:bg-black/90 p-2 text-right border-t border-gray-200 dark:border-neutral-700 z-10">
-                      <Link
-                        component="button"
-                        onClick={handleMarkAllAsRead}
-                        className="dark:text-white font-semibold"
-                        underline="hover"
-                      >
-                        Mark all as read
-                      </Link>
-                    </div>
+                  <Bell />
+                  {/* Show dot if there are unread notifications */}
+                  {notificationList.some((n) => !n.isRead) && (
+                    <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 z-10"></span>
                   )}
-                </div>
-              </ClickAwayListener>
+                </Button>
+                {/* Notification Dropdown */}
+                {notificationOpen && (
+                  <ClickAwayListener onClickAway={() => setNotificationOpen(false)}>
+                    <div
+                      className="absolute right-0 left-auto mt-2 min-w-sm shadow-lg rounded z-50 overflow-y-auto max-h-96 bg-white text-black dark:bg-black dark:text-white flex flex-col"
+                      style={{ maxWidth: "400px", minHeight: "200px" }}
+                    >
+                      <div className="flex-1 overflow-y-auto">
+                        {notificationList.length === 0 ? (
+                          <div className="p-4 text-center">{t("noNotifications")}</div>
+                        ) : (
+                          <>
+                            {notificationList.map((notifi, i) => (
+                              <MenuItem
+                                key={notifi._id}
+                                onClick={() => HandleNotificationRedirect(notifi)}
+                                className="transition-all px-3 py-2 flex items-center gap-3 relative"
+                                style={{ cursor: "pointer" }}
+                                sx={
+                                  !notifi.isRead
+                                    ? {
+                                      backgroundColor:
+                                        theme === "dark" ? "#064e3b" : "#ecfdf5", // emerald tint
+                                      "&:hover": {
+                                        backgroundColor:
+                                          theme === "dark"
+                                            ? "#022c22"
+                                            : "#d1fae5",
+                                      },
+                                    }
+                                    : {}
+                                }
+                              >
+                                {/* Remove the unread dot here */}
+                                <div className="notification_box flex items-center gap-3 w-full">
+                                  <img
+                                    src={"/favicon.svg" || "/default-avatar.png"}
+                                    alt=""
+                                    className="flex-none w-8 h-8 rounded-full border border-gray-200"
+                                  />
+                                  <div className="notification_msg whitespace-break-spaces w-full">
+                                    <div className="font-semibold text-sm mb-0.5">
+                                      {notifi.notificationType}
+                                    </div>
+                                    <div className="text-xs mb-1">
+                                      {notifi.notificationText}
+                                    </div>
+                                    <div className="text-xs">
+                                      {new Date(notifi.createdAt).toLocaleString()}
+                                    </div>
+                                  </div>
+                                </div>
+                              </MenuItem>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                      {notificationList.filter((x) => !x.isRead).length > 0 && (
+                        <div className="sticky bottom-0 bg-white dark:bg-black/90 p-2 text-right border-t border-gray-200 dark:border-neutral-700 z-10">
+                          <Link
+                            component="button"
+                            onClick={handleMarkAllAsRead}
+                            className="dark:text-white font-semibold"
+                            underline="hover"
+                          >
+                            {t("markAllAsRead")}
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </ClickAwayListener>
+                )}
+              </>
             )}
           </div>
+
+          <LanguageSwitcher />
 
           <Button
             variant={theme === "dark" ? "default" : "secondary"}

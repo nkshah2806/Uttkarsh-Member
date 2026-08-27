@@ -9,8 +9,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function LoginForm({ className, ...props }) {
+  const { t } = useLanguage();
   const {
     register,
     handleSubmit,
@@ -36,10 +38,10 @@ export function LoginForm({ className, ...props }) {
       localStorage.setItem("token", response.data.data.jwtToken);
       localStorage.setItem("UserDetails", JSON.stringify(response.data.data));
       localStorage.setItem("isAuthenticated", "true");
-      toast.success("Login successful! Redirecting to dashboard...");
+      toast.success(t("loginSuccessful"));
       navigate("/dashboard");
     } catch (error) {
-      toast.error(error?.response?.data?.meta?.message || "Login failed. Please try again.");
+      toast.error(error?.response?.data?.meta?.message || t("loginFailed"));
     } finally {
       setLoading(false);
     }
@@ -52,19 +54,19 @@ export function LoginForm({ className, ...props }) {
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center mb-5">
-        <h1 className="text-3xl font-bold">Member Login</h1>
+        <h1 className="text-3xl font-bold">{t("memberLogin")}</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          Enter your email below to login to your account
+          {t("enterEmail")}
         </p>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-3">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("email")}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="m@example.com"
-            {...register("email", { required: "Email is required" })}
+            placeholder={t("emailPlaceholder")}
+            {...register("email", { required: t("emailRequired") })}
           />
           {errors.email && (
             <p className="text-red-500 text-sm">{errors.email.message}</p>
@@ -72,19 +74,19 @@ export function LoginForm({ className, ...props }) {
         </div>
 
         <div className="grid gap-3">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t("password")}</Label>
           <div className="flex items-center justify-between relative">
             <Input
               id="password"
               type={passVisible ? "password" : "text"}
-              placeholder="Enter password"
-              {...register("password", { required: "Password is required" })}
+              placeholder={t("passwordPlaceholder")}
+              {...register("password", { required: t("passwordRequired") })}
             />
             <button
               type="button"
               onClick={handlePasswordVisible}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label="Toggle password visibility"
+              aria-label={t("togglePassword")}
             >
               {passVisible ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -103,13 +105,13 @@ export function LoginForm({ className, ...props }) {
           size="lg"
           disabled={loading}
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? t("loggingIn") : t("login")}
         </Button>
         <Link
           to="/forgot-password"
           className="text-[14px] font-medium hover:text-gray-500 duration-300 transition-all"
         >
-          Forgot your password?
+          {t("forgotPassword")}
         </Link>
       </div>
     </form>

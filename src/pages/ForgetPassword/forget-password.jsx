@@ -2,9 +2,10 @@ import { GalleryVerticalEnd } from "lucide-react";
 import login from "../../assets/login.jpg";
 import { ForgetPasswordForm } from "@/components/forget-password-form";
 import logo from "../../assets/logo.png"
-
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ForgetPassword() {
+  const { t } = useLanguage();
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -13,7 +14,7 @@ export default function ForgetPassword() {
             <div className="flex h-15 w-15 items-center justify-center">
               <img src={logo} alt="" />
             </div>
-            Uttkarsh Corporation.
+            {t("appName")}
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">

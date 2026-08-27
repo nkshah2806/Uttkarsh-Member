@@ -16,26 +16,28 @@ import { Eye, PencilRuler } from "lucide-react";
 import DeleteDialog from "@/components/DeleteDialog";
 import user from "../../assets/user.png";
 import { toast } from "sonner";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function User() {
   const navigate = useNavigate();
   const tableRef = useRef();
+  const { t } = useLanguage();
 
   const headers = [
     {
       key: "sNo",
-      label: "S. No.",
+      label: t("sNo"),
       filterable: false,
     },
     {
       key: "profileUrl",
-      label: "Profile",
+      label: t("profile"),
       filterable: false,
       render: (row) => (
         <img
           className="w-10 h-10 rounded-full object-cover flex-none"
           src={row.profileUrl}
-          alt={`${row.firstname} profile`}
+          alt={`${row.firstname} ${t("profile")}`}
           onError={({ currentTarget }) => {
             currentTarget.onerror = null;
             currentTarget.src = user;
@@ -45,35 +47,37 @@ export default function User() {
     },
     {
       key: "name",
-      label: "Full Name",
+      label: t("fullName"),
       filterable: true,
     },
-    { key: "email", label: "Email", filterable: true },
-    { key: "phone", label: "Phone Number", filterable: true },
+    { key: "email", label: t("email"), filterable: true },
+    { key: "phone", label: t("phone"), filterable: true },
     {
       key: "role",
-      label: "Admin/User",
+      label: t("adminOrUser"),
       filterable: true,
       render: (row) => (
         <Badge variant={row.role === "admin" ? "destructive" : "default"} className="capitalize min-w-auto">
-          {row.role}
+          {row.role === "admin" ? t("admin") : t("member")}
         </Badge>
       ),
     },
     {
       key: "createdAt",
-      label: "Created At",
+      label: t("createdAt"),
       filterable: true,
     },
     {
       key: "isActive",
-      label: "isActive",
+      label: t("isActive"),
       filterable: true,
       render: (row) => (
         <DeleteDialog
-          title={`${!row.isActive ? "Active" : "Inactive"} User?`}
-          des={`Are you sure you want to ${!row.isActive ? "Active" : "InActive"
-            } ${row.fullName}?`}
+          title={row.isActive ? t("inactiveUserConfirm") : t("activeUserConfirm")}
+          des={(row.isActive ? t("deactivateUserConfirm") : t("activateUserConfirm")).replace(
+            "{name}",
+            row.fullName
+          )}
           row={row}
           handleToggleChange={HandleDelete}
           disabled={row?.isAdmin}
@@ -82,7 +86,7 @@ export default function User() {
     },
     {
       key: "actions",
-      label: "Actions",
+      label: t("actions"),
       render: (row) => (
         <div className="flex gap-3">
           <Button onClick={() => navigate(`/user/${row._id}`)}><Eye /></Button>
@@ -103,14 +107,14 @@ export default function User() {
   const deleteUserMutation = useApiMutation(
     ({ id, data }) => toggleUserStatus(id, data),
     {
-      successMessage: "Status updated successfully",
+      successMessage: t("statusUpdated"),
       onSuccess: () => {
         if (tableRef.current) {
           tableRef.current.refetchTable();
         }
       },
       onError: (err) => {
-        toast.error(err?.response?.data?.message || "Failed to delete user");
+        toast.error(err?.response?.data?.message || t("failedDeleteUser"));
       },
     }
   );
@@ -132,8 +136,8 @@ export default function User() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>List of Users</CardTitle>
-        <CardDescription>All user information below.</CardDescription>
+        <CardTitle>{t("listOfUsers")}</CardTitle>
+        <CardDescription>{t("allUserInfo")}</CardDescription>
       </CardHeader>
       <CardContent>
         <ReusableTable

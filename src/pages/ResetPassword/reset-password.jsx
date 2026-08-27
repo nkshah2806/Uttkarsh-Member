@@ -3,8 +3,10 @@ import { LoginForm } from "@/components/login-form";
 import login from "../../assets/login.jpg";
 import { ResetPasswordForm } from "@/components/reset-password-form";
 import { useParams } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ResetPassword() {
+  const { t } = useLanguage();
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -13,7 +15,7 @@ export default function ResetPassword() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <GalleryVerticalEnd className="size-4" />
             </div>
-            Uttkarsh Corporation.
+            {t("appName")}
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">

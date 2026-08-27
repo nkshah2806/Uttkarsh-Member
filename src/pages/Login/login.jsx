@@ -1,7 +1,9 @@
 import { LoginForm } from "@/components/login-form";
+import { useLanguage } from "@/context/LanguageContext";
 import login from "../../assets/login.jpg";
 
 export default function Login() {
+  const { t } = useLanguage();
   return (
     <div className="min-h-svh bg-slate-50 lg:grid lg:grid-cols-2">
       {/* Left - Login Section */}
@@ -15,10 +17,10 @@ export default function Login() {
 
             <div>
               <h1 className="text-lg font-bold leading-tight text-slate-900">
-                Utkarsh Corporation
+                {t("appName")}
               </h1>
               <p className="text-xs font-medium text-slate-500">
-                Member Portal
+                {t("memberPortal")}
               </p>
             </div>
           </div>
@@ -45,19 +47,19 @@ export default function Login() {
           </div>
 
           <p className="mt-6 text-center text-xs leading-5 text-slate-500">
-            By continuing, you agree to our{" "}
+            {t("byContinuing")}{" "}
             <a
               href="#"
               className="font-medium text-primary hover:underline"
             >
-              Terms of Service
+              {t("termsOfService")}
             </a>{" "}
-            and{" "}
+            {t("and")}{" "}
             <a
               href="#"
               className="font-medium text-primary hover:underline"
             >
-              Privacy Policy
+              {t("privacyPolicy")}
             </a>
             .
           </p>
@@ -65,15 +67,15 @@ export default function Login() {
 
         {/* Footer */}
         <div className="flex flex-col gap-2 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Utkarsh Corporation</span>
+          <span>© {new Date().getFullYear()} {t("appName")}</span>
 
           <span>
-            Need help?{" "}
+            {t("needHelp")}{" "}
             <a
               href="#"
               className="font-medium text-slate-600 hover:text-primary"
             >
-              Contact Support
+              {t("contactSupport")}
             </a>
           </span>
         </div>
@@ -95,7 +97,7 @@ export default function Login() {
           {/* Top */}
           <div className="flex justify-end">
             <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium backdrop-blur-md">
-              Secure Member Portal
+              {t("secureMemberPortal")}
             </span>
           </div>
 
@@ -106,30 +108,26 @@ export default function Login() {
             </div>
 
             <h2 className="text-4xl font-bold leading-tight xl:text-5xl">
-              Your membership,
-              <br />
-              your journey.
+              {t("membershipJourney")}
             </h2>
 
             <p className="mt-5 max-w-lg text-sm leading-7 text-white/75 xl:text-base">
-              Access your personal profile, membership information,
-              activities, documents and other member services from one
-              secure dashboard.
+              {t("memberPortalAccessMsg")}
             </p>
 
             {/* Feature Cards */}
             <div className="mt-8 grid max-w-lg grid-cols-2 gap-3">
               <div className="rounded-xl border border-white/10 bg-white/10 p-4 backdrop-blur-md">
-                <p className="text-sm font-semibold">Member Profile</p>
+                <p className="text-sm font-semibold">{t("memberProfileFeature")}</p>
                 <p className="mt-1 text-xs text-white/60">
-                  Manage your information
+                  {t("manageYourInfo")}
                 </p>
               </div>
 
               <div className="rounded-xl border border-white/10 bg-white/10 p-4 backdrop-blur-md">
-                <p className="text-sm font-semibold">Secure Access</p>
+                <p className="text-sm font-semibold">{t("secureAccessFeature")}</p>
                 <p className="mt-1 text-xs text-white/60">
-                  Your data stays protected
+                  {t("yourDataProtected")}
                 </p>
               </div>
             </div>
@@ -137,7 +135,7 @@ export default function Login() {
 
           {/* Bottom */}
           <div className="text-xs text-white/50">
-            Trusted access for Utkarsh Corporation members
+            {t("trustedAccess")}
           </div>
         </div>
       </div>

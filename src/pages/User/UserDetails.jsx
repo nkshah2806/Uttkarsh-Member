@@ -14,10 +14,12 @@ import { format } from "date-fns";
 import user from "../../assets/user.png";
 import { Config } from "@/lib/Config";
 import { CheckCircle, XCircle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function UserDetails() {
     const navigate = useNavigate();
     const { id } = useParams();
+    const { t } = useLanguage();
     const [userDetails, setUserDetails] = useState(null);
     const [bookingDetails, setBookingDetails] = useState(null);
     const [activeTab, setActiveTab] = useState("personal"); // 👈 active tab state
@@ -34,7 +36,7 @@ export default function UserDetails() {
         }
     }, [id]);
 
-    if (!userDetails) return <div className="text-center py-10">Loading...</div>;
+    if (!userDetails) return <div className="text-center py-10">{t("loading")}</div>;
 
     return (
         <div className="space-y-4">
@@ -46,7 +48,7 @@ export default function UserDetails() {
                             <img
                                 className="w-24 h-24 rounded-full object-cover flex-none"
                                 src={`${Config.API_URL}${userDetails.image}`}
-                                alt={`${userDetails.firstname} profile`}
+                                alt={`${userDetails.firstname} ${t("profile")}`}
                                 onError={({ currentTarget }) => {
                                     currentTarget.onerror = null;
                                     currentTarget.src = user;
@@ -58,12 +60,12 @@ export default function UserDetails() {
                                     {userDetails.firstname} {userDetails.lastname}
                                 </CardTitle>
                                 <div className="flex flex-wrap gap-2 justify-center mt-4">
-                                    {userDetails.isAdmin && <Badge variant="destructive">Admin</Badge>}
-                                    {userDetails.isVerified && <Badge variant="default">Verified</Badge>}
+                                    {userDetails.isAdmin && <Badge variant="destructive">{t("admin")}</Badge>}
+                                    {userDetails.isVerified && <Badge variant="default">{t("verified")}</Badge>}
                                     {userDetails.isActive ? (
-                                        <Badge variant="success">Active</Badge>
+                                        <Badge variant="success">{t("active")}</Badge>
                                     ) : (
-                                        <Badge variant="secondary">Inactive</Badge>
+                                        <Badge variant="secondary">{t("inactive")}</Badge>
                                     )}
                                 </div>
                             </div>
@@ -78,14 +80,14 @@ export default function UserDetails() {
                                 onClick={() => setActiveTab("personal")}
                                 className="w-full justify-start"
                             >
-                                Personal Info
+                                {t("personalInfo")}
                             </Button>
                             <Button
                                 variant={activeTab === "bookings" ? "default" : "ghost"}
                                 onClick={() => setActiveTab("bookings")}
                                 className="w-full justify-start"
                             >
-                                Booking Details
+                                {t("bookingDetails")}
                             </Button>
                         </CardContent>
                     </Card>
@@ -96,24 +98,24 @@ export default function UserDetails() {
                     {activeTab === "personal" && (
                         <Card>
                             <div className="flex justify-between mx-5">
-                                <div className="text-3xl">User Information</div>
+                                <div className="text-3xl">{t("userInformation")}</div>
                                 <Button onClick={() => navigate(-1)} variant="outline">
-                                    Back
+                                    {t("back")}
                                 </Button>
                             </div>
 
                             <CardContent className="grid gap-4 pt-4">
                                 {[
-                                    { label: "Email", value: userDetails.email },
-                                    { label: "Phone", value: userDetails.phoneNumber },
-                                    { label: "Gender", value: userDetails.gender },
-                                    { label: "Age", value: userDetails.age },
+                                    { label: t("email"), value: userDetails.email },
+                                    { label: t("phoneLabel"), value: userDetails.phoneNumber },
+                                    { label: t("gender"), value: userDetails.gender },
+                                    { label: t("age"), value: userDetails.age },
                                     {
-                                        label: "Created At",
+                                        label: t("createdAt"),
                                         value: format(new Date(userDetails.createdAt), "dd MMM yyyy, hh:mm a"),
                                     },
                                     {
-                                        label: "Updated At",
+                                        label: t("updatedAt"),
                                         value: format(new Date(userDetails.updatedAt), "dd MMM yyyy, hh:mm a"),
                                     },
                                 ].map((item) => (
@@ -135,9 +137,9 @@ export default function UserDetails() {
                     {activeTab === "bookings" && (
                         <Card>
                             <div className="flex justify-between mx-5">
-                                <div className="text-3xl">User Booking Details</div>
+                                <div className="text-3xl">{t("userBookingDetails")}</div>
                                 <Button onClick={() => navigate(-1)} variant="outline">
-                                    Back
+                                    {t("back")}
                                 </Button>
                             </div>
                             <CardContent className="pt-4">
@@ -149,43 +151,43 @@ export default function UserDetails() {
                                                     {/* Booking Info */}
                                                     <div className="flex-1 space-y-2">
                                                         <div className="flex justify-between items-center flex-wrap gap-2">
-                                                            <h3 className="text-lg font-semibold">Booking ID: {booking.orderNo}</h3>
+                                                            <h3 className="text-lg font-semibold">{`${t("bookingId")}: ${booking.orderNo}`}</h3>
                                                             <div className="flex gap-2 items-center">
                                                                 <Badge variant={booking.status === "confirmed" ? "success" : "secondary"}>
                                                                     {booking.status}
                                                                 </Badge>
                                                                 <Badge variant={booking.isPaid ? "success" : "destructive"}>
                                                                     {booking.isPaid ? <CheckCircle className="w-4 h-4 mr-1 inline" /> : <XCircle className="w-4 h-4 mr-1 inline" />}
-                                                                    {booking.isPaid ? "Paid" : "Unpaid"}
+                                                                    {booking.isPaid ? t("paid") : t("unpaid")}
                                                                 </Badge>
                                                             </div>
                                                         </div>
 
                                                         <div className="text-sm grid gap-1">
                                                             <p>
-                                                                <span className="font-medium text-muted-foreground">Pickup:</span>{" "}
+                                                                <span className="font-medium text-muted-foreground">{t("pickup")}:</span>{" "}
                                                                 {booking.pickupLocation.apartment}, {booking.pickupLocation.pincode}
                                                             </p>
                                                             <p>
-                                                                <span className="font-medium text-muted-foreground">Dropoff:</span>{" "}
+                                                                <span className="font-medium text-muted-foreground">{t("dropoff")}:</span>{" "}
                                                                 {booking.dropoffLocation.apartment}, {booking.dropoffLocation.pincode}
                                                             </p>
                                                             <p>
-                                                                <span className="font-medium text-muted-foreground">Pickup Time:</span>{" "}
+                                                                <span className="font-medium text-muted-foreground">{t("pickupTime")}:</span>{" "}
                                                                 {format(new Date(booking.pickupDateTime), "dd MMM yyyy, hh:mm a")}
                                                             </p>
                                                             <p>
-                                                                <span className="font-medium text-muted-foreground">Dropoff Time:</span>{" "}
+                                                                <span className="font-medium text-muted-foreground">{t("dropoffTime")}:</span>{" "}
                                                                 {format(new Date(booking.dropoffDateTime), "dd MMM yyyy, hh:mm a")}
                                                             </p>
                                                             <p>
-                                                                <span className="font-medium text-muted-foreground">Created:</span>{" "}
+                                                                <span className="font-medium text-muted-foreground">{t("created")}:</span>{" "}
                                                                 {format(new Date(booking.createdAt), "dd MMM yyyy, hh:mm a")}
                                                             </p>
                                                         </div>
 
                                                         <div className="pt-2">
-                                                            <span className="font-medium text-muted-foreground">Services:</span>
+                                                            <span className="font-medium text-muted-foreground">{t("services")}:</span>
                                                             <ul className="list-disc list-inside text-sm">
                                                                 {booking.services.map((s, idx) => (
                                                                     <li key={idx}>
@@ -196,7 +198,7 @@ export default function UserDetails() {
                                                         </div>
                                                         <div className="pt-4 flex justify-end">
                                                             <Button onClick={() => navigate(`/booking/${booking._id}`)} size="sm">
-                                                                View Details
+                                                                {t("viewDetails")}
                                                             </Button>
                                                         </div>
                                                     </div>
@@ -206,7 +208,7 @@ export default function UserDetails() {
                                     </div>
                                 ) : (
                                     <div className="text-center text-muted-foreground py-10">
-                                        No bookings found for this user.
+                                        {t("noBookings")}
                                     </div>
                                 )}
                             </CardContent>
