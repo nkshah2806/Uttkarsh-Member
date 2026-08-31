@@ -42,7 +42,7 @@ import ReusableTable from "@/components/ReusableTable";
 export default function PatientDetails() {
   const { patientId } = useParams();
   const navigate = useNavigate();
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [patientData, setPatientData] = useState(null);
@@ -54,7 +54,6 @@ export default function PatientDetails() {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
   const [detailedReport, setDetailedReport] = useState(null);
-  const [reportLang, setReportLang] = useState(lang);
   const [paramFilter, setParamFilter] = useState("all"); // 'all', 'abnormal', 'normal'
   const [paramSearch, setParamSearch] = useState("");
 
@@ -163,7 +162,7 @@ export default function PatientDetails() {
   const handlePrintReport = async (visitId) => {
     try {
       const res = await axiosInstance.post(`v1/visits/${visitId}/generate-pdf`, {
-        lang: reportLang,
+        lang: "en",
       });
       const win = window.open("", "_blank");
       if (!win) return;
@@ -176,7 +175,7 @@ export default function PatientDetails() {
           const style = win.document.createElement("style");
           style.innerHTML = `@page { size: A4; margin: 10mm; } body { margin: 0; } .report-container, .report { width: 190mm; margin: 0 auto; }`;
           win.document.head && win.document.head.appendChild(style);
-        } catch (e) {}
+        } catch (e) { }
       };
 
       win.focus();
@@ -192,7 +191,7 @@ export default function PatientDetails() {
   const handleDownloadReport = async (visitId) => {
     try {
       const res = await axiosInstance.post(`v1/visits/${visitId}/generate-pdf`, {
-        lang: reportLang,
+        lang: "en",
       });
       const blob = new Blob([res.data.html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
@@ -309,7 +308,7 @@ export default function PatientDetails() {
     },
     {
       key: "next_visit_date",
-      label: "Next Visit",
+      label: "Suggested Reassessment",
       sortable: true,
       render: (v) =>
         v.next_visit_date ? (
@@ -600,7 +599,7 @@ export default function PatientDetails() {
                     {patientData.registered_by?.fullName || patientData.registered_by?.username || "Franchise Consultant"}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {patientData.registered_by?.email || patientData.registered_by?.role || "Healthcare Specialist"}
+                    {patientData.registered_by?.email || patientData.registered_by?.role || "Wellness Consultant"}
                   </p>
                 </div>
                 <span className="p-2 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl text-indigo-600 dark:text-indigo-400">
@@ -728,28 +727,6 @@ export default function PatientDetails() {
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Language Switcher */}
-                <div className="flex items-center rounded-lg border bg-white dark:bg-slate-800 p-0.5 text-xs">
-                  <button
-                    onClick={() => setReportLang("en")}
-                    className={`px-2.5 py-1 rounded font-semibold transition-all ${reportLang === "en"
-                        ? "bg-indigo-600 text-white shadow-xs"
-                        : "text-slate-500 hover:text-slate-700"
-                      }`}
-                  >
-                    English
-                  </button>
-                  <button
-                    onClick={() => setReportLang("hi")}
-                    className={`px-2.5 py-1 rounded font-semibold transition-all ${reportLang === "hi"
-                        ? "bg-indigo-600 text-white shadow-xs"
-                        : "text-slate-500 hover:text-slate-700"
-                      }`}
-                  >
-                    हिंदी
-                  </button>
-                </div>
-
                 <Button
                   size="sm"
                   variant="outline"
@@ -822,7 +799,7 @@ export default function PatientDetails() {
                       <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300 mt-1">
                         {detailedReport.summary?.selected_points_count || 0}
                       </p>
-                      <p className="text-[11px] text-indigo-600/70">Clinical guidance points</p>
+                      <p className="text-[11px] text-indigo-600/70">Wellness guidance points</p>
                     </div>
                   </div>
 
@@ -845,8 +822,8 @@ export default function PatientDetails() {
                           <button
                             onClick={() => setParamFilter("all")}
                             className={`px-2.5 py-1 rounded font-semibold transition-all ${paramFilter === "all"
-                                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs"
-                                : "text-slate-500"
+                              ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs"
+                              : "text-slate-500"
                               }`}
                           >
                             All ({detailedReport.parameters?.length || 0})
@@ -854,8 +831,8 @@ export default function PatientDetails() {
                           <button
                             onClick={() => setParamFilter("abnormal")}
                             className={`px-2.5 py-1 rounded font-semibold transition-all ${paramFilter === "abnormal"
-                                ? "bg-white dark:bg-slate-700 text-rose-600 shadow-xs"
-                                : "text-slate-500"
+                              ? "bg-white dark:bg-slate-700 text-rose-600 shadow-xs"
+                              : "text-slate-500"
                               }`}
                           >
                             Abnormal ({detailedReport.summary?.abnormal || 0})
@@ -863,8 +840,8 @@ export default function PatientDetails() {
                           <button
                             onClick={() => setParamFilter("normal")}
                             className={`px-2.5 py-1 rounded font-semibold transition-all ${paramFilter === "normal"
-                                ? "bg-white dark:bg-slate-700 text-emerald-600 shadow-xs"
-                                : "text-slate-500"
+                              ? "bg-white dark:bg-slate-700 text-emerald-600 shadow-xs"
+                              : "text-slate-500"
                               }`}
                           >
                             Normal ({detailedReport.summary?.normal || 0})
@@ -892,14 +869,14 @@ export default function PatientDetails() {
                               <th className="py-2.5 px-3.5">Parameter Name</th>
                               <th className="py-2.5 px-3.5">Category</th>
                               <th className="py-2.5 px-3.5">Observed Value</th>
-                              <th className="py-2.5 px-3.5">Normal Reference Range</th>
-                              <th className="py-2.5 px-3.5">Evaluation Status</th>
+                              <th className="py-2.5 px-3.5">Reference Range*</th>
+                              <th className="py-2.5 px-3.5">Assessment Status</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                             {filteredParameters.map((p) => {
                               const isAbnormal = p.result_type === "LOW" || p.result_type === "HIGH";
-                              const displayName = reportLang === "hi" && p.name_hi ? p.name_hi : p.name;
+                              const displayName = p.name;
 
                               return (
                                 <tr
@@ -915,11 +892,6 @@ export default function PatientDetails() {
                                   </td>
                                   <td className="py-2.5 px-3.5 font-semibold text-slate-800 dark:text-slate-200">
                                     {displayName}
-                                    {reportLang === "hi" && p.name && (
-                                      <span className="block text-[10px] text-slate-400 font-normal">
-                                        {p.name}
-                                      </span>
-                                    )}
                                   </td>
                                   <td className="py-2.5 px-3.5 text-slate-500">{p.category || "General"}</td>
                                   <td className="py-2.5 px-3.5 font-bold font-mono text-slate-900 dark:text-slate-100">
@@ -954,12 +926,12 @@ export default function PatientDetails() {
                     </div>
                   </div>
 
-                  {/* Selected Report Content & Clinical Recommendations */}
+                  {/* Selected Report Content & Wellness Recommendations */}
                   <div className="space-y-4 pt-2">
                     <div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                         <Sparkles className="h-4 w-4 text-amber-500" />
-                        Selected Clinical & Ayurvedic Recommendations in Report
+                        Selected Wellness Information & Ayurvedic Lifestyle Guidance in Report
                       </h4>
                       <p className="text-xs text-slate-500">
                         The specific guidance points and remedies chosen for inclusion in this patient's final report.
@@ -975,7 +947,7 @@ export default function PatientDetails() {
                       <div className="space-y-3.5">
                         {detailedReport.abnormal_analysis.map((item, idx) => {
                           const p = item.parameter;
-                          const paramName = reportLang === "hi" && p.name_hi ? p.name_hi : p.name;
+                          const paramName = p.name;
 
                           // Only show sections that have selected items
                           const validSections = (item.sections || []).filter(
@@ -1000,8 +972,8 @@ export default function PatientDetails() {
                                 </div>
                                 <span
                                   className={`text-xs font-bold px-2 py-0.5 rounded ${item.result_type === "HIGH"
-                                      ? "bg-rose-100 text-rose-700"
-                                      : "bg-amber-100 text-amber-700"
+                                    ? "bg-rose-100 text-rose-700"
+                                    : "bg-amber-100 text-amber-700"
                                     }`}
                                 >
                                   {item.result_type}: {item.raw_value} {p.unit || ""} (Range: {p.normal_min}–{p.normal_max})
@@ -1010,7 +982,7 @@ export default function PatientDetails() {
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {validSections.map((sec) => {
-                                  const secTitle = reportLang === "hi" && sec.title_hi ? sec.title_hi : sec.title_en;
+                                  const secTitle = sec.title_en;
                                   const selectedItems = (sec.items || []).filter((it) => it.is_selected);
 
                                   return (
@@ -1024,7 +996,7 @@ export default function PatientDetails() {
                                       <ul className="space-y-1 text-slate-700 dark:text-slate-300 pl-3 list-disc">
                                         {selectedItems.map((it) => (
                                           <li key={it.id} className="leading-relaxed">
-                                            {reportLang === "hi" && it.text_hi ? it.text_hi : it.text_en}
+                                            {it.text_en}
                                           </li>
                                         ))}
                                       </ul>

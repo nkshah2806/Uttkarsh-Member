@@ -12,9 +12,8 @@ import {
 
 export default function PDFReportViewer() {
   const { visitId } = useParams();
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
 
-  const [reportLang, setReportLang] = useState(lang);
   const [reportHtml, setReportHtml] = useState("");
   const [reportId, setReportId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,13 +28,13 @@ export default function PDFReportViewer() {
   }, []);
 
   const generateReport = useCallback(
-    async (selectedLang) => {
+    async () => {
       try {
         setLoading(true);
         const res = await axiosInstance.post(
           `v1/visits/${visitId}/generate-pdf`,
           {
-            lang: selectedLang,
+            lang: "en",
           }
         );
         if (!isMountedRef.current) return;
@@ -55,8 +54,8 @@ export default function PDFReportViewer() {
   );
 
   useEffect(() => {
-    generateReport(reportLang);
-  }, [generateReport, reportLang]);
+    generateReport();
+  }, [generateReport]);
 
   const handlePrint = () => {
     const win = window.open("", "_blank");
@@ -153,28 +152,6 @@ export default function PDFReportViewer() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Language Toggle */}
-          <div className="flex items-center rounded-lg border bg-slate-100 dark:bg-slate-800 p-1 text-xs">
-            <button
-              onClick={() => setReportLang("en")}
-              className={`px-3 py-1 rounded font-semibold transition-all ${reportLang === "en"
-                ? "bg-white dark:bg-indigo-600 dark:text-white text-indigo-600 shadow"
-                : "text-slate-500"
-                }`}
-            >
-              English
-            </button>
-            <button
-              onClick={() => setReportLang("hi")}
-              className={`px-3 py-1 rounded font-semibold transition-all ${reportLang === "hi"
-                ? "bg-white dark:bg-indigo-600 dark:text-white text-indigo-600 shadow"
-                : "text-slate-500"
-                }`}
-            >
-              हिंदी
-            </button>
-          </div>
-
           <Button variant="outline" size="sm" onClick={handlePrint}>
             <Printer className="mr-1.5 h-4 w-4" /> {t("printView")}
           </Button>
@@ -212,7 +189,7 @@ export default function PDFReportViewer() {
         <div className="flex flex-col items-center justify-center py-20 space-y-4 bg-white dark:bg-slate-900 rounded-2xl border shadow-sm">
           <div className="h-10 w-10 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
           <p className="text-sm text-slate-500">
-            {reportLang === "hi" ? t("compilingReportHi") : t("compilingReport")}
+            {t("compilingReport")}
           </p>
         </div>
       ) : (

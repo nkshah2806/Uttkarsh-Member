@@ -426,7 +426,7 @@ export default {
     clientReportDetails: "ક્લાયંટ અને રિપોર્ટ વિગતો",
     clientReportDetailsDesc: "હેલ્થ રિપોર્ટ વર્કફ્લો માટે મુખ્ય વિગતો.",
     consultantName: "સલાહકારનું નામ",
-    phClinicalNotes: "ક્લિનિકલ નોંધો અને અવલોકનો",
+    phClinicalNotes: "વેલનેસ નોંધો અને અવલોકનો",
     parameterEntry: "પેરામીટર એન્ટ્રી",
     parameterEntryDesc: "માસ્ટર-સંચાલિત એન્ટ્રીઓ અને સ્ટેટસ ટેગિંગ માટે પ્રોટોટાઇપ લેઆઉટ.",
     autoStatus: "ઓટો સ્ટેટસ",

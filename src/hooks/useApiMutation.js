@@ -23,7 +23,7 @@ export const useApiMutation = (
         silentError = false,
     } = {}
 ) => {
-    return useMutation( {
+    return useMutation({
         mutationFn: apiFn,
         onSuccess: (data, variables, context) => {
             if (successMessage) toast.success(successMessage);
@@ -36,6 +36,7 @@ export const useApiMutation = (
                 } else {
                     // Default error message from API or generic fallback
                     const msg =
+                        error?.response?.data?.message ||
                         error?.response?.data?.meta?.message ||
                         error?.message ||
                         'Something went wrong';

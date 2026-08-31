@@ -29,7 +29,7 @@ import { toast } from "sonner";
 import ReusableTable from "@/components/ReusableTable";
 
 export default function PatientRegistration() {
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [patients, setPatients] = useState([]);
@@ -168,7 +168,7 @@ export default function PatientRegistration() {
   const headers = [
     {
       key: "patient_code",
-      label: "Patient ID",
+      label: "Client ID",
       render: (row) => (
         <span className="font-mono font-bold text-xs bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 px-2 py-1 rounded-md border border-indigo-200/60 dark:border-indigo-800">
           {row.patient_code}
@@ -323,9 +323,7 @@ export default function PatientRegistration() {
           <p className="text-xs uppercase tracking-widest text-indigo-200 font-semibold">Quantum Health System</p>
           <h1 className="text-2xl font-bold mt-1">{t("patientReg")}</h1>
           <p className="text-sm text-indigo-100 mt-1">
-            {lang === "hi"
-              ? "रोगी पंजीकरण सूची देखें, नए रोगी जोड़ें और संपूर्ण रोगी इतिहास देखने के लिए विवरण देखें।"
-              : "Clean patient directory overview. Click View Details on any patient to see their full profile and report history."}
+            Clean patient directory overview. Click View Details on any patient to see their full profile and report history.
           </p>
         </div>
         <Button
@@ -344,7 +342,7 @@ export default function PatientRegistration() {
             headers={headers}
             data={patients}
             loading={loading}
-            Search="Search by Patient ID, Name, Mobile, Email..."
+            Search="Search by Client ID, Name, Mobile, Email..."
             CreateExportRender={() => (
               <Button
                 onClick={openRegisterModal}
@@ -541,8 +539,8 @@ export default function PatientRegistration() {
                   {submitting
                     ? "Saving..."
                     : editingPatient
-                    ? "Update Patient Details"
-                    : "Save & Proceed to Scan"}
+                      ? "Update Patient Details"
+                      : "Save & Proceed to Scan"}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>

@@ -10,7 +10,7 @@ import { toast } from "sonner";
 export default function QuantumDataEntry() {
   const { visitId } = useParams();
   const navigate = useNavigate();
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
 
   const [patient, setPatient] = useState(null);
   const [parameters, setParameters] = useState([]);
@@ -180,11 +180,10 @@ export default function QuantumDataEntry() {
           <button
             key={cat}
             onClick={() => setCategoryFilter(cat)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
-              categoryFilter === cat
+            className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${categoryFilter === cat
                 ? "bg-indigo-600 text-white shadow"
                 : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50"
-            }`}
+              }`}
           >
             {cat}
           </button>
@@ -199,7 +198,7 @@ export default function QuantumDataEntry() {
               <thead className="bg-slate-50 dark:bg-slate-800 text-xs uppercase font-semibold text-slate-500 sticky top-0">
                 <tr>
                   <th className="px-4 py-3 text-left w-20">Code</th>
-                  <th className="px-4 py-3 text-left">Parameter ({lang.toUpperCase()})</th>
+                  <th className="px-4 py-3 text-left">Parameter</th>
                   <th className="px-4 py-3 text-left">{t("normalRange")}</th>
                   <th className="px-4 py-3 w-40">{t("rawInput")}</th>
                   <th className="px-4 py-3 text-center w-32">{t("status")}</th>
@@ -212,15 +211,14 @@ export default function QuantumDataEntry() {
                   return (
                     <tr
                       key={p._id}
-                      className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${
-                        status === "HIGH" ? "bg-rose-50/40 dark:bg-rose-950/10" :
-                        status === "LOW" ? "bg-amber-50/40 dark:bg-amber-950/10" : ""
-                      }`}
+                      className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${status === "HIGH" ? "bg-rose-50/40 dark:bg-rose-950/10" :
+                          status === "LOW" ? "bg-amber-50/40 dark:bg-amber-950/10" : ""
+                        }`}
                     >
                       <td className="px-4 py-2.5 font-mono text-xs font-bold text-indigo-600">{p.code}</td>
                       <td className="px-4 py-2.5">
                         <div className="font-medium text-slate-800 dark:text-white">
-                          {lang === "hi" ? p.name_hi : p.name_en}
+                          {p.name_en}
                         </div>
                         <div className="text-xs text-slate-400">{p.category}</div>
                       </td>
@@ -234,12 +232,11 @@ export default function QuantumDataEntry() {
                           placeholder="—"
                           value={val}
                           onChange={(e) => setResultsMap((prev) => ({ ...prev, [p._id]: e.target.value }))}
-                          className={`w-full rounded-lg border px-3 py-1.5 text-sm font-semibold text-center bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 transition-colors ${
-                            status === "HIGH" ? "border-rose-300 focus:ring-rose-400" :
-                            status === "LOW" ? "border-amber-300 focus:ring-amber-400" :
-                            status === "NORMAL" ? "border-emerald-300 focus:ring-emerald-400" :
-                            "border-slate-200 focus:ring-indigo-400"
-                          }`}
+                          className={`w-full rounded-lg border px-3 py-1.5 text-sm font-semibold text-center bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 transition-colors ${status === "HIGH" ? "border-rose-300 focus:ring-rose-400" :
+                              status === "LOW" ? "border-amber-300 focus:ring-amber-400" :
+                                status === "NORMAL" ? "border-emerald-300 focus:ring-emerald-400" :
+                                  "border-slate-200 focus:ring-indigo-400"
+                            }`}
                         />
                       </td>
                       <td className="px-4 py-2.5 text-center">

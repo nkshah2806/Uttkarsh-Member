@@ -1,5 +1,4 @@
 import { AppSidebar } from "@/components/app-sidebar";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import {
   SidebarInset,
@@ -22,19 +21,22 @@ export default function Layout(props) {
   const [notificationList, setNotificationList] = useState([]);
   const [notificationOpen, setNotificationOpen] = useState(false);
 
-  // A member whose profile is not yet complete+approved is restricted to the
-  // profile page + logout only. Hide the notification bell in that state.
+  // A member whose profile is not yet complete+approved, or whose account is
+  // inactive, is restricted to the profile page + logout only. Hide the
+  // notification bell in that state.
   const [isApproved, setIsApproved] = useState(
     () =>
       localStorage.getItem("isProfileCompleted") === "true" &&
-      localStorage.getItem("memberApprovalStatus") === "approved"
+      localStorage.getItem("memberApprovalStatus") === "approved" &&
+      localStorage.getItem("memberIsActive") !== "false"
   );
 
   useEffect(() => {
     const sync = () => {
       setIsApproved(
         localStorage.getItem("isProfileCompleted") === "true" &&
-        localStorage.getItem("memberApprovalStatus") === "approved"
+        localStorage.getItem("memberApprovalStatus") === "approved" &&
+        localStorage.getItem("memberIsActive") !== "false"
       );
     };
     const interval = setInterval(sync, 1000);
@@ -202,8 +204,6 @@ export default function Layout(props) {
               </>
             )}
           </div>
-
-          <LanguageSwitcher />
 
           <Button
             variant={theme === "dark" ? "default" : "secondary"}

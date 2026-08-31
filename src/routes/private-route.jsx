@@ -14,6 +14,7 @@ function PrivateRoute() {
     completed: localStorage.getItem("isProfileCompleted") === "true",
     approvalStatus: localStorage.getItem("memberApprovalStatus") || "pending",
     rejectionReason: localStorage.getItem("memberApprovalReason") || "",
+    isActive: localStorage.getItem("memberIsActive") !== "false",
   }));
 
   const checkStatus = async () => {
@@ -23,14 +24,17 @@ function PrivateRoute() {
         const completed = !!res.data.profile_completed;
         const approvalStatus = res.data.approval_status || "pending";
         const rejectionReason = res.data.rejection_reason || "";
+        const isActive = res.data.is_active !== false;
         setProfileStatus({
           completed,
           approvalStatus,
           rejectionReason,
+          isActive,
         });
         localStorage.setItem("isProfileCompleted", completed ? "true" : "false");
         localStorage.setItem("memberApprovalStatus", approvalStatus);
         localStorage.setItem("memberApprovalReason", rejectionReason);
+        localStorage.setItem("memberIsActive", isActive ? "true" : "false");
       }
     } catch (err) {
       console.warn("Could not verify member profile status:", err);
@@ -78,13 +82,24 @@ function PrivateRoute() {
     profileStatus.completed || localStorage.getItem("isProfileCompleted") === "true";
   const approvalStatus =
     profileStatus.approvalStatus || localStorage.getItem("memberApprovalStatus") || "pending";
-  const isApproved = completed && approvalStatus === "approved";
+  const isActive =
+    profileStatus.isActive !== false && localStorage.getItem("memberIsActive") !== "false";
+  // Full access requires: Profile = Completed AND Approval = Approved AND Account = Active.
+  const isApproved = completed && approvalStatus === "approved" && isActive;
 
   const isProfileRoute = location.pathname === "/member/profile";
   const isLoginRoute = location.pathname === "/";
 
-  // If profile is not completed OR not yet approved, restrict to the profile page
-  // (and login). This prevents URL/refresh/API access to the rest of the app.
+  // Deactivated accounts are signed out so login is required again.
+  if (!isActive && isLoggedIn) {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("token");
+    return <Navigate to="/" replace />;
+  }
+
+  // If profile is not completed OR not yet approved OR account inactive,
+  // restrict to the profile page (and login). This prevents URL/refresh/API
+  // access to the rest of the app.
   if (!isApproved && !isProfileRoute && !isLoginRoute) {
     return <Navigate to="/member/profile" replace />;
   }

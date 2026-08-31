@@ -38,6 +38,7 @@ export function AppSidebar({ ...props }) {
   const [profileStatus, setProfileStatus] = React.useState(() => ({
     completed: localStorage.getItem("isProfileCompleted") === "true",
     approvalStatus: localStorage.getItem("memberApprovalStatus") || "pending",
+    isActive: localStorage.getItem("memberIsActive") !== "false",
   }));
 
   React.useEffect(() => {
@@ -49,6 +50,7 @@ export function AppSidebar({ ...props }) {
       setProfileStatus({
         completed: localStorage.getItem("isProfileCompleted") === "true",
         approvalStatus: localStorage.getItem("memberApprovalStatus") || "pending",
+        isActive: localStorage.getItem("memberIsActive") !== "false",
       });
     };
     const interval = setInterval(sync, 1000);
@@ -65,8 +67,8 @@ export function AppSidebar({ ...props }) {
     ? `${userDetails?.name[0] ?? ""}`.toUpperCase()
     : "";
 
-  const { completed, approvalStatus } = profileStatus;
-  const isApproved = completed && approvalStatus === "approved";
+  const { completed, approvalStatus, isActive } = profileStatus;
+  const isApproved = completed && approvalStatus === "approved" && isActive;
 
   // Full navigation available only after the profile is complete AND approved.
   const fullNav = [
@@ -101,6 +103,22 @@ export function AppSidebar({ ...props }) {
 
   const renderRestrictionNotice = () => {
     if (isApproved) return null;
+
+    if (!isActive) {
+      return (
+        <div className="mx-3 my-2 rounded-xl border border-rose-500/40 bg-rose-500/10 p-3">
+          <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+            <ShieldAlert className="h-4 w-4" />
+            <span className="text-xs font-bold uppercase tracking-wide">
+              {t("accountInactive")}
+            </span>
+          </div>
+          <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed">
+            {t("accountInactiveMsg")}
+          </p>
+        </div>
+      );
+    }
 
     if (approvalStatus === "rejected") {
       return (

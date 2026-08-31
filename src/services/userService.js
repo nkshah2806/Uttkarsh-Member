@@ -28,7 +28,7 @@ export const getAllUsers = async ({
     };
 
     const response = await axiosInstance.get(`${ENDPOINT}`, {
-      // params,
+      params,
     });
     return {
       data: response.data.data.map((user, index) => {
@@ -37,8 +37,12 @@ export const getAllUsers = async ({
           ...user,
           sNo: serialNumber,
           id: user._id,
-          fullName: `${user.firstname} ${user.lastname}`,
-          // joinedOn: new Date(user.createdAt).toLocaleString(),
+          fullName:
+            user.fullName ||
+            [user.firstname, user.lastname].filter(Boolean).join(" ") ||
+            user.email,
+          approval_status: user.approval_status || (user.isAdmin ? "approved" : "pending"),
+          isAdmin: Boolean(user.isAdmin),
           isActive: user.isActive,
           profileUrl: user.image
             ? Config.API_URL + user.image
@@ -48,7 +52,7 @@ export const getAllUsers = async ({
             : "N/A",
         };
       }),
-      total: response.data.data.count,
+      total: response.data.total ?? response.data.data.count,
     };
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -56,9 +60,9 @@ export const getAllUsers = async ({
   }
 };
 
-// TOGGLE ACTIVE STATUS (soft delete)
+// TOGGLE ACTIVE STATUS (soft delete / activate-deactivate)
 export const toggleUserStatus = (id, body) =>
-  axiosInstance.put(`${ENDPOINT}/deleteUser`, body);
+  axiosInstance.put(`${ENDPOINT}/${id}`, { userId: id, ...body });
 
 // GET USER BY ID
 export const getUserById = async (id) => {

@@ -38,10 +38,16 @@ export function LoginForm({ className, ...props }) {
       localStorage.setItem("token", response.data.data.jwtToken);
       localStorage.setItem("UserDetails", JSON.stringify(response.data.data));
       localStorage.setItem("isAuthenticated", "true");
+      // Keep profile/approval/account status fresh for a returning member so
+      // the route guard can immediately decide which pages are reachable.
+      localStorage.setItem("memberApprovalStatus", userData?.approval_status || "pending");
+      localStorage.setItem("memberIsActive", userData?.isActive !== false ? "true" : "false");
       toast.success(t("loginSuccessful"));
+      // The PrivateRoute guard redirects incomplete / not-yet-approved
+      // members to the Personal Details page automatically.
       navigate("/dashboard");
     } catch (error) {
-      toast.error(error?.response?.data?.meta?.message || t("loginFailed"));
+      toast.error(error?.response?.data?.message || t("loginFailed"));
     } finally {
       setLoading(false);
     }
