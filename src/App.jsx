@@ -21,11 +21,10 @@ import {
   PDFReportViewer,
 } from "./pages/HealthAnalysis";
 import MemberProfilePage from "./pages/MemberProfile";
-import { LanguageProvider } from "./context/LanguageContext";
 
 function App() {
   return (
-    <LanguageProvider>
+    <>
       <Toaster position="top-right" />
       <BrowserRouter>
         <Routes>
@@ -59,7 +58,7 @@ function App() {
           <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
       </BrowserRouter>
-    </LanguageProvider>
+    </>
   );
 }
 

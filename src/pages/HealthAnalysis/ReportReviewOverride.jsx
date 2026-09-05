@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLanguage } from "@/context/LanguageContext";
 import {
   FileCheck,
   CheckSquare,
@@ -32,7 +31,6 @@ import { toast } from "sonner";
 export default function ReportReviewOverride() {
   const { visitId } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
 
   const [analysisData, setAnalysisData] = useState(null);
   const [patient, setPatient] = useState(null);
@@ -40,17 +38,21 @@ export default function ReportReviewOverride() {
   const [saving, setSaving] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [nextVisitDate, setNextVisitDate] = useState("");
+  // Report price confirmation — asked on every final report generation.
+  // Pre-filled from the visit's scan pricing and saved with the report.
+  const [reportAmount, setReportAmount] = useState("");
+  const [reportPaymentStatus, setReportPaymentStatus] = useState("");
 
   // Medicines library (active medicines from admin)
   const [medicines, setMedicines] = useState([]);
-  // Per-parameter medicine association: { [paramId]: [{_id,name,details,dosage,is_active}] }
-  const [paramMedicines, setParamMedicines] = useState({});
-  // Per-parameter consultant note: { [paramId]: string }
-  const [paramNotes, setParamNotes] = useState({});
-  // Per-parameter medicine search text: { [paramId]: string }
-  const [medicineSearch, setMedicineSearch] = useState({});
-  // Per-parameter dropdown open state: { [paramId]: boolean }
-  const [medicineDropdownOpen, setMedicineDropdownOpen] = useState({});
+  // GLOBAL recommended medicines for the whole report: [{_id,name,details,dosage,is_active}]
+  const [selectedMedicines, setSelectedMedicines] = useState([]);
+  // GLOBAL consultant note about the recommended medicines
+  const [medicineNote, setMedicineNote] = useState("");
+  // Global medicine search text
+  const [medicineSearch, setMedicineSearch] = useState("");
+  // Global dropdown open state
+  const [medicineDropdownOpen, setMedicineDropdownOpen] = useState(false);
 
   // Selection Map: { [`${paramId}_${nodeId}`]: boolean }
   const [selections, setSelections] = useState({});
@@ -60,12 +62,6 @@ export default function ReportReviewOverride() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const getItemKey = (paramId, bulletId) => `${paramId}_${bulletId}`;
-
-  // Per-parameter medicine helpers
-  const getParamMedicines = (paramId) => paramMedicines[paramId] || [];
-  const getParamNote = (paramId) => paramNotes[paramId] || "";
-  const getParamSearch = (paramId) => medicineSearch[paramId] || "";
-  const isParamDropdownOpen = (paramId) => Boolean(medicineDropdownOpen[paramId]);
 
   useEffect(() => {
     fetchData();
@@ -79,24 +75,20 @@ export default function ReportReviewOverride() {
         const list = mRes.data?.data || [];
         setMedicines(list);
         // Refresh selected snapshots with fresh master data where still available
-        setParamMedicines((prev) => {
-          const next = { ...prev };
-          Object.keys(next).forEach((paramId) => {
-            next[paramId] = (next[paramId] || []).map((sel) => {
-              const fresh = list.find((m) => String(m._id) === String(sel._id));
-              return fresh
-                ? {
-                  _id: String(fresh._id),
-                  name: fresh.name,
-                  details: fresh.details || "",
-                  dosage: fresh.dosage || "",
-                  is_active: fresh.is_active,
-                }
-                : sel;
-            });
-          });
-          return next;
-        });
+        setSelectedMedicines((prev) =>
+          prev.map((sel) => {
+            const fresh = list.find((m) => String(m._id) === String(sel._id));
+            return fresh
+              ? {
+                _id: String(fresh._id),
+                name: fresh.name,
+                details: fresh.details || "",
+                dosage: fresh.dosage || "",
+                is_active: fresh.is_active,
+              }
+              : sel;
+          })
+        );
       } catch (err) {
         console.warn("Failed to load medicines:", err.message);
       }
@@ -115,49 +107,55 @@ export default function ReportReviewOverride() {
       const visitData = vRes.data.data?.visit;
       setPatient(visitData?.patient_id);
 
+      // Pre-fill the report price asked at the "Generate Final Report" step
+      // from the visit's scan pricing snapshot (amount + payment status).
+      const scanPricing = visitData?.scan_pricing || {};
+      setReportAmount(scanPricing.amount != null ? String(scanPricing.amount) : "");
+      setReportPaymentStatus(scanPricing.payment_status || "");
+
       const analysis = aRes.data.data;
       setAnalysisData(analysis);
 
-      // Restore previously saved per-parameter medicine selections from the visit
-      const savedParamMedicines = visitData?.parameter_medicines || [];
-      if (Array.isArray(savedParamMedicines) && savedParamMedicines.length > 0) {
-        const restored = {};
-        const restoredNotes = {};
-        savedParamMedicines.forEach((entry) => {
-          if (!entry?.parameter_id) return;
-          restored[String(entry.parameter_id)] = (entry.medicines || []).map((s) => ({
-            _id: String(s.medicine_id),
-            name: s.name_snapshot || "",
-            details: s.details_snapshot || "",
-            dosage: s.dosage_snapshot || "",
-            is_active: false,
-          }));
-          if (entry.note) restoredNotes[String(entry.parameter_id)] = entry.note;
+      // Restore GLOBAL recommended medicines for the whole report from the visit.
+      // Previously saved per-parameter medicines (older data) and any visit-level
+      // global medicines are merged into one deduplicated list (by medicine id).
+      const restoredMedicines = [];
+      const seenMedicineIds = new Set();
+      const pushMedicineSnapshot = (s) => {
+        const id = String(s?.medicine_id || s?._id || "");
+        if (!id || seenMedicineIds.has(id)) return;
+        seenMedicineIds.add(id);
+        restoredMedicines.push({
+          _id: id,
+          name: s?.name_snapshot || s?.name || "",
+          details: s?.details_snapshot || s?.details || "",
+          dosage: s?.dosage_snapshot || s?.dosage || "",
+          is_active: false,
         });
-        setParamMedicines(restored);
-        setParamNotes(restoredNotes);
-      } else {
-        // Backward compatibility: legacy visit-level medicines + note
-        const savedMedicines = visitData?.medicines || [];
-        if (savedMedicines.length > 0 || visitData?.medicine_note) {
-          const legacy = {};
-          const legacyNotes = {};
-          (analysis.analyzed_items || []).forEach((item) => {
-            legacy[item.parameter.id] = savedMedicines.map((s) => ({
-              _id: String(s.medicine_id),
-              name: s.name_snapshot || "",
-              details: s.details_snapshot || "",
-              dosage: s.dosage_snapshot || "",
-              is_active: false,
-            }));
-            if (visitData?.medicine_note) {
-              legacyNotes[item.parameter.id] = visitData.medicine_note;
-            }
-          });
-          setParamMedicines(legacy);
-          setParamNotes(legacyNotes);
-        }
+      };
+      (visitData?.parameter_medicines || []).forEach((entry) =>
+        (entry?.medicines || []).forEach(pushMedicineSnapshot)
+      );
+      (visitData?.medicines || []).forEach(pushMedicineSnapshot);
+
+      let restoredNote = visitData?.medicine_note || "";
+      if (!restoredNote) {
+        const paramNoteList = [
+          ...new Set(
+            (visitData?.parameter_medicines || [])
+              .map((e) => (e?.note || "").trim())
+              .filter(Boolean)
+          ),
+        ];
+        restoredNote =
+          paramNoteList.length === 1
+            ? paramNoteList[0]
+            : paramNoteList.length > 1
+              ? paramNoteList.join("\n")
+              : "";
       }
+      setSelectedMedicines(restoredMedicines);
+      setMedicineNote(restoredNote);
 
       // Initialize selections map & expanded state with parameter-scoped keys
       const initialMap = {};
@@ -257,55 +255,42 @@ export default function ReportReviewOverride() {
     setExpandedParams(next);
   };
 
-  const toggleMedicine = (paramId, med) => {
-    setParamMedicines((prev) => {
-      const current = prev[paramId] || [];
-      const exists = current.some((m) => String(m._id) === String(med._id));
+  const toggleMedicine = (med) => {
+    setSelectedMedicines((prev) => {
+      const exists = prev.some((m) => String(m._id) === String(med._id));
       if (exists) {
-        return {
-          ...prev,
-          [paramId]: current.filter((m) => String(m._id) !== String(med._id)),
-        };
+        return prev.filter((m) => String(m._id) !== String(med._id));
       }
-      return {
+      return [
         ...prev,
-        [paramId]: [
-          ...current,
-          {
-            _id: String(med._id),
-            name: med.name,
-            details: med.details || "",
-            dosage: med.dosage || "",
-            is_active: med.is_active,
-          },
-        ],
-      };
+        {
+          _id: String(med._id),
+          name: med.name,
+          details: med.details || "",
+          dosage: med.dosage || "",
+          is_active: med.is_active,
+        },
+      ];
     });
   };
 
-  const removeMedicine = (paramId, id) => {
-    setParamMedicines((prev) => ({
-      ...prev,
-      [paramId]: (prev[paramId] || []).filter((m) => String(m._id) !== String(id)),
-    }));
+  const removeMedicine = (id) => {
+    setSelectedMedicines((prev) => prev.filter((m) => String(m._id) !== String(id)));
   };
 
-  const clearMedicines = (paramId) => {
-    setParamMedicines((prev) => ({ ...prev, [paramId]: [] }));
-    setMedicineSearch((prev) => ({ ...prev, [paramId]: "" }));
+  const clearMedicines = () => {
+    setSelectedMedicines([]);
+    setMedicineSearch("");
   };
 
-  const setParamNote = (paramId, value) => {
-    setParamNotes((prev) => ({ ...prev, [paramId]: value }));
-  };
-
-  // Render the searchable medicine multi-select + note block for a single parameter
-  const renderMedicineSection = (paramId) => {
-    const selected = getParamMedicines(paramId);
-    const note = getParamNote(paramId);
-    const search = getParamSearch(paramId);
-    const open = isParamDropdownOpen(paramId);
-    const filtered = getFilteredMedicines(paramId);
+  // Render the GLOBAL searchable medicine multi-select + note block.
+  // Shown ONCE for the whole report (not repeated per parameter).
+  const renderMedicineSection = () => {
+    const selected = selectedMedicines;
+    const note = medicineNote;
+    const search = medicineSearch;
+    const open = medicineDropdownOpen;
+    const filtered = getFilteredMedicines();
 
     return (
       <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50/40 dark:bg-violet-950/20 p-3.5 space-y-2.5">
@@ -320,7 +305,7 @@ export default function ReportReviewOverride() {
           {selected.length > 0 && (
             <button
               type="button"
-              onClick={() => clearMedicines(paramId)}
+              onClick={clearMedicines}
               className="text-[10px] text-slate-400 hover:text-red-500 underline underline-offset-2"
             >
               Clear all
@@ -332,9 +317,7 @@ export default function ReportReviewOverride() {
         <div className="relative">
           <button
             type="button"
-            onClick={() =>
-              setMedicineDropdownOpen((prev) => ({ ...prev, [paramId]: !prev[paramId] }))
-            }
+            onClick={() => setMedicineDropdownOpen((prev) => !prev)}
             className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
           >
             <span className="truncate">
@@ -355,9 +338,7 @@ export default function ReportReviewOverride() {
                   autoFocus
                   type="text"
                   value={search}
-                  onChange={(e) =>
-                    setMedicineSearch((prev) => ({ ...prev, [paramId]: e.target.value }))
-                  }
+                  onChange={(e) => setMedicineSearch(e.target.value)}
                   placeholder="Type to search medicines..."
                   className="w-full bg-transparent text-xs text-slate-700 dark:text-slate-200 outline-none placeholder:text-slate-400"
                 />
@@ -376,7 +357,7 @@ export default function ReportReviewOverride() {
                       <button
                         key={med._id}
                         type="button"
-                        onClick={() => toggleMedicine(paramId, med)}
+                        onClick={() => toggleMedicine(med)}
                         className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-left hover:bg-slate-100 dark:hover:bg-slate-800"
                       >
                         <span className="flex-1 min-w-0">
@@ -410,7 +391,7 @@ export default function ReportReviewOverride() {
                 {med.name}
                 <button
                   type="button"
-                  onClick={() => removeMedicine(paramId, med._id)}
+                  onClick={() => removeMedicine(med._id)}
                   className="text-violet-400 hover:text-violet-700 dark:hover:text-violet-200"
                   aria-label={`Remove ${med.name}`}
                 >
@@ -424,7 +405,7 @@ export default function ReportReviewOverride() {
         {/* Note textarea */}
         <textarea
           value={note}
-          onChange={(e) => setParamNote(paramId, e.target.value)}
+          onChange={(e) => setMedicineNote(e.target.value)}
           rows={2}
           placeholder="Optional note about the prescribed medicines..."
           className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
@@ -456,25 +437,21 @@ export default function ReportReviewOverride() {
         });
       });
 
-      // Build per-parameter medicines + note payload
-      const parameterMedicinesPayload = (analysisData?.analyzed_items || [])
-        .map((item) => {
-          const paramId = item.parameter.id;
-          const meds = getParamMedicines(paramId);
-          const note = (getParamNote(paramId) || "").trim();
-          if (meds.length === 0 && !note) return null;
-          return {
-            parameter_id: paramId,
-            medicines: meds.map((m) => m._id),
-            note: note || undefined,
-          };
-        })
-        .filter(Boolean);
-
       await axiosInstance.patch(`v1/visits/${visitId}/selected-content`, {
         selections: payload,
         ...(nextVisitDate ? { next_visit_date: nextVisitDate } : {}),
-        parameter_medicines: parameterMedicinesPayload,
+        // GLOBAL recommended medicines (whole report) stored at visit level.
+        // parameter_medicines is cleared so the PDF renders the single global
+        // "Recommended Medicines" section (not repeated per parameter).
+        medicines: selectedMedicines.map((m) => m._id),
+        note: (medicineNote || "").trim() || undefined,
+        parameter_medicines: [],
+        // Report price confirmed in the modal — saved to the visit's scan
+        // pricing snapshot and recorded with the generated report.
+        report_price: {
+          amount: Number(reportAmount),
+          payment_status: reportPaymentStatus || "",
+        },
       });
 
       toast.success("Selections saved! Generating final report...");
@@ -486,13 +463,16 @@ export default function ReportReviewOverride() {
     }
   };
 
+  const reportAmountNumber = reportAmount === "" ? NaN : Number(reportAmount);
+  const reportAmountValid = Number.isFinite(reportAmountNumber) && reportAmountNumber >= 0;
+
   const activeMedicines = useMemo(
     () => (medicines || []).filter((m) => m.is_active !== false),
     [medicines]
   );
 
-  const getFilteredMedicines = (paramId) => {
-    const q = getParamSearch(paramId).toLowerCase().trim();
+  const getFilteredMedicines = () => {
+    const q = medicineSearch.toLowerCase().trim();
     if (!q) return activeMedicines;
     return activeMedicines.filter(
       (m) =>
@@ -739,6 +719,27 @@ export default function ReportReviewOverride() {
             </CardContent>
           </Card>
 
+          {/* GLOBAL Recommended Medicines (whole report) — shown once, not per parameter */}
+          <Card className="gap-0 border-0 shadow-sm rounded-2xl overflow-hidden py-0">
+            <CardHeader className="gap-0 bg-slate-50 dark:bg-slate-800/60 dark:border-slate-800 py-4">
+              <CardTitle className="flex flex-wrap items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
+                <span className="h-8 w-8 rounded-lg bg-violet-100 dark:bg-violet-900/50 text-violet-600 flex items-center justify-center shrink-0">
+                  <Pill className="h-4 w-4" />
+                </span>
+                Recommended Medicines
+                <span className="text-xs font-normal text-slate-400">for the whole report</span>
+                {selectedMedicines.length > 0 && (
+                  <span className="ml-auto text-[11px] font-semibold text-violet-600 bg-violet-100 dark:bg-violet-900/50 px-2 py-0.5 rounded-full">
+                    {selectedMedicines.length} selected
+                  </span>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {renderMedicineSection()}
+            </CardContent>
+          </Card>
+
           {/* List of Abnormal Flagged Parameters */}
           {filteredAnalysisItems.length === 0 ? (
             <Card className="border-0 shadow-sm">
@@ -763,16 +764,16 @@ export default function ReportReviewOverride() {
                 );
 
                 return (
-                  <Card key={param.id} className="border-0 shadow-sm overflow-hidden rounded-2xl">
+                  <Card key={param.id} className="border-0 shadow-sm overflow-hidden rounded-2xl py-0">
                     {/* Parameter Card Accordion Header */}
                     <div
                       onClick={() => toggleParamExpand(param.id)}
                       className="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded">
+                        {/* <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded">
                           {param.code}
-                        </span>
+                        </span> */}
                         <div>
                           <span className="font-bold text-sm text-slate-900 dark:text-white">
                             {param.name_en}
@@ -884,8 +885,6 @@ export default function ReportReviewOverride() {
                           );
                         })}
 
-                        {/* Per-Parameter Medicine Selection + Note */}
-                        {renderMedicineSection(param.id)}
                       </CardContent>
                     )}
                   </Card>
@@ -899,7 +898,7 @@ export default function ReportReviewOverride() {
         {/* RIGHT COLUMN: STICKY LIVE REPORT PREVIEW PANEL (5 COLS) */}
         {/* ========================================================================= */}
         <div className="lg:col-span-5 sticky top-5 space-y-3">
-          <Card className="border shadow-lg rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+          <Card className="border shadow-lg rounded-2xl overflow-hidden bg-white dark:bg-slate-900 py-0">
             {/* Live Preview Header */}
             <div className="bg-indigo-600 text-white px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -908,7 +907,6 @@ export default function ReportReviewOverride() {
                   Live Selected Report Preview
                 </span>
               </div>
-
             </div>
 
             {/* Document Body Preview */}
@@ -979,32 +977,36 @@ export default function ReportReviewOverride() {
                           ))}
                         </div>
 
-                        {/* Per-Parameter Medicines + Note in Live Preview */}
-                        {getParamMedicines(p.id).length > 0 && (
-                          <div className="pt-2 border-t border-violet-100 dark:border-violet-900 space-y-1.5">
-                            <h5 className="text-[10px] font-bold uppercase tracking-wider text-violet-600 flex items-center gap-1">
-                              <Pill className="h-3 w-3" /> Recommended Medicines
-                            </h5>
-                            <div className="flex flex-wrap gap-1.5">
-                              {getParamMedicines(p.id).map((med) => (
-                                <span
-                                  key={med._id}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-800 text-[10px] font-medium text-violet-700 dark:text-violet-300"
-                                >
-                                  {med.name}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {getParamNote(p.id).trim() && (
-                          <p className="pt-1 text-[10px] italic text-slate-500 dark:text-slate-400">
-                            Note: {getParamNote(p.id)}
-                          </p>
-                        )}
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* GLOBAL Recommended Medicines in Live Preview (whole report) */}
+              {(selectedMedicines.length > 0 || (medicineNote || "").trim()) && (
+                <div className="border border-violet-200 dark:border-violet-800 rounded-xl p-3 bg-violet-50/40 dark:bg-violet-950/20 space-y-1.5">
+                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-violet-600 flex items-center gap-1">
+                    <Pill className="h-3 w-3" /> Recommended Medicines
+                    <span className="text-slate-400 font-normal normal-case">(whole report)</span>
+                  </h5>
+                  {selectedMedicines.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedMedicines.map((med) => (
+                        <span
+                          key={med._id}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-800 text-[10px] font-medium text-violet-700 dark:text-violet-300"
+                        >
+                          {med.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {medicineNote.trim() && (
+                    <p className="pt-1 text-[10px] italic text-slate-500 dark:text-slate-400">
+                      Note: {medicineNote}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -1045,7 +1047,7 @@ export default function ReportReviewOverride() {
             <div className="p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 text-xs space-y-1.5 text-slate-700 dark:text-slate-200">
               <p className="font-semibold text-indigo-900 dark:text-indigo-300">Report Freeze Guarantee:</p>
               <p className="text-[11px] text-slate-500">
-                A permanent version snapshot will be saved. Future master data edits will never alter this patient's report.
+                A permanent version snapshot will be saved. Future master data edits will never alter this client's report.
               </p>
             </div>
 
@@ -1073,13 +1075,57 @@ export default function ReportReviewOverride() {
               )}
             </div>
 
+            {/* Report Price Confirmation — asked on every final report generation */}
+            <div className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 space-y-3">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">💰</span>
+                <p className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wide">
+                  Report Price Confirmation
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                    Price (₹) <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={reportAmount}
+                    onChange={(e) => setReportAmount(e.target.value)}
+                    placeholder="0"
+                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Payment Status</label>
+                  <select
+                    value={reportPaymentStatus}
+                    onChange={(e) => setReportPaymentStatus(e.target.value)}
+                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  >
+                    <option value="">Unpaid / Not Collected</option>
+                    <option value="PAID">Paid</option>
+                    <option value="PENDING">Pending</option>
+                  </select>
+                </div>
+              </div>
+              {!reportAmountValid && reportAmount !== "" && (
+                <p className="text-[10px] text-rose-500 font-medium">Please enter a valid non-negative amount.</p>
+              )}
+              <p className="text-[10px] text-slate-500 leading-snug">
+                This amount & payment status will be saved to the visit and recorded with this final report.
+              </p>
+            </div>
+
             <div className="flex justify-end gap-2 pt-2 border-t">
               <Button variant="outline" onClick={() => setShowConfirmModal(false)}>
                 Back to Review
               </Button>
               <Button
                 onClick={handleGenerateFinalReport}
-                disabled={saving}
+                disabled={saving || !reportAmountValid}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
               >
                 {saving ? "Generating..." : "Confirm & View Report"}

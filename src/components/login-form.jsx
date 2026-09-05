@@ -9,10 +9,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
-import { useLanguage } from "@/context/LanguageContext";
 
 export function LoginForm({ className, ...props }) {
-  const { t } = useLanguage();
   const {
     register,
     handleSubmit,
@@ -42,12 +40,12 @@ export function LoginForm({ className, ...props }) {
       // the route guard can immediately decide which pages are reachable.
       localStorage.setItem("memberApprovalStatus", userData?.approval_status || "pending");
       localStorage.setItem("memberIsActive", userData?.isActive !== false ? "true" : "false");
-      toast.success(t("loginSuccessful"));
+      toast.success("Login successful");
       // The PrivateRoute guard redirects incomplete / not-yet-approved
       // members to the Personal Details page automatically.
       navigate("/dashboard");
     } catch (error) {
-      toast.error(error?.response?.data?.message || t("loginFailed"));
+      toast.error(error?.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -60,19 +58,19 @@ export function LoginForm({ className, ...props }) {
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center mb-5">
-        <h1 className="text-3xl font-bold">{t("memberLogin")}</h1>
+        <h1 className="text-3xl font-bold">Member Login</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          {t("enterEmail")}
+          Enter your email
         </p>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-3">
-          <Label htmlFor="email">{t("email")}</Label>
+          <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
-            placeholder={t("emailPlaceholder")}
-            {...register("email", { required: t("emailRequired") })}
+            placeholder="you@example.com"
+            {...register("email", { required: "Email is required" })}
           />
           {errors.email && (
             <p className="text-red-500 text-sm">{errors.email.message}</p>
@@ -80,19 +78,19 @@ export function LoginForm({ className, ...props }) {
         </div>
 
         <div className="grid gap-3">
-          <Label htmlFor="password">{t("password")}</Label>
+          <Label htmlFor="password">Password</Label>
           <div className="flex items-center justify-between relative">
             <Input
               id="password"
               type={passVisible ? "password" : "text"}
-              placeholder={t("passwordPlaceholder")}
-              {...register("password", { required: t("passwordRequired") })}
+              placeholder="Enter your password"
+              {...register("password", { required: "Password is required" })}
             />
             <button
               type="button"
               onClick={handlePasswordVisible}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label={t("togglePassword")}
+              aria-label="Show password"
             >
               {passVisible ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -111,13 +109,13 @@ export function LoginForm({ className, ...props }) {
           size="lg"
           disabled={loading}
         >
-          {loading ? t("loggingIn") : t("login")}
+          {loading ? "Logging in..." : "Login"}
         </Button>
         <Link
           to="/forgot-password"
           className="text-[14px] font-medium hover:text-gray-500 duration-300 transition-all"
         >
-          {t("forgotPassword")}
+          Forgot your password?
         </Link>
       </div>
     </form>

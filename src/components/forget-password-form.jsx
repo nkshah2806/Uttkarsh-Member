@@ -8,10 +8,8 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
-import { useLanguage } from "@/context/LanguageContext";
 
 export function ForgetPasswordForm({ className, ...props }) {
-  const { t } = useLanguage();
   const {
     register,
     handleSubmit,
@@ -27,10 +25,10 @@ export function ForgetPasswordForm({ className, ...props }) {
         email: data.email,
         isWebsite: true,
       });
-      toast.success(t("emailSent"));
+      toast.success("Email sent successful! Redirecting to login...");
       navigate("/");
     } catch (error) {
-      toast.error(t("emailSentFailed"));
+      toast.error("Email sent failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -42,19 +40,19 @@ export function ForgetPasswordForm({ className, ...props }) {
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-3xl font-bold">{t("forgetPasswordTitle")}</h1>
+        <h1 className="text-3xl font-bold">Forget your passowrd?</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          {t("forgetPasswordDesc")}
+          We will send you the reset instrucations
         </p>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-3">
-          <Label htmlFor="email">{t("email")}</Label>
+          <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
             placeholder="m@example.com"
-            {...register("email", { required: t("emailRequired") })}
+            {...register("email", { required: "Email is required" })}
           />
           {errors.email && (
             <p className="text-red-500 text-sm">{errors.email.message}</p>
@@ -69,14 +67,14 @@ export function ForgetPasswordForm({ className, ...props }) {
           size="lg"
           disabled={loading}
         >
-          {t("sendMail")}
+          Send Mail
         </Button>
         <Link
           to="/"
           className="text-[14px] font-medium flex items-center justify-center gap-2 hover:text-gray-500 duration-300 transition-all"
         >
           <MoveLeft />
-          {t("backToLogin")}
+          Back to login
         </Link>
       </div>
     </form>

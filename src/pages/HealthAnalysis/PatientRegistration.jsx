@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useLanguage } from "@/context/LanguageContext";
+import { scanPricingService } from "@/services/scanPricingService";
+import ScanPricingSelectionModal from "@/components/ScanPricingSelectionModal";
 import {
   UserPlus,
   ArrowRight,
@@ -29,7 +30,6 @@ import { toast } from "sonner";
 import ReusableTable from "@/components/ReusableTable";
 
 export default function PatientRegistration() {
-  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [patients, setPatients] = useState([]);
@@ -40,6 +40,12 @@ export default function PatientRegistration() {
   const [showModal, setShowModal] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
   const [deletingPatient, setDeletingPatient] = useState(null);
+
+  // Scan pricing selection state (only used when multiple active prices exist)
+  const [pricingOptions, setPricingOptions] = useState([]);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
+  const [startingScan, setStartingScan] = useState(false);
+  const [pendingScanPatientId, setPendingScanPatientId] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -65,7 +71,7 @@ export default function PatientRegistration() {
       const res = await axiosInstance.get("v1/patients");
       setPatients(res.data.data || []);
     } catch (err) {
-      toast.error("Failed to load patients");
+      toast.error("Failed to load clients");
     } finally {
       setLoading(false);
     }
@@ -115,27 +121,24 @@ export default function PatientRegistration() {
       if (editingPatient) {
         // Edit Patient
         await axiosInstance.put(`v1/patients/${editingPatient._id}`, form);
-        toast.success(`Patient details updated for ${editingPatient.patient_code}`);
+        toast.success(`Client details updated for ${editingPatient.patient_code}`);
         setShowModal(false);
         fetchPatients();
       } else {
         // Create Patient
         const patientRes = await axiosInstance.post("v1/patients", form);
         const newPatient = patientRes.data.data;
-        toast.success(`Patient Registered: ${newPatient.patient_code}`);
+        toast.success(`Client Registered: ${newPatient.patient_code}`);
 
         setShowModal(false);
+        setSubmitting(false);
         fetchPatients();
 
-        // Create Visit & Navigate to Quantum Scan
-        const visitRes = await axiosInstance.post("v1/visits", {
-          patient_id: newPatient._id,
-        });
-
-        navigate(`/quantum-scan/${visitRes.data.data._id}`);
+        // Create Visit & Navigate to Quantum Scan (price-aware)
+        await choosePricingAndStartScan(newPatient._id);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to save patient details");
+      toast.error(err.response?.data?.message || "Failed to save client details");
     } finally {
       setSubmitting(false);
     }
@@ -145,23 +148,64 @@ export default function PatientRegistration() {
     if (!deletingPatient) return;
     try {
       await axiosInstance.delete(`v1/patients/${deletingPatient._id}`);
-      toast.success(`Deleted patient ${deletingPatient.patient_code}`);
+      toast.success(`Deleted client ${deletingPatient.patient_code}`);
       setDeletingPatient(null);
       fetchPatients();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete patient record");
+      toast.error(err.response?.data?.message || "Failed to delete client record");
     }
   };
 
-  const startNewScan = async (patientId) => {
+  const launchVisit = async (patientId, scanPricingId) => {
     try {
+      setStartingScan(true);
       const visitRes = await axiosInstance.post("v1/visits", {
         patient_id: patientId,
+        scan_pricing_id: scanPricingId,
       });
       navigate(`/quantum-scan/${visitRes.data.data._id}`);
     } catch (err) {
       toast.error("Failed to start new scan");
+      setStartingScan(false);
     }
+  };
+
+  const choosePricingAndStartScan = async (patientId) => {
+    try {
+      setStartingScan(true);
+      const pricings = await scanPricingService.getActiveScanPricings();
+      if (pricings.length === 0) {
+        toast.info("No active scan price configured. Scan will be recorded without an amount.");
+        await launchVisit(patientId, undefined);
+        return;
+      }
+      const defaultPricing = pricings.find((p) => p.is_default);
+      if (defaultPricing || pricings.length === 1) {
+        // Single active price (or an explicit default) is auto-selected.
+        await launchVisit(patientId, (defaultPricing || pricings[0])._id);
+        return;
+      }
+      // Multiple active prices with no explicit default -> let the consultant pick.
+      setPendingScanPatientId(patientId);
+      setPricingOptions(pricings);
+      setPricingModalOpen(true);
+      setStartingScan(false);
+    } catch (err) {
+      toast.error("Failed to start new scan");
+      setStartingScan(false);
+    }
+  };
+
+  const startNewScan = async (patientId) => {
+    await choosePricingAndStartScan(patientId);
+  };
+
+  const handleConfirmPricing = async (pricingId) => {
+    if (!pendingScanPatientId) return;
+    const patientId = pendingScanPatientId;
+    setPricingModalOpen(false);
+    setPendingScanPatientId(null);
+    await launchVisit(patientId, pricingId);
   };
 
   // Clean, focused table columns
@@ -177,7 +221,7 @@ export default function PatientRegistration() {
     },
     {
       key: "name",
-      label: "Patient Name",
+      label: "Client Name",
       render: (row) => (
         <button
           onClick={() => navigate(`/patients/${row._id}`)}
@@ -273,7 +317,7 @@ export default function PatientRegistration() {
             variant="outline"
             onClick={() => navigate(`/patients/${row._id}`)}
             className="h-8 px-2.5 text-xs font-semibold text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:text-indigo-300 dark:border-indigo-800 dark:hover:bg-indigo-950"
-            title="View Complete Patient Profile & History"
+            title="View Complete Client Profile & History"
           >
             <Eye className="h-3.5 w-3.5 mr-1" /> View Details
           </Button>
@@ -293,7 +337,7 @@ export default function PatientRegistration() {
           <Button
             size="sm"
             variant="ghost"
-            title="Edit Patient"
+            title="Edit Client"
             onClick={() => openEditModal(row)}
             className="h-8 w-8 p-0 text-slate-500 hover:text-indigo-600"
           >
@@ -304,7 +348,7 @@ export default function PatientRegistration() {
           <Button
             size="sm"
             variant="ghost"
-            title="Delete Patient Record"
+            title="Delete Client Record"
             onClick={() => setDeletingPatient(row)}
             className="h-8 w-8 p-0 text-slate-500 hover:text-rose-600"
           >
@@ -321,9 +365,9 @@ export default function PatientRegistration() {
       <div className="rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 p-6 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-widest text-indigo-200 font-semibold">Quantum Health System</p>
-          <h1 className="text-2xl font-bold mt-1">{t("patientReg")}</h1>
+          <h1 className="text-2xl font-bold mt-1">Client Registration</h1>
           <p className="text-sm text-indigo-100 mt-1">
-            Clean patient directory overview. Click View Details on any patient to see their full profile and report history.
+            Clean client directory overview. Click View Details on any client to see their full profile and report history.
           </p>
         </div>
         <Button
@@ -331,7 +375,7 @@ export default function PatientRegistration() {
           className="bg-white text-indigo-700 hover:bg-indigo-50 font-bold px-5 py-2.5 rounded-xl shadow-md shrink-0 flex items-center gap-2"
         >
           <Plus className="h-5 w-5" />
-          <span>Register New Patient</span>
+          <span>Register New Client</span>
         </Button>
       </div>
 
@@ -349,7 +393,7 @@ export default function PatientRegistration() {
                 className="bg-indigo-600 text-white hover:bg-indigo-700 font-semibold px-4 py-2 rounded-xl shadow-xs shrink-0 flex items-center gap-2 text-xs"
               >
                 <Plus className="h-4 w-4" />
-                <span>Add Patient</span>
+                <span>Add Client</span>
               </Button>
             )}
             pagination={true}
@@ -365,7 +409,7 @@ export default function PatientRegistration() {
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold">
                 <UserPlus className="h-5 w-5" />
                 <h3 className="text-lg">
-                  {editingPatient ? `Edit Patient (${editingPatient.patient_code})` : "Register New Patient"}
+                  {editingPatient ? `Edit Client (${editingPatient.patient_code})` : "Register New Client"}
                 </h3>
               </div>
               <button
@@ -379,7 +423,7 @@ export default function PatientRegistration() {
             <form onSubmit={handleSavePatient} className="space-y-4 text-sm">
               <div>
                 <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                  {t("patientName")} *
+                  Client Name *
                 </label>
                 <input
                   type="text"
@@ -394,7 +438,7 @@ export default function PatientRegistration() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    {t("age")} *
+                    Age *
                   </label>
                   <input
                     type="number"
@@ -409,7 +453,7 @@ export default function PatientRegistration() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    {t("gender")} *
+                    Gender *
                   </label>
                   <select
                     value={form.gender}
@@ -426,7 +470,7 @@ export default function PatientRegistration() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    {t("mobile")} *
+                    Mobile Number *
                   </label>
                   <input
                     type="text"
@@ -444,7 +488,7 @@ export default function PatientRegistration() {
                   </label>
                   <input
                     type="email"
-                    placeholder="patient@example.com"
+                    placeholder="client@example.com"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -539,7 +583,7 @@ export default function PatientRegistration() {
                   {submitting
                     ? "Saving..."
                     : editingPatient
-                      ? "Update Patient Details"
+                      ? "Update Client Details"
                       : "Save & Proceed to Scan"}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -555,10 +599,10 @@ export default function PatientRegistration() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl border border-rose-100 dark:border-rose-900/50">
             <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
               <AlertTriangle className="h-6 w-6 shrink-0" />
-              <h3 className="text-lg font-bold">Delete Patient Record</h3>
+              <h3 className="text-lg font-bold">Delete Client Record</h3>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Are you sure you want to delete patient record <strong className="text-slate-900 dark:text-slate-100">{deletingPatient.patient_code} - {deletingPatient.name}</strong>?
+              Are you sure you want to delete client record <strong className="text-slate-900 dark:text-slate-100">{deletingPatient.patient_code} - {deletingPatient.name}</strong>?
               This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3 pt-2">
@@ -568,6 +612,18 @@ export default function PatientRegistration() {
           </div>
         </div>
       )}
+
+      {/* Scan Pricing Selection Modal (only opens when multiple active prices exist) */}
+      <ScanPricingSelectionModal
+        open={pricingModalOpen}
+        pricings={pricingOptions}
+        onClose={() => {
+          setPricingModalOpen(false);
+          setPendingScanPatientId(null);
+        }}
+        onConfirm={handleConfirmPricing}
+        submitting={startingScan}
+      />
     </div>
   );
 }

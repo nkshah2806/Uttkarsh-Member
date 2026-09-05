@@ -3,8 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserPlus, PencilLine, Trash2, History } from "lucide-react";
 import ReusableTable from "@/components/ReusableTable";
-import { useLanguage } from "@/context/LanguageContext";
-
 const clients = [];
 
 const statusColors = {
@@ -13,15 +11,15 @@ const statusColors = {
   Normal: "bg-emerald-100 text-emerald-700",
 };
 
-const getHeaders = (t) => [
+const getHeaders = () => [
   {
     key: "name",
-    label: t("clientName"),
+    label: "Client Name",
     render: (row) => <span className="font-semibold">{row.name}</span>,
   },
-  { key: "mobile", label: t("mobile") },
-  { key: "reportId", label: t("reportId") },
-  { key: "date", label: t("date") },
+  { key: "mobile", label: "Mobile Number" },
+  { key: "reportId", label: "Report ID" },
+  { key: "date", label: "Date" },
   {
     key: "status",
     label: "Status",
@@ -36,7 +34,7 @@ const getHeaders = (t) => [
   },
   {
     key: "actions",
-    label: t("actions"),
+    label: "Actions",
     filterable: false,
     render: () => (
       <div className="flex items-center gap-2">
@@ -55,31 +53,29 @@ const getHeaders = (t) => [
 ];
 
 const AddClientButton = () => {
-  const { t } = useLanguage();
   return (
     <Button className="gap-2">
-      <UserPlus className="h-4 w-4" /> {t("addClient")}
+      <UserPlus className="h-4 w-4" /> Add Client
     </Button>
   );
 };
 
 export default function ClientManagement() {
-  const { t } = useLanguage();
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">{t("clientManagement")}</h1>
+        <h1 className="text-2xl font-semibold">Client Management</h1>
         <p className="text-sm text-muted-foreground">
-          {t("clientManagementDescription")}
+          Manage your clients and track their reports and scan activity.
         </p>
       </div>
 
       <Card className="border-0 shadow-sm">
         <CardContent className="p-6">
           <ReusableTable
-            headers={getHeaders(t)}
+            headers={getHeaders()}
             data={clients}
-            Search={t("searchClientPlaceholder")}
+            Search="Search by client name, mobile, report ID..."
             CreateExportRender={AddClientButton}
             pagination={true}
           />

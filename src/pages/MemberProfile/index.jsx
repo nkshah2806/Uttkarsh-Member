@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useLanguage } from "@/context/LanguageContext";
 import {
   User,
   Building2,
@@ -31,7 +30,6 @@ import { memberProfileService } from "@/services/memberProfileService";
 
 export default function MemberProfilePage() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
   const [initialLoading, setInitialLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [profileData, setProfileData] = useState(null);
@@ -121,7 +119,7 @@ export default function MemberProfilePage() {
       }
     } catch (err) {
       console.error("Failed to load profile:", err);
-      toast.error(t("loadProfileFailed"));
+      toast.error("Failed to load member profile details");
     } finally {
       setInitialLoading(false);
     }
@@ -153,8 +151,8 @@ export default function MemberProfilePage() {
           window.dispatchEvent(new Event("profileCompleted"));
           toast.success(
             approvalStatus === "approved"
-              ? t("profileApprovedRedirect")
-              : t("profileSubmittedToast")
+              ? "✅ Profile approved! Redirecting to your dashboard..."
+              : "✅ Profile submitted for admin approval!"
           );
           if (approvalStatus === "approved") {
             setTimeout(() => {
@@ -162,7 +160,7 @@ export default function MemberProfilePage() {
             }, 400);
           }
         } else {
-          toast.success(t("profileSavedPartial"));
+          toast.success("Profile saved. Complete all required fields to submit for approval.");
         }
       }
     } catch (err) {
@@ -170,7 +168,7 @@ export default function MemberProfilePage() {
       const errMsg =
         err?.response?.data?.message ||
         err?.message ||
-        t("saveProfileFailed");
+        "Failed to save profile. Please check all fields.";
       toast.error(errMsg);
     } finally {
       setSubmitting(false);
@@ -182,7 +180,7 @@ export default function MemberProfilePage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
         <p className="text-sm text-muted-foreground font-medium">
-          {t("loadingPersonalDetails")}
+          Loading your personal details…
         </p>
       </div>
     );
@@ -221,43 +219,43 @@ export default function MemberProfilePage() {
             {!isCompleted ? (
               <>
                 <h2 className="text-lg font-bold text-amber-600">
-                  {t("profileIncompleteLocked")}
+                  Profile Incomplete — Full Access Locked
                 </h2>
                 <p className="text-sm text-foreground/80 mt-1">
-                  {t("profileIncompleteMsg")}
+                  Your member account is currently restricted. You must complete all required personal, contact and bank details below before your profile can be submitted for admin approval.
                 </p>
                 <p className="text-xs text-foreground/70 mt-2 flex items-center gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5" /> {t("profileOnlyAccessMsg")}
+                  <AlertCircle className="w-3.5 h-3.5" /> Only your profile page is accessible until your account is approved. Fields marked with * are required.
                 </p>
               </>
             ) : approvalStatus === "rejected" ? (
               <>
                 <h2 className="text-lg font-bold text-rose-600">
-                  {t("profileRejected")}
+                  Profile Rejected
                 </h2>
                 <p className="text-sm text-foreground/80 mt-1">
-                  {t("profileRejectedMsg")}
+                  Your profile was reviewed by the admin and needs corrections.
                 </p>
                 {rejectionReason && (
                   <div className="mt-3 rounded-xl border border-rose-500/30 bg-background/60 p-3 text-sm">
-                    <span className="font-semibold">{t("reasonLabel")}</span>
+                    <span className="font-semibold">Reason: </span>
                     {rejectionReason}
                   </div>
                 )}
                 <p className="text-xs text-foreground/70 mt-3">
-                  {t("profileResubmitMsg")}
+                  Please correct the highlighted details below and save again. Your profile will be re-submitted for admin approval.
                 </p>
               </>
             ) : (
               <>
                 <h2 className="text-lg font-bold text-amber-600">
-                  {t("profileSubmittedPending")}
+                  Profile Submitted — Pending Admin Approval
                 </h2>
                 <p className="text-sm text-foreground/80 mt-1">
-                  {t("profileSubmittedMsg")}
+                  Your profile is complete and has been submitted to the admin for review. You will get full portal access once it is approved.
                 </p>
                 <p className="text-xs text-foreground/70 mt-2 flex items-center gap-1.5">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("profileEditAnytimeMsg")}
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> You can edit your details anytime, but access remains restricted until approval.
                 </p>
               </>
             )}
@@ -273,11 +271,11 @@ export default function MemberProfilePage() {
                 <User className="w-6 h-6" />
               </span>
               <h1 className="text-2xl font-bold tracking-tight">
-                {t("memberProfileTitle")}
+                Member Profile & Personal Details
               </h1>
             </div>
             <p className="text-sm text-muted-foreground max-w-xl">
-              {t("memberProfileSubtitle")}
+              Complete your Franchise, Bank & Contact details to activate your member account and unlock full portal access.
             </p>
           </div>
 
@@ -286,11 +284,11 @@ export default function MemberProfilePage() {
             <div className="flex items-center gap-2">
               {isCompleted ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> {t("profileComplete100")}
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Profile Complete (100%)
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 border border-amber-500/20 animate-pulse">
-                  <AlertCircle className="w-3.5 h-3.5" /> {t("setupRequired")} ({percentage}%)
+                  <AlertCircle className="w-3.5 h-3.5" /> Setup Required ({percentage}%)
                 </span>
               )}
             </div>
@@ -309,7 +307,7 @@ export default function MemberProfilePage() {
         {!isCompleted && (
           <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-2 text-xs text-amber-600 font-medium">
             <Sparkles className="w-4 h-4 shrink-0" />
-            {t("noteRequiredFields")}
+            Note: All required fields marked with an asterisk (*) must be completed to proceed to your dashboard.
           </div>
         )}
       </div>
@@ -323,9 +321,9 @@ export default function MemberProfilePage() {
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">{t("franchiseSection")}</h2>
+              <h2 className="text-lg font-bold">A. Franchise & Personal Details</h2>
               <p className="text-xs text-muted-foreground">
-                {t("franchiseSectionDesc")}
+                Your distributor information, contact address, and franchise group settings.
               </p>
             </div>
           </div>
@@ -334,7 +332,7 @@ export default function MemberProfilePage() {
             {/* Distributor ID */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("distributorId")}
+                Distributor ID (Auto / Read-Only)
               </label>
               <input
                 type="text"
@@ -347,11 +345,11 @@ export default function MemberProfilePage() {
             {/* Member Name */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("memberName")} <span className="text-destructive">*</span>
+                Member Name <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
-                placeholder={t("phFullMemberName")}
+                placeholder="Full Member Name"
                 {...register("member_name")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -365,11 +363,11 @@ export default function MemberProfilePage() {
             {/* Branch Name */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("branchName")}
+                Branch Name
               </label>
               <input
                 type="text"
-                placeholder={t("phRegionalBranch")}
+                placeholder="Regional Branch"
                 {...register("branch_name")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -378,11 +376,11 @@ export default function MemberProfilePage() {
             {/* Store Name */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("storeName")}
+                Store / Outlet Name
               </label>
               <input
                 type="text"
-                placeholder={t("phStoreName")}
+                placeholder="Store Name (if applicable)"
                 {...register("store_name")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -391,13 +389,13 @@ export default function MemberProfilePage() {
             {/* State */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("stateLabel")} <span className="text-destructive">*</span>
+                State <span className="text-destructive">*</span>
               </label>
               <select
                 {...register("state")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               >
-                <option value="">{t("phSelectState")}</option>
+                <option value="">-- Select State --</option>
                 {INDIA_STATES.map((st) => (
                   <option key={st} value={st}>
                     {st}
@@ -414,11 +412,11 @@ export default function MemberProfilePage() {
             {/* City */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("cityLabel")} <span className="text-destructive">*</span>
+                City <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
-                placeholder={t("phCityTown")}
+                placeholder="City / Town"
                 {...register("city")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -432,11 +430,11 @@ export default function MemberProfilePage() {
             {/* District */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("districtLabel")} <span className="text-destructive">*</span>
+                District <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
-                placeholder={t("phDistrict")}
+                placeholder="District"
                 {...register("district")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -450,11 +448,11 @@ export default function MemberProfilePage() {
             {/* Area */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("areaLabel")}
+                Area / Locality
               </label>
               <input
                 type="text"
-                placeholder={t("phSubDistrict")}
+                placeholder="Sub-district or Area"
                 {...register("area")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -463,7 +461,7 @@ export default function MemberProfilePage() {
             {/* Franchise Type */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("franchiseType")} <span className="text-destructive">*</span>
+                Franchise Type <span className="text-destructive">*</span>
               </label>
               <select
                 {...register("franchise_type")}
@@ -480,7 +478,7 @@ export default function MemberProfilePage() {
             {/* Under Group */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("underGroup")} <span className="text-destructive">*</span>
+                Under Group <span className="text-destructive">*</span>
               </label>
               <select
                 {...register("under_group")}
@@ -497,7 +495,7 @@ export default function MemberProfilePage() {
             {/* Franchise Code */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("franchiseCode")}
+                Franchise Code (Auto / Read-Only)
               </label>
               <input
                 type="text"
@@ -510,11 +508,11 @@ export default function MemberProfilePage() {
             {/* Contact Person Name */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("contactPersonName")} <span className="text-destructive">*</span>
+                Contact Person Name <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
-                placeholder={t("phFullName")}
+                placeholder="Full Name"
                 {...register("contact_person")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -528,12 +526,12 @@ export default function MemberProfilePage() {
             {/* Phone Number */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("phoneNumber")} <span className="text-destructive">*</span>
+                Phone Number (10 Digits) <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
                 maxLength={10}
-                placeholder={t("phPhone")}
+                placeholder="9876543210"
                 {...register("phone")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -547,11 +545,11 @@ export default function MemberProfilePage() {
             {/* Email Address */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("emailAddress")} <span className="text-destructive">*</span>
+                Email Address <span className="text-destructive">*</span>
               </label>
               <input
                 type="email"
-                placeholder={t("phEmail")}
+                placeholder="member@example.com"
                 {...register("email")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -565,12 +563,12 @@ export default function MemberProfilePage() {
             {/* PIN Code */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("pinCode")} <span className="text-destructive">*</span>
+                PIN Code (6 Digits) <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
                 maxLength={6}
-                placeholder={t("phPinCode")}
+                placeholder="400001"
                 {...register("pincode")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -584,11 +582,11 @@ export default function MemberProfilePage() {
             {/* Full Address */}
             <div className="sm:col-span-2 lg:col-span-3">
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("fullAddress")} <span className="text-destructive">*</span>
+                Full Address <span className="text-destructive">*</span>
               </label>
               <textarea
                 rows={2}
-                placeholder={t("phAddress")}
+                placeholder="Street address, building, landmark..."
                 {...register("address")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -608,9 +606,9 @@ export default function MemberProfilePage() {
               <CreditCard className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">{t("bankSection")}</h2>
+              <h2 className="text-lg font-bold">B. Bank Information</h2>
               <p className="text-xs text-muted-foreground">
-                {t("bankSectionDesc")}
+                Your bank payout account details for payouts, commissions, and franchise settlements.
               </p>
             </div>
           </div>
@@ -619,11 +617,11 @@ export default function MemberProfilePage() {
             {/* Account Holder Name */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("accountHolderName")} <span className="text-destructive">*</span>
+                Account Holder Name <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
-                placeholder={t("phAccountName")}
+                placeholder="Name as per Bank Passbook"
                 {...register("account_name")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -637,11 +635,11 @@ export default function MemberProfilePage() {
             {/* Bank Name */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("bankName")} <span className="text-destructive">*</span>
+                Bank Name <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
-                placeholder={t("phBankName")}
+                placeholder="e.g. State Bank of India, HDFC Bank"
                 {...register("bank_name")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -655,11 +653,11 @@ export default function MemberProfilePage() {
             {/* Account Number */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("accountNumber")} <span className="text-destructive">*</span>
+                Account Number <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
-                placeholder={t("phAccountNumber")}
+                placeholder="Bank Account Number"
                 {...register("account_number")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -673,7 +671,7 @@ export default function MemberProfilePage() {
             {/* Account Type */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("accountType")} <span className="text-destructive">*</span>
+                Account Type <span className="text-destructive">*</span>
               </label>
               <select
                 {...register("account_type")}
@@ -690,12 +688,12 @@ export default function MemberProfilePage() {
             {/* IFSC Code */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("ifscCode")} <span className="text-destructive">*</span>
+                IFSC Code <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
                 maxLength={11}
-                placeholder={t("phIfscCode")}
+                placeholder="e.g. SBIN0001234"
                 {...register("ifsc_code")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm uppercase outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -709,11 +707,11 @@ export default function MemberProfilePage() {
             {/* Branch Address */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("branchAddress")}
+                Branch Address / City
               </label>
               <input
                 type="text"
-                placeholder={t("phBranchCity")}
+                placeholder="Bank Branch City"
                 {...register("branch_address")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -728,9 +726,9 @@ export default function MemberProfilePage() {
               <Lock className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">{t("loginSection")}</h2>
+              <h2 className="text-lg font-bold">C. Login & Security Information</h2>
               <p className="text-xs text-muted-foreground">
-                {t("loginSectionDesc")}
+                Optional: Update your account password if you wish to change it now.
               </p>
             </div>
           </div>
@@ -739,11 +737,11 @@ export default function MemberProfilePage() {
             {/* New Password */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("newPassword")}
+                New Password (Optional, Min 8 Chars)
               </label>
               <input
                 type="password"
-                placeholder={t("phPassword")}
+                placeholder="Leave blank to keep current password"
                 {...register("password")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -757,11 +755,11 @@ export default function MemberProfilePage() {
             {/* Confirm Password */}
             <div>
               <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                {t("confirmNewPassword")}
+                Confirm New Password
               </label>
               <input
                 type="password"
-                placeholder={t("phConfirmPassword")}
+                placeholder="Re-enter new password"
                 {...register("confirm_password")}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
@@ -777,7 +775,7 @@ export default function MemberProfilePage() {
         {/* Submit Actions */}
         <div className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-border bg-card shadow-lg sticky bottom-6 z-10 backdrop-blur-md">
           <p className="text-xs text-muted-foreground hidden sm:block">
-            {t("doubleCheckMsg")}
+            Please double-check your bank account and phone details before saving.
           </p>
           <button
             type="submit"
@@ -786,11 +784,11 @@ export default function MemberProfilePage() {
           >
             {submitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> {t("savingDetails")}
+                <Loader2 className="w-4 h-4 animate-spin" /> Saving Details…
               </>
             ) : (
               <>
-                <Save className="w-4 h-4" /> {t("saveCompleteProfile")}
+                <Save className="w-4 h-4" /> Save & Complete Profile
               </>
             )}
           </button>

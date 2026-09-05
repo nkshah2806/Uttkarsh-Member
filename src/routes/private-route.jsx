@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Layout from "@/layout/layout";
-import { useLanguage } from "@/context/LanguageContext";
 import { memberProfileService } from "@/services/memberProfileService";
 import { Loader2 } from "lucide-react";
 
 function PrivateRoute() {
   const location = useLocation();
-  const { t } = useLanguage();
   const isLoggedIn = localStorage.getItem("isAuthenticated") === "true";
   const [checkingProfile, setCheckingProfile] = useState(true);
   const [profileStatus, setProfileStatus] = useState(() => ({
@@ -71,7 +69,7 @@ function PrivateRoute() {
       <div className="flex flex-col items-center justify-center min-h-screen gap-3 bg-background">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
         <p className="text-sm font-medium text-muted-foreground">
-          {t("authenticatingProfile")}
+          Authenticating & checking member profile status...
         </p>
       </div>
     );

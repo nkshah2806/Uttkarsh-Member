@@ -25,10 +25,8 @@ import {
 import { DatePicker } from "@/components/date-picker";
 import { getUserById, updateUser } from "@/services/userService";
 import { Calendar22 } from "@/components/Calendar22";
-import { useLanguage } from "@/context/LanguageContext";
 
 export default function UserEdit() {
-  const { t } = useLanguage();
   const {
     register,
     handleSubmit,
@@ -66,11 +64,11 @@ export default function UserEdit() {
         const newUserDetails = { ...currentUser, ...updatedUser };
         localStorage.setItem("UserDetails", JSON.stringify(newUserDetails));
       }
-      toast.success(response.meta.message || t("userUpdated"));
+      toast.success(response.meta.message || "User updated successfully");
       navigate("/user");
     } catch (error) {
       toast.error(
-        error?.response?.data?.meta?.message || t("failedUpdateUser")
+        error?.response?.data?.meta?.message || "Failed to update user"
       );
     } finally {
       setLoading(false);
@@ -94,7 +92,7 @@ export default function UserEdit() {
       }
     } catch (error) {
       console.error("Fetch Error:", error);
-      toast.error(t("failedFetchUser"));
+      toast.error("Failed to fetch user details.");
     }
   };
 
@@ -157,7 +155,7 @@ export default function UserEdit() {
       setDefaultImage(response.data.data?.image || file.name);
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(t("uploadFailed"));
+      toast.error("Upload failed. Try again.");
     }
   };
   // ...existing code...
@@ -165,13 +163,13 @@ export default function UserEdit() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("editUser")}</CardTitle>
-        <CardDescription>{t("updateUserInfo")}</CardDescription>
+        <CardTitle>Edit User</CardTitle>
+        <CardDescription>Update user information below.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-6">
           <ImageUploader
-            label={t("profilePicture")}
+            label="Profile Picture"
             defaultImage={defaultImage}
             apiUrl="user/uploadProfileImage"
             handleUploadProfile={handleUploadProfile}
@@ -182,22 +180,22 @@ export default function UserEdit() {
           <div className="grid grid-cols-12 w-full items-center gap-4">
             <div className="col-span-3 mb-auto flex flex-col space-y-1.5">
               <Label htmlFor="firstname">
-                {t("firstName")} <span className="text-red-500">*</span>
+                First Name <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="firstname"
                 type="text"
-                placeholder={t("enterFirstName")}
+                placeholder="Enter first name"
                 maxLength={30} // Character limit for first name
                 {...register("firstname", {
-                  required: t("firstNameRequired"),
+                  required: "First name is required",
                   maxLength: {
                     value: 30,
-                    message: t("firstNameMax"),
+                    message: "First name cannot exceed 30 characters",
                   },
                   pattern: {
                     value: /^[A-Za-z\s-]+$/,
-                    message: t("firstNamePattern"),
+                    message: "First name must contain only letters, spaces, or hyphens",
                   },
                 })}
               />
@@ -209,22 +207,22 @@ export default function UserEdit() {
             </div>
             <div className="col-span-3 mb-auto flex flex-col space-y-1.5">
               <Label htmlFor="lastname">
-                {t("lastName")} <span className="text-red-500">*</span>
+                Last Name <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="lastname"
                 type="text"
-                placeholder={t("enterLastName")}
+                placeholder="Enter last name"
                 maxLength={30} // Character limit for last name
                 {...register("lastname", {
-                  required: t("lastNameRequired"),
+                  required: "Last name is required",
                   maxLength: {
                     value: 30,
-                    message: t("lastNameMax"),
+                    message: "Last name cannot exceed 30 characters",
                   },
                   pattern: {
                     value: /^[A-Za-z\s-]+$/,
-                    message: t("lastNamePattern"),
+                    message: "Last name must contain only letters, spaces, or hyphens",
                   },
                 })}
               />
@@ -236,22 +234,22 @@ export default function UserEdit() {
             </div>
             <div className="col-span-3 mb-auto flex flex-col space-y-1.5">
               <Label htmlFor="email">
-                {t("email")} <span className="text-red-500">*</span>
+                Email <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder={t("enterEmail")}
+                placeholder="Enter email"
                 maxLength={50} // Character limit for email
                 {...register("email", {
-                  required: t("emailRequired"),
+                  required: "Email is required",
                   maxLength: {
                     value: 50,
-                    message: t("emailMax"),
+                    message: "Email cannot exceed 50 characters",
                   },
                   pattern: {
                     value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/,
-                    message: t("emailPattern"),
+                    message: "Email must be in lowercase and valid format",
                   },
                 })}
               />
@@ -263,26 +261,26 @@ export default function UserEdit() {
             </div>
             <div className="col-span-3 mb-auto flex flex-col space-y-1.5">
               <Label htmlFor="phoneNumber">
-                {t("phoneLabel")} <span className="text-red-500">*</span>
+                Phone Number <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="phoneNumber"
                 type="tel"
-                placeholder={t("enterPhone")}
+                placeholder="Enter Phone Number"
                 maxLength={10} // Digit limit for phone number
                 {...register("phoneNumber", {
-                  required: t("phoneRequired"),
+                  required: "Phone number is required",
                   maxLength: {
                     value: 10,
-                    message: t("phoneMax"),
+                    message: "Phone number cannot exceed 10 digits",
                   },
                   minLength: {
                     value: 10,
-                    message: t("phoneDigits"),
+                    message: "Phone number must be 10 digits",
                   },
                   pattern: {
                     value: /^[0-9]+$/,
-                    message: t("phoneOnlyDigits"),
+                    message: "Phone number must contain only digits",
                   },
                 })}
               />
@@ -293,17 +291,17 @@ export default function UserEdit() {
               )}
             </div>
             <div className="col-span-3 mb-auto flex flex-col space-y-1.5">
-              <Label htmlFor="gender">{t("gender")}</Label>
+              <Label htmlFor="gender">Gender</Label>
               <Select onValueChange={handleIsActive} value={gender}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t("selectGender")} />
+                  <SelectValue placeholder="Select Gender" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem key="Male" value="Male">
-                    {t("male")}
+                    Male
                   </SelectItem>
                   <SelectItem key="Female" value="Female">
-                    {t("female")}
+                    Female
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -328,22 +326,22 @@ export default function UserEdit() {
             </div> */}
             <div className="col-span-3 mb-auto flex flex-col space-y-1.5">
               <Label htmlFor="age">
-                {t("age")} <span className="text-red-500">*</span>
+                Age <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="age"
                 type="number"
-                placeholder={t("enterAge")}
+                placeholder="Enter age"
                 maxLength={3}
                 {...register("age", {
-                  required: t("ageRequired"),
+                  required: "Age is required",
                   max: {
                     value: 100,
-                    message: t("ageMax"),
+                    message: "Age cannot exceed 100",
                   },
                   min: {
                     value: 1,
-                    message: t("ageMin"),
+                    message: "Age must be greater than 0",
                   },
                 })}
               />
@@ -360,10 +358,10 @@ export default function UserEdit() {
               type="button"
               onClick={() => navigate("/user")}
             >
-              {t("cancel")}
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? t("saving") : t("update")}
+              {loading ? "Saving..." : "Update"}
             </Button>
           </CardFooter>
         </form>

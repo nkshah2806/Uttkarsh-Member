@@ -1,29 +1,51 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLanguage } from "@/context/LanguageContext";
-import { Activity, FileSpreadsheet, ChevronUp, ChevronDown } from "lucide-react";
+import { Activity, ChevronDown, ChevronUp, FileSpreadsheet, IndianRupee, ListFilter, Search, X } from "lucide-react";
 import { toast } from "sonner";
 
 export default function QuantumDataEntry() {
   const { visitId } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
 
   const [patient, setPatient] = useState(null);
+  const [visit, setVisit] = useState(null);
   const [parameters, setParameters] = useState([]);
   const [resultsMap, setResultsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [csvRawText, setCsvRawText] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("All");
+  // Multi-select category filter — empty array = "All Categories"
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const categoryFilterRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchData();
   }, [visitId]);
+
+  // Close the category filter dropdown on outside click or Escape key
+  useEffect(() => {
+    if (!categoryDropdownOpen) return;
+    const handlePointerDown = (e) => {
+      if (categoryFilterRef.current && !categoryFilterRef.current.contains(e.target)) {
+        setCategoryDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setCategoryDropdownOpen(false);
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [categoryDropdownOpen]);
 
   const fetchData = async () => {
     try {
@@ -34,6 +56,7 @@ export default function QuantumDataEntry() {
       ]);
 
       setPatient(vRes.data.data.visit.patient_id);
+      setVisit(vRes.data.data.visit);
       const params = pRes.data.data || [];
       setParameters(params);
 
@@ -109,9 +132,21 @@ export default function QuantumDataEntry() {
     }
   };
 
-  const categories = ["All", ...new Set(parameters.map((p) => p.category))];
-  const filteredParams =
-    categoryFilter === "All" ? parameters : parameters.filter((p) => p.category === categoryFilter);
+  // Unique categories present in the parameter list (drives the filter options)
+  const filterCategories = [...new Set(parameters.map((p) => p.category).filter(Boolean))];
+
+  const filteredParams = parameters.filter((p) => {
+    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(p.category);
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return matchesCategory;
+    return (
+      matchesCategory &&
+      ((p.code || "").toLowerCase().includes(q) ||
+        (p.name_en || "").toLowerCase().includes(q) ||
+        (p.name_hi || "").toLowerCase().includes(q) ||
+        (p.category || "").toLowerCase().includes(q))
+    );
+  });
 
   const entered = Object.values(resultsMap).filter((v) => v !== "" && !isNaN(Number(v))).length;
   const abnormal = parameters.filter((p) => {
@@ -142,10 +177,23 @@ export default function QuantumDataEntry() {
           <p className="text-xs text-violet-200 mt-0.5">
             Age: {patient?.age} | Gender: {patient?.gender} | Mobile: {patient?.mobile}
           </p>
+          {visit?.scan_pricing?.amount != null && (
+            <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 border border-white/30 backdrop-blur-sm">
+              <IndianRupee className="h-3.5 w-3.5 shrink-0" />
+              <span className="text-sm font-bold">
+                {Number(visit.scan_pricing.amount).toLocaleString("en-IN")}
+              </span>
+              {visit.scan_pricing.name && (
+                <span className="text-[10px] font-medium text-violet-100 uppercase tracking-wide">
+                  · {visit.scan_pricing.name}
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="secondary" size="sm" onClick={() => setShowCsvModal(true)} className="text-xs">
-            <FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> {t("bulkCSV")}
+            <FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> CSV Upload
           </Button>
           <Button
             onClick={handleSaveAndAnalyze}
@@ -153,7 +201,7 @@ export default function QuantumDataEntry() {
             className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold text-sm px-5"
           >
             <Activity className="mr-2 h-4 w-4" />
-            {saving ? "Saving..." : t("runAutoAnalysis")}
+            {saving ? "Saving..." : "Save & Run Analysis"}
           </Button>
         </div>
       </div>
@@ -174,20 +222,145 @@ export default function QuantumDataEntry() {
         </div>
       </div>
 
-      {/* Category Filter Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {categories.map((cat) => (
+      {/* Category Multi-Select Filter Dropdown */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative" ref={categoryFilterRef}>
           <button
-            key={cat}
-            onClick={() => setCategoryFilter(cat)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${categoryFilter === cat
-                ? "bg-indigo-600 text-white shadow"
-                : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50"
+            type="button"
+            onClick={() => setCategoryDropdownOpen((open) => !open)}
+            className={`inline-flex items-center gap-2 text-xs px-3.5 py-2 rounded-lg font-semibold transition-all border cursor-pointer ${selectedCategories.length > 0
+              ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+              : "bg-white dark:bg-slate-800 text-slate-600 border hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300"
               }`}
           >
-            {cat}
+            <ListFilter className="h-3.5 w-3.5" />
+            <span>
+              {selectedCategories.length === 0
+                ? "All Categories"
+                : `Filtering ${selectedCategories.length} Categor${selectedCategories.length === 1 ? "y" : "ies"}`}
+            </span>
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-150 ${categoryDropdownOpen ? "rotate-180" : ""}`} />
           </button>
-        ))}
+
+          {categoryDropdownOpen && (
+            <div className="absolute left-0 top-full mt-2 z-30 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-2">
+              <div className="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Filter by Category
+                </span>
+                {selectedCategories.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategories([])}
+                    className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
+                  >
+                    Clear ({selectedCategories.length})
+                  </button>
+                )}
+              </div>
+
+              <div className="max-h-72 overflow-y-auto py-1.5 space-y-0.5">
+                <label className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.length === 0}
+                    onChange={() => setSelectedCategories([])}
+                    className="h-3.5 w-3.5 rounded accent-indigo-600"
+                  />
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex-1">
+                    All Categories
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-400">{parameters.length}</span>
+                </label>
+
+                {filterCategories.map((cat) => {
+                  const count = parameters.filter((p) => p.category === cat).length;
+                  const checked = selectedCategories.includes(cat);
+                  const disabled = count === 0 && !checked;
+                  return (
+                    <label
+                      key={cat}
+                      className={`flex items-center gap-2.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 ${disabled ? "opacity-45 cursor-not-allowed" : ""
+                        }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={disabled}
+                        onChange={() =>
+                          setSelectedCategories((prev) =>
+                            checked ? prev.filter((c) => c !== cat) : [...prev, cat]
+                          )
+                        }
+                        className="h-3.5 w-3.5 rounded accent-indigo-600"
+                      />
+                      <span className="text-xs font-medium text-slate-700 dark:text-slate-200 flex-1 truncate">
+                        {cat}
+                      </span>
+                      <span className="text-[10px] font-semibold text-slate-400">{count}</span>
+                    </label>
+                  );
+                })}
+
+                {filterCategories.length === 0 && (
+                  <p className="px-2 py-3 text-xs text-slate-400 text-center">No categories available</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {selectedCategories.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {selectedCategories.map((cat) => (
+              <span
+                key={cat}
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-900 rounded-full pl-2.5 pr-1.5 py-1"
+              >
+                {cat}
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategories((prev) => prev.filter((c) => c !== cat))}
+                  className="p-0.5 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 cursor-pointer"
+                  aria-label={`Remove ${cat} filter`}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSelectedCategories([])}
+              className="text-[11px] font-semibold text-slate-500 hover:text-rose-600 hover:underline cursor-pointer"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
+
+        <p className="ml-auto text-xs text-slate-400 dark:text-slate-500">
+          Showing {filteredParams.length} of {parameters.length} parameters
+        </p>
+      </div>
+
+      {/* Parameter Search Box */}
+      <div className="relative">
+        <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+        <input
+          type="text"
+          placeholder="Search by code, name or category..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-600"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Parameter Table */}
@@ -199,9 +372,9 @@ export default function QuantumDataEntry() {
                 <tr>
                   <th className="px-4 py-3 text-left w-20">Code</th>
                   <th className="px-4 py-3 text-left">Parameter</th>
-                  <th className="px-4 py-3 text-left">{t("normalRange")}</th>
-                  <th className="px-4 py-3 w-40">{t("rawInput")}</th>
-                  <th className="px-4 py-3 text-center w-32">{t("status")}</th>
+                  <th className="px-4 py-3 text-left">Normal Range</th>
+                  <th className="px-4 py-3 w-40">Value</th>
+                  <th className="px-4 py-3 text-center w-32">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -212,7 +385,7 @@ export default function QuantumDataEntry() {
                     <tr
                       key={p._id}
                       className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${status === "HIGH" ? "bg-rose-50/40 dark:bg-rose-950/10" :
-                          status === "LOW" ? "bg-amber-50/40 dark:bg-amber-950/10" : ""
+                        status === "LOW" ? "bg-amber-50/40 dark:bg-amber-950/10" : ""
                         }`}
                     >
                       <td className="px-4 py-2.5 font-mono text-xs font-bold text-indigo-600">{p.code}</td>
@@ -233,9 +406,9 @@ export default function QuantumDataEntry() {
                           value={val}
                           onChange={(e) => setResultsMap((prev) => ({ ...prev, [p._id]: e.target.value }))}
                           className={`w-full rounded-lg border px-3 py-1.5 text-sm font-semibold text-center bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 transition-colors ${status === "HIGH" ? "border-rose-300 focus:ring-rose-400" :
-                              status === "LOW" ? "border-amber-300 focus:ring-amber-400" :
-                                status === "NORMAL" ? "border-emerald-300 focus:ring-emerald-400" :
-                                  "border-slate-200 focus:ring-indigo-400"
+                            status === "LOW" ? "border-amber-300 focus:ring-amber-400" :
+                              status === "NORMAL" ? "border-emerald-300 focus:ring-emerald-400" :
+                                "border-slate-200 focus:ring-indigo-400"
                             }`}
                         />
                       </td>

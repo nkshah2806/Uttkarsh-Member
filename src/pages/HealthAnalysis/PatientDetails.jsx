@@ -3,7 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/context/LanguageContext";
+import { scanPricingService } from "@/services/scanPricingService";
+import ScanPricingSelectionModal from "@/components/ScanPricingSelectionModal";
 import {
   ArrowLeft,
   User,
@@ -35,6 +36,7 @@ import {
   HeartPulse,
   Sparkles,
   Info,
+  Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 import ReusableTable from "@/components/ReusableTable";
@@ -42,12 +44,16 @@ import ReusableTable from "@/components/ReusableTable";
 export default function PatientDetails() {
   const { patientId } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [patientData, setPatientData] = useState(null);
   const [visits, setVisits] = useState([]);
   const [stats, setStats] = useState({});
+
+  // Scan Pricing Selection State (shown only when multiple active prices exist)
+  const [pricingOptions, setPricingOptions] = useState([]);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
+  const [startingScan, setStartingScan] = useState(false);
 
   // Active Report Modal State
   const [selectedVisitId, setSelectedVisitId] = useState(null);
@@ -88,7 +94,7 @@ export default function PatientDetails() {
         setStats(res.data.data.stats || {});
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to load patient details");
+      toast.error(err.response?.data?.message || "Failed to load client details");
     } finally {
       setLoading(false);
     }
@@ -117,25 +123,58 @@ export default function PatientDetails() {
     try {
       setSubmittingEdit(true);
       await axiosInstance.put(`v1/patients/${patientId}`, editForm);
-      toast.success("Patient details updated successfully");
+      toast.success("Client details updated successfully");
       setShowEditModal(false);
       fetchPatientProfile();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update patient details");
+      toast.error(err.response?.data?.message || "Failed to update client details");
     } finally {
       setSubmittingEdit(false);
     }
   };
 
-  const startNewScan = async () => {
+  const launchVisit = async (scanPricingId) => {
     try {
+      setStartingScan(true);
       const visitRes = await axiosInstance.post("v1/visits", {
         patient_id: patientId,
+        scan_pricing_id: scanPricingId,
       });
       navigate(`/quantum-scan/${visitRes.data.data._id}`);
     } catch (err) {
       toast.error("Failed to start new scan");
+      setStartingScan(false);
     }
+  };
+
+  const startNewScan = async () => {
+    try {
+      setStartingScan(true);
+      const pricings = await scanPricingService.getActiveScanPricings();
+      if (pricings.length === 0) {
+        toast.info("No active scan price configured. Scan will be recorded without an amount.");
+        await launchVisit(undefined);
+        return;
+      }
+      const defaultPricing = pricings.find((p) => p.is_default);
+      if (defaultPricing || pricings.length === 1) {
+        // Single active price (or an explicit default) is auto-selected.
+        await launchVisit((defaultPricing || pricings[0])._id);
+        return;
+      }
+      // Multiple active prices with no explicit default -> let the consultant pick.
+      setPricingOptions(pricings);
+      setPricingModalOpen(true);
+      setStartingScan(false);
+    } catch (err) {
+      toast.error("Failed to start new scan");
+      setStartingScan(false);
+    }
+  };
+
+  const handleConfirmPricing = async (pricingId) => {
+    setPricingModalOpen(false);
+    await launchVisit(pricingId);
   };
 
   // Open Detailed Report Modal
@@ -197,7 +236,7 @@ export default function PatientDetails() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `HealthReport_${patientData?.patient_code || "Patient"}_${visitId.slice(-6)}.html`;
+      a.download = `HealthReport_${patientData?.patient_code || "Client"}_${visitId.slice(-6)}.html`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -248,7 +287,7 @@ export default function PatientDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[450px] space-y-4">
         <div className="h-10 w-10 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
-        <p className="text-sm font-medium text-slate-500">Loading comprehensive patient record...</p>
+        <p className="text-sm font-medium text-slate-500">Loading comprehensive client record...</p>
       </div>
     );
   }
@@ -257,9 +296,9 @@ export default function PatientDetails() {
     return (
       <div className="text-center py-16 space-y-4">
         <AlertCircle className="h-12 w-12 text-rose-500 mx-auto" />
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Patient Record Not Found</h2>
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Client Record Not Found</h2>
         <Button onClick={() => navigate("/patients")} variant="outline">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Patient List
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Client List
         </Button>
       </div>
     );
@@ -363,6 +402,29 @@ export default function PatientDetails() {
       ),
     },
     {
+      key: "scan_amount",
+      label: "Amount",
+      sortable: true,
+      render: (v) =>
+        v.scan_amount !== null && v.scan_amount !== undefined ? (
+          <div className="flex items-center gap-1.5">
+            <Tag className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+            <div className="leading-tight">
+              <span className="font-bold text-emerald-700 dark:text-emerald-300">
+                ₹{Number(v.scan_amount).toLocaleString("en-IN")}
+              </span>
+              {v.scan_pricing_name && (
+                <span className="block text-[10px] text-slate-400 font-medium">
+                  {v.scan_pricing_name}
+                </span>
+              )}
+            </div>
+          </div>
+        ) : (
+          <span className="text-xs text-slate-400 italic">—</span>
+        ),
+    },
+    {
       key: "actions",
       label: "Actions",
       render: (v) => (
@@ -417,7 +479,7 @@ export default function PatientDetails() {
             size="icon"
             onClick={() => navigate("/patients")}
             className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
-            title="Back to Patient List"
+            title="Back to Client List"
           >
             <ArrowLeft className="h-5 w-5 text-slate-600 dark:text-slate-300" />
           </Button>
@@ -471,7 +533,7 @@ export default function PatientDetails() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
                 <User className="h-4 w-4 text-indigo-600" />
-                Patient Information & Vitals
+                Client Information & Vitals
               </CardTitle>
               <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                 Complete Profile
@@ -481,7 +543,7 @@ export default function PatientDetails() {
           <CardContent className="p-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Patient Code</p>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Client ID</p>
                 <p className="text-base font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
                   {patientData.patient_code}
                 </p>
@@ -671,7 +733,7 @@ export default function PatientDetails() {
                 Previous Reports & Visit History
               </CardTitle>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                All previously generated health analysis scans and clinical reports for this patient.
+                All previously generated health analysis scans and clinical reports for this client.
               </p>
             </div>
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
@@ -688,7 +750,7 @@ export default function PatientDetails() {
                 <Activity className="h-10 w-10 text-indigo-400 mx-auto" />
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No Previous Reports Yet</p>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  No scan sessions or clinical reports have been generated for {patientData?.name ?? "this patient"} yet. Click below to start the first scan session.
+                  No scan sessions or clinical reports have been generated for {patientData?.name ?? "this client"} yet. Click below to start the first scan session.
                 </p>
                 <Button onClick={startNewScan} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white mt-2">
                   <Plus className="h-4 w-4 mr-1.5" /> Start First Scan Session
@@ -721,7 +783,7 @@ export default function PatientDetails() {
                     )}
                   </div>
                   <p className="text-xs text-slate-500">
-                    Patient: <strong className="text-slate-700 dark:text-slate-300">{patientData.name}</strong> ({patientData.patient_code}) · {patientData.age} Yrs / {patientData.gender}
+                    Client: <strong className="text-slate-700 dark:text-slate-300">{patientData.name}</strong> ({patientData.patient_code}) · {patientData.age} Yrs / {patientData.gender}
                   </p>
                 </div>
               </div>
@@ -802,6 +864,28 @@ export default function PatientDetails() {
                       <p className="text-[11px] text-indigo-600/70">Wellness guidance points</p>
                     </div>
                   </div>
+
+                  {/* Scan Price Banner */}
+                  {detailedReport.visit?.scan_pricing &&
+                    detailedReport.visit.scan_pricing.amount !== null &&
+                    detailedReport.visit.scan_pricing.amount !== undefined && (
+                      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                        <div className="flex items-center gap-2.5">
+                          <Tag className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          <div>
+                            <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                              {detailedReport.visit.scan_pricing.name || "Scan Price"}
+                            </p>
+                            <p className="text-[10px] text-emerald-600/70">
+                              Amount charged on this scan session
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
+                          ₹{Number(detailedReport.visit.scan_pricing.amount).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    )}
 
                   {/* Evaluated Parameters Section */}
                   <div className="space-y-3">
@@ -934,7 +1018,7 @@ export default function PatientDetails() {
                         Selected Wellness Information & Ayurvedic Lifestyle Guidance in Report
                       </h4>
                       <p className="text-xs text-slate-500">
-                        The specific guidance points and remedies chosen for inclusion in this patient's final report.
+                        The specific guidance points and remedies chosen for inclusion in this client's final report.
                       </p>
                     </div>
 
@@ -1047,7 +1131,7 @@ export default function PatientDetails() {
             <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold">
                 <Pencil className="h-5 w-5" />
-                <h3 className="text-lg">Edit Patient Profile ({patientData.patient_code})</h3>
+                <h3 className="text-lg">Edit Client Profile ({patientData.patient_code})</h3>
               </div>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1122,7 +1206,7 @@ export default function PatientDetails() {
                   </label>
                   <input
                     type="email"
-                    placeholder="patient@example.com"
+                    placeholder="client@example.com"
                     value={editForm.email}
                     onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -1203,6 +1287,15 @@ export default function PatientDetails() {
           </div>
         </div>
       )}
+
+      {/* Scan Pricing Selection Modal (only opens when multiple active prices exist) */}
+      <ScanPricingSelectionModal
+        open={pricingModalOpen}
+        pricings={pricingOptions}
+        onClose={() => setPricingModalOpen(false)}
+        onConfirm={handleConfirmPricing}
+        submitting={startingScan}
+      />
     </div>
   );
 }

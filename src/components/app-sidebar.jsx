@@ -24,10 +24,8 @@ import {
 } from "@/components/ui/sidebar";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { Config } from "@/lib/Config";
-import { useLanguage } from "@/context/LanguageContext";
 
 export function AppSidebar({ ...props }) {
-  const { t } = useLanguage();
   const [userDetails, setUserDetails] = React.useState(() => {
     const data = localStorage.getItem("UserDetails");
     return data ? JSON.parse(data) : null;
@@ -72,22 +70,22 @@ export function AppSidebar({ ...props }) {
 
   // Full navigation available only after the profile is complete AND approved.
   const fullNav = [
-    { title: t("dashboard"), url: "/dashboard", icon: DashboardIcon },
-    { title: t("personalDetails"), url: "/member/profile", icon: UserCheck },
+    { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
+    { title: "Personal Details", url: "/member/profile", icon: UserCheck },
     {
-      title: t("quantumModule"),
+      title: "Quantum Health Analysis",
       url: "#",
       icon: Stethoscope,
       items: [
-        { title: t("patientReg"), url: "/patients", icon: Users },
-        { title: t("reportHistory"), url: "/clients", icon: ClipboardList },
+        { title: "Client Registration", url: "/patients", icon: Users },
+        { title: "Report History", url: "/clients", icon: ClipboardList },
       ],
     },
   ];
 
   // Restricted mode: only the profile page remains reachable (logout is in the footer).
   const restrictedNav = [
-    { title: t("personalDetails"), url: "/member/profile", icon: UserCheck },
+    { title: "Personal Details", url: "/member/profile", icon: UserCheck },
   ];
 
   const data = {
@@ -110,11 +108,11 @@ export function AppSidebar({ ...props }) {
           <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
             <ShieldAlert className="h-4 w-4" />
             <span className="text-xs font-bold uppercase tracking-wide">
-              {t("accountInactive")}
+              Account Inactive
             </span>
           </div>
           <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed">
-            {t("accountInactiveMsg")}
+            Your account has been deactivated by the administrator. Please contact support for assistance.
           </p>
         </div>
       );
@@ -126,11 +124,11 @@ export function AppSidebar({ ...props }) {
           <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-xs font-bold uppercase tracking-wide">
-              {t("profileRejected")}
+              Profile Rejected
             </span>
           </div>
           <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed">
-            {t("rejectionMsg")}
+            Your profile was rejected. Please review the reason and update your details.
           </p>
         </div>
       );
@@ -142,11 +140,11 @@ export function AppSidebar({ ...props }) {
           <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
             <Info className="h-4 w-4" />
             <span className="text-xs font-bold uppercase tracking-wide">
-              {t("profileIncomplete")}
+              Profile Incomplete
             </span>
           </div>
           <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed">
-            {t("profileCompletionMsg")}
+            Please complete your profile before accessing the portal.
           </p>
         </div>
       );
@@ -157,11 +155,11 @@ export function AppSidebar({ ...props }) {
         <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
           <ShieldAlert className="h-4 w-4" />
           <span className="text-xs font-bold uppercase tracking-wide">
-            {t("accountUnderReview")}
+            Account Under Review
           </span>
         </div>
         <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed">
-          {t("underReviewMsg")}
+          Your profile has been submitted and is under review. You will get access once approved.
         </p>
       </div>
     );

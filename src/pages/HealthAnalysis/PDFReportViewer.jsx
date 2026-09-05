@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/context/LanguageContext";
 import { Printer, Download, Share2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -12,7 +11,6 @@ import {
 
 export default function PDFReportViewer() {
   const { visitId } = useParams();
-  const { t } = useLanguage();
 
   const [reportHtml, setReportHtml] = useState("");
   const [reportId, setReportId] = useState(null);
@@ -42,7 +40,7 @@ export default function PDFReportViewer() {
         setReportId(res.data.report_id);
       } catch (err) {
         if (isMountedRef.current) {
-          toast.error(t("failedCompileReport"));
+          toast.error("Failed to compile report. Please try again.");
         }
       } finally {
         if (isMountedRef.current) {
@@ -90,19 +88,19 @@ export default function PDFReportViewer() {
   const handleDownloadPdf = async () => {
     if (pdfBusy) return; // prevent duplicate clicks while generating
     if (loading || !reportHtml) {
-      toast.error(t("reportNotReady"));
+      toast.error("Report is not ready yet. Please wait for it to compile.");
       return;
     }
     setPdfBusy(true);
     try {
       const win = openReportForPdfSave(reportHtml, reportTitle);
       if (!win) {
-        toast.error(t("printBlocked"));
+        toast.error("Could not open the print window. Please allow pop-ups for this site and try again.");
       } else {
-        toast.success(t("saveAsPdfHint"));
+        toast.success("Choose “Save as PDF” as the destination to download the report.");
       }
     } catch (err) {
-      toast.error(t("failedOpenPdf"));
+      toast.error("Failed to open PDF download. Please try again.");
     } finally {
       setPdfBusy(false);
     }
@@ -112,7 +110,7 @@ export default function PDFReportViewer() {
   const handleWhatsApp = async () => {
     if (pdfBusy) return; // prevent duplicate clicks while generating
     if (loading || !reportId || !reportHtml) {
-      toast.error(t("reportNotReady"));
+      toast.error("Report is not ready yet. Please wait for it to compile.");
       return;
     }
     setPdfBusy(true);
@@ -128,12 +126,12 @@ export default function PDFReportViewer() {
         },
       });
       if (started) {
-        toast.success(t("pdfGeneratedWhatsApp"));
+        toast.success("PDF generated. Save it, attach it to the WhatsApp chat, and send it with the message.");
       } else {
-        toast.error(t("printBlocked"));
+        toast.error("Could not open the print window. Please allow pop-ups for this site and try again.");
       }
     } catch (err) {
-      toast.error(t("failedWhatsAppLink"));
+      toast.error("Failed to generate WhatsApp link");
     } finally {
       setPdfBusy(false);
     }
@@ -146,14 +144,14 @@ export default function PDFReportViewer() {
         <div className="flex items-center gap-3">
           <div className="h-8 w-1 rounded-full bg-indigo-600" />
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t("quantumHealthReport")}</p>
-            <p className="text-sm font-bold text-slate-800 dark:text-white">{t("visitNumber").replace("{id}", visitId?.slice(-6).toUpperCase())}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Quantum Health Report</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-white">{"Visit #{id}".replace("{id}", visitId?.slice(-6).toUpperCase())}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={handlePrint}>
-            <Printer className="mr-1.5 h-4 w-4" /> {t("printView")}
+            <Printer className="mr-1.5 h-4 w-4" /> Print
           </Button>
           <Button
             variant="outline"
@@ -166,7 +164,7 @@ export default function PDFReportViewer() {
             ) : (
               <Download className="mr-1.5 h-4 w-4" />
             )}
-            {t("downloadPDF")}
+            Download PDF
           </Button>
           <Button
             size="sm"
@@ -179,7 +177,7 @@ export default function PDFReportViewer() {
             ) : (
               <Share2 className="mr-1.5 h-4 w-4" />
             )}
-            {t("shareWhatsApp")}
+            Share via WhatsApp
           </Button>
         </div>
       </div>
@@ -189,13 +187,13 @@ export default function PDFReportViewer() {
         <div className="flex flex-col items-center justify-center py-20 space-y-4 bg-white dark:bg-slate-900 rounded-2xl border shadow-sm">
           <div className="h-10 w-10 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
           <p className="text-sm text-slate-500">
-            {t("compilingReport")}
+            Compiling your report...
           </p>
         </div>
       ) : (
         <div className="bg-white p-4 rounded-2xl shadow-lg border overflow-hidden max-w-4xl mx-auto">
           <iframe
-            title={t("reportPreview")}
+            title="Report Preview"
             srcDoc={reportHtml}
             className="w-full border-0"
             style={{ height: "80vh", minHeight: 600 }}

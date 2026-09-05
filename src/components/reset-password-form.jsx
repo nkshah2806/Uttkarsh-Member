@@ -7,10 +7,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
-import { useLanguage } from "@/context/LanguageContext";
 
 export function ResetPasswordForm({ className, ...props }) {
-  const { t } = useLanguage();
   const {
     register,
     handleSubmit,
@@ -30,10 +28,10 @@ export function ResetPasswordForm({ className, ...props }) {
         otp,
         password: data.password,
       });
-      toast.success(t("passwordUpdated"));
+      toast.success("Password update successful!");
       navigate("/");
     } catch (error) {
-      toast.error(t("passwordUpdateFailed"));
+      toast.error("Password update failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -46,19 +44,19 @@ export function ResetPasswordForm({ className, ...props }) {
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center mb-5">
-        <h1 className="text-3xl font-bold">{t("resetPasswordTitle")}</h1>
+        <h1 className="text-3xl font-bold">Reset your password</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          {t("resetPasswordDesc")}
+          Set a new password to continue logging into your account.
         </p>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-3">
-          <Label htmlFor="password">{t("newPasswordLabel")}</Label>
+          <Label htmlFor="password">New Password</Label>
           <Input
             id="password"
             type="text"
-            placeholder={t("enterNewPassword")}
-            {...register("password", { required: t("newPasswordRequired") })}
+            placeholder="Enter new password"
+            {...register("password", { required: "New Password is required" })}
           />
           {errors.password && (
             <p className="text-red-500 text-sm">{errors.password.message}</p>
@@ -72,7 +70,7 @@ export function ResetPasswordForm({ className, ...props }) {
           size="lg"
           disabled={loading}
         >
-          {t("submit")}
+          Submit
         </Button>
       </div>
     </form>
