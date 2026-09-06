@@ -174,8 +174,15 @@ export default function QuantumDataEntry() {
             {patient?.name}
             <span className="ml-2 text-sm font-normal text-violet-200">({patient?.patient_code})</span>
           </h1>
-          <p className="text-xs text-violet-200 mt-0.5">
-            Age: {patient?.age} | Gender: {patient?.gender} | Mobile: {patient?.mobile}
+          <p className="text-xs text-violet-200 mt-0.5 inline-flex flex-wrap items-center gap-x-1.5">
+            <span>Age:</span>
+            <span>{patient?.age ?? "—"}</span>
+            <span aria-hidden="true">|</span>
+            <span>Gender:</span>
+            <span>{patient?.gender ?? "—"}</span>
+            <span aria-hidden="true">|</span>
+            <span>Mobile:</span>
+            <span>{patient?.mobile ?? "—"}</span>
           </p>
           {visit?.scan_pricing?.amount != null && (
             <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 border border-white/30 backdrop-blur-sm">
@@ -234,10 +241,16 @@ export default function QuantumDataEntry() {
               }`}
           >
             <ListFilter className="h-3.5 w-3.5" />
-            <span>
-              {selectedCategories.length === 0
-                ? "All Categories"
-                : `Filtering ${selectedCategories.length} Categor${selectedCategories.length === 1 ? "y" : "ies"}`}
+            <span className="inline-flex items-center">
+              {selectedCategories.length === 0 ? (
+                <span>All Categories</span>
+              ) : (
+                <span className="inline-flex items-center gap-1">
+                  <span>Filtering</span>
+                  <span>{selectedCategories.length}</span>
+                  <span>Categor{selectedCategories.length === 1 ? "y" : "ies"}</span>
+                </span>
+              )}
             </span>
             <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-150 ${categoryDropdownOpen ? "rotate-180" : ""}`} />
           </button>
@@ -339,7 +352,11 @@ export default function QuantumDataEntry() {
         )}
 
         <p className="ml-auto text-xs text-slate-400 dark:text-slate-500">
-          Showing {filteredParams.length} of {parameters.length} parameters
+          <span>Showing</span>{" "}
+          <span className="font-semibold text-slate-600 dark:text-slate-400">{filteredParams.length}</span>
+          <span>of</span>{" "}
+          <span className="font-semibold text-slate-600 dark:text-slate-400">{parameters.length}</span>
+          <span>parameters</span>
         </p>
       </div>
 
@@ -396,7 +413,10 @@ export default function QuantumDataEntry() {
                         <div className="text-xs text-slate-400">{p.category}</div>
                       </td>
                       <td className="px-4 py-2.5 text-xs text-slate-500">
-                        {p.normal_min} – {p.normal_max} {p.unit}
+                        <span>{p.normal_min}</span>
+                        <span aria-hidden="true"> – </span>
+                        <span>{p.normal_max}</span>
+                        <span> {p.unit}</span>
                       </td>
                       <td className="px-4 py-2.5">
                         <input

@@ -235,8 +235,11 @@ export default function PatientRegistration() {
       key: "age",
       label: "Age / Gender",
       render: (row) => (
-        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-          {row.age} Yrs / {row.gender}
+        <span className="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 font-medium">
+          <span>{row.age}</span>
+          <span>Yrs</span>
+          <span aria-hidden="true">/</span>
+          <span>{row.gender}</span>
         </span>
       ),
     },
@@ -255,11 +258,13 @@ export default function PatientRegistration() {
       render: (row) => (
         <span className="flex items-center gap-1.5 text-xs text-slate-500">
           <Calendar className="h-3.5 w-3.5 text-slate-400" />
-          {new Date(row.createdAt).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })}
+          <span>
+            {new Date(row.createdAt).toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
         </span>
       ),
     },
@@ -268,7 +273,7 @@ export default function PatientRegistration() {
       label: "Consultant Name",
       render: (row) => (
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-          {row.registered_by?.fullName || row.registered_by?.username || "Franchise Consultant"}
+          <span>{row.registered_by?.fullName || row.registered_by?.username || "Franchise Consultant"}</span>
         </span>
       ),
     },

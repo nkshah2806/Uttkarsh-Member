@@ -65,7 +65,11 @@ export default function Login() {
 
         {/* Footer */}
         <div className="flex flex-col gap-2 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Utkarsh Corporation</span>
+          <span className="inline-flex items-center gap-1">
+            <span aria-hidden="true">©</span>
+            <span>{new Date().getFullYear()}</span>
+            <span>Utkarsh Corporation</span>
+          </span>
 
           <span>
             Need help?{" "}

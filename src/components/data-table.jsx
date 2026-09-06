@@ -136,9 +136,9 @@ export function DataTable({
                     )}
                     {header.column.getCanSort()
                       ? {
-                          asc: " ↑",
-                          desc: " ↓",
-                        }[header.column.getIsSorted()] ?? " ↕"
+                        asc: " ↑",
+                        desc: " ↓",
+                      }[header.column.getIsSorted()] ?? " ↕"
                       : null}
                   </TableHead>
                 ))}
@@ -202,14 +202,19 @@ export function DataTable({
           </Select>
         </div>
 
-        <div className="text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+        <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
+          <span>Page</span>
+          <span className="font-medium">{table.getState().pagination.pageIndex + 1}</span>
+          <span>of</span>
+          <span className="font-medium">{table.getPageCount()}</span>
         </div>
 
-        <div className="text-sm text-muted-foreground">
-          Showing {table.getRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} entries
+        <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
+          <span>Showing</span>
+          <span className="font-medium">{table.getRowModel().rows.length}</span>
+          <span>of</span>
+          <span className="font-medium">{table.getFilteredRowModel().rows.length}</span>
+          <span>entries</span>
         </div>
 
         <div className="ms-auto space-x-2">

@@ -354,8 +354,9 @@ const ReusableTable = forwardRef(
         )}
 
         {selectedRows.length > 0 && (
-          <div className="mb-4 text-sm font-medium">
-            {selectedRows.length} row(s) selected
+          <div className="mb-4 text-sm font-medium inline-flex items-center gap-1">
+            <span>{selectedRows.length}</span>
+            <span>row(s) selected</span>
           </div>
         )}
 

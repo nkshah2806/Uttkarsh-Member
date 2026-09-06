@@ -151,8 +151,9 @@ function ChartTooltip({ active, payload, label }) {
     <div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-md">
       {label && <p className="font-medium">{label}</p>}
       {payload.map((entry, i) => (
-        <p key={i} className="mt-0.5" style={{ color: entry.color || entry.stroke || entry.fill }}>
-          {entry.name}: <span className="font-semibold">{entry.value}</span>
+        <p key={i} className="mt-0.5 inline-flex items-baseline gap-1" style={{ color: entry.color || entry.stroke || entry.fill }}>
+          <span>{entry.name}:</span>
+          <span className="font-semibold">{entry.value}</span>
         </p>
       ))}
     </div>
@@ -369,7 +370,14 @@ export default function DashboardOverview() {
                     : "text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
                     }`}
                 >
-                  {disabled ? "Nothing pending" : <><span className="flex items-center gap-1">Open <ArrowRight className="h-3 w-3" /></span></>}
+                  {disabled ? (
+                    <span className="flex items-center gap-1">Nothing pending</span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <span>Open</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </span>
+                  )}
                 </span>
               </button>
             );
@@ -574,9 +582,13 @@ export default function DashboardOverview() {
                         <Users className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {p.patient_code} · {p.mobile || "—"}
+                        <p className="text-sm font-medium">
+                          <span>{p.name}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                          <span>{p.patient_code}</span>
+                          <span aria-hidden="true">·</span>
+                          <span>{p.mobile || "—"}</span>
                         </p>
                       </div>
                     </div>
@@ -622,9 +634,13 @@ export default function DashboardOverview() {
                         <FileText className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{r.patient?.name || "Unknown client"}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {r.patient?.patient_code || "—"} · {r.language === "hi" ? "हिंदी" : "English"}
+                        <p className="text-sm font-medium">
+                          <span>{r.patient?.name || "Unknown client"}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                          <span>{r.patient?.patient_code || "—"}</span>
+                          <span aria-hidden="true">·</span>
+                          <span>{r.language === "hi" ? "हिंदी" : "English"}</span>
                         </p>
                       </div>
                     </div>
@@ -673,9 +689,13 @@ export default function DashboardOverview() {
                         {v.status === "DATA_ENTRY" ? <ScanLine className="h-4 w-4" /> : <Stethoscope className="h-4 w-4" />}
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{v.patient?.name || "Unknown client"}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {v.patient?.patient_code || "—"} · {fmtDate(v.visit_date || v.createdAt)}
+                        <p className="text-sm font-medium">
+                          <span>{v.patient?.name || "Unknown client"}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                          <span>{v.patient?.patient_code || "—"}</span>
+                          <span aria-hidden="true">·</span>
+                          <span>{fmtDate(v.visit_date || v.createdAt)}</span>
                         </p>
                       </div>
                     </div>
@@ -723,9 +743,13 @@ export default function DashboardOverview() {
                         <CalendarClock className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{v.patient?.name || "Unknown client"}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {v.patient?.patient_code || "—"} · {v.patient?.mobile || "—"}
+                        <p className="text-sm font-medium">
+                          <span>{v.patient?.name || "Unknown client"}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                          <span>{v.patient?.patient_code || "—"}</span>
+                          <span aria-hidden="true">·</span>
+                          <span>{v.patient?.mobile || "—"}</span>
                         </p>
                       </div>
                     </div>

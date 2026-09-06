@@ -169,13 +169,13 @@ export default function Layout(props) {
                                   />
                                   <div className="notification_msg whitespace-break-spaces w-full">
                                     <div className="font-semibold text-sm mb-0.5">
-                                      {notifi.notificationType}
+                                      <span>{notifi.notificationType}</span>
                                     </div>
                                     <div className="text-xs mb-1">
-                                      {notifi.notificationText}
+                                      <span>{notifi.notificationText}</span>
                                     </div>
                                     <div className="text-xs">
-                                      {new Date(notifi.createdAt).toLocaleString()}
+                                      <span>{new Date(notifi.createdAt).toLocaleString()}</span>
                                     </div>
                                   </div>
                                 </div>

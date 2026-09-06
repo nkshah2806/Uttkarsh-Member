@@ -320,10 +320,16 @@ export default function ReportReviewOverride() {
             onClick={() => setMedicineDropdownOpen((prev) => !prev)}
             className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
           >
-            <span className="truncate">
-              {selected.length === 0
-                ? "Search & select medicines..."
-                : `${selected.length} medicine${selected.length > 1 ? "s" : ""} selected`}
+            <span className="truncate inline-flex items-center">
+              {selected.length === 0 ? (
+                <span>Search & select medicines...</span>
+              ) : (
+                <span className="inline-flex items-center gap-1">
+                  <span>{selected.length}</span>
+                  <span>medicine{selected.length > 1 ? "s" : ""}</span>
+                  <span>selected</span>
+                </span>
+              )}
             </span>
             <ChevronDown
               className={`h-4 w-4 transition-transform shrink-0 ${open ? "rotate-180" : ""}`}
@@ -346,9 +352,11 @@ export default function ReportReviewOverride() {
               <div className="max-h-40 overflow-y-auto p-1">
                 {filtered.length === 0 ? (
                   <p className="px-3 py-3 text-[11px] text-slate-400">
-                    {activeMedicines.length === 0
-                      ? "No active medicines available. Please ask admin to add medicines."
-                      : "No medicines found"}
+                    {activeMedicines.length === 0 ? (
+                      <span>No active medicines available. Please ask admin to add medicines.</span>
+                    ) : (
+                      <span>No medicines found</span>
+                    )}
                   </p>
                 ) : (
                   filtered.map((med) => {
@@ -595,13 +603,50 @@ export default function ReportReviewOverride() {
               Visit #{visitId?.slice(-6).toUpperCase()}
             </span>
           </div>
-          <h1 className="text-xl font-bold">
-            {patient?.name} <span className="text-sm font-normal text-indigo-200">({patient?.patient_code})</span>
+          <h1 className="text-xl font-bold flex flex-wrap items-baseline gap-x-2">
+            <span className="font-bold">{patient?.name || "—"}</span>
+            {patient?.patient_code && (
+              <span className="text-sm font-normal text-indigo-200">
+                ({patient?.patient_code})
+              </span>
+            )}
           </h1>
-          <p className="text-xs text-indigo-200">
-            Age: {patient?.age} Yrs | Gender: {patient?.gender} | Mobile: {patient?.mobile}
-            {patient?.weight ? ` | ${patient.weight} ${patient.weight_unit || "kg"}` : ""}
-            {patient?.height ? ` | ${patient.height} ${patient.height_unit || "cm"}` : ""}
+          <p className="text-xs text-indigo-200 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="inline-flex items-center gap-x-1">
+              <span className="font-semibold">Age:</span>
+              <span>{patient?.age || "—"}</span>
+              <span>Yrs</span>
+            </span>
+            <span aria-hidden="true">|</span>
+            <span className="inline-flex items-center gap-x-1">
+              <span className="font-semibold">Gender:</span>
+              <span>{patient?.gender || "—"}</span>
+            </span>
+            <span aria-hidden="true">|</span>
+            <span className="inline-flex items-center gap-x-1">
+              <span className="font-semibold">Mobile:</span>
+              <span>{patient?.mobile || "—"}</span>
+            </span>
+            {patient?.weight ? (
+              <>
+                <span aria-hidden="true">|</span>
+                <span className="inline-flex items-center gap-x-1">
+                  <span className="font-semibold">Weight:</span>
+                  <span>{patient.weight}</span>
+                  <span>{patient.weight_unit || "kg"}</span>
+                </span>
+              </>
+            ) : null}
+            {patient?.height ? (
+              <>
+                <span aria-hidden="true">|</span>
+                <span className="inline-flex items-center gap-x-1">
+                  <span className="font-semibold">Height:</span>
+                  <span>{patient.height}</span>
+                  <span>{patient.height_unit || "cm"}</span>
+                </span>
+              </>
+            ) : null}
           </p>
         </div>
 
@@ -609,7 +654,10 @@ export default function ReportReviewOverride() {
           <div className="text-right hidden sm:block">
             <div className="text-xs text-indigo-200 font-semibold">Selected for Report</div>
             <div className="text-xl font-extrabold text-white">
-              {selectedItemsCount} <span className="text-xs font-normal text-indigo-200">/ {totalItemsCount} Points</span>
+              <span>{selectedItemsCount}</span>{" "}
+              <span className="text-xs font-normal text-indigo-200">
+                <span aria-hidden="true">/</span> <span>{totalItemsCount}</span> <span>Points</span>
+              </span>
             </div>
           </div>
           <Button
@@ -686,8 +734,11 @@ export default function ReportReviewOverride() {
               {/* Live Selection Stats Strip */}
               <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-slate-700 dark:text-slate-200">
-                    {selectedItemsCount} of {totalItemsCount} items selected
+                  <span className="inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-200">
+                    <span>{selectedItemsCount}</span>
+                    <span>of</span>
+                    <span>{totalItemsCount}</span>
+                    <span>items selected</span>
                   </span>
                   <span className="text-slate-400">({selectionPercentage}%)</span>
                 </div>
@@ -729,8 +780,9 @@ export default function ReportReviewOverride() {
                 Recommended Medicines
                 <span className="text-xs font-normal text-slate-400">for the whole report</span>
                 {selectedMedicines.length > 0 && (
-                  <span className="ml-auto text-[11px] font-semibold text-violet-600 bg-violet-100 dark:bg-violet-900/50 px-2 py-0.5 rounded-full">
-                    {selectedMedicines.length} selected
+                  <span className="ml-auto inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600 bg-violet-100 dark:bg-violet-900/50 px-2 py-0.5 rounded-full">
+                    <span>{selectedMedicines.length}</span>
+                    <span>selected</span>
                   </span>
                 )}
               </CardTitle>
@@ -778,8 +830,10 @@ export default function ReportReviewOverride() {
                           <span className="font-bold text-sm text-slate-900 dark:text-white">
                             {param.name_en}
                           </span>
-                          <span className="text-xs text-slate-400 ml-2">
-                            Normal: {param.normal_min}–{param.normal_max} {param.unit}
+                          <span className="text-xs text-slate-400 ml-2 inline-flex items-center gap-1">
+                            <span className="font-semibold">Normal:</span>
+                            <span>{param.normal_min}–{param.normal_max}</span>
+                            <span>{param.unit}</span>
                           </span>
                         </div>
                       </div>
@@ -792,11 +846,14 @@ export default function ReportReviewOverride() {
                             }`}
                         >
                           {item.result_type === "HIGH" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                          {item.result_type} ({item.raw_value} {param.unit})
+                          <span>{item.result_type}</span>
+                          <span>({item.raw_value} {param.unit})</span>
                         </span>
 
                         <span className="text-[11px] font-semibold text-slate-500 bg-slate-200/70 dark:bg-slate-700 px-2 py-0.5 rounded-full">
-                          {selectedParamNodes.length} / {allParamNodes.length}
+                          <span>{selectedParamNodes.length}</span>
+                          <span aria-hidden="true"> / </span>
+                          <span>{allParamNodes.length}</span>
                         </span>
 
                         {isExpanded ? (
@@ -838,8 +895,11 @@ export default function ReportReviewOverride() {
                                   </span>
                                 </div>
 
-                                <span className="text-[10px] font-mono text-slate-400">
-                                  {selectedSecItems.length} of {secItems.length} selected
+                                <span className="text-[10px] font-mono text-slate-400 inline-flex items-center gap-1">
+                                  <span>{selectedSecItems.length}</span>
+                                  <span aria-hidden="true">of</span>
+                                  <span>{secItems.length}</span>
+                                  <span>selected</span>
                                 </span>
                               </div>
 
@@ -870,12 +930,12 @@ export default function ReportReviewOverride() {
 
                                       <div className="flex-1 min-w-0">
                                         <p className="font-medium text-slate-900 dark:text-white leading-relaxed">
-                                          {bullet.text_en}
+                                          <span>{bullet.text_en}</span>
                                         </p>
                                       </div>
 
                                       <span className="shrink-0 text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
-                                        {bullet.categoryType || "ITEM"}
+                                        <span>{bullet.categoryType || "ITEM"}</span>
                                       </span>
                                     </div>
                                   );
@@ -918,12 +978,17 @@ export default function ReportReviewOverride() {
                     <h3 className="font-extrabold text-sm text-indigo-900 dark:text-indigo-200">
                       QUANTUM HEALTH ANALYSIS REPORT
                     </h3>
-                    <p className="text-[10px] text-slate-400">
-                      {patient?.name} ({patient?.patient_code}) • {new Date().toLocaleDateString("en-IN")}
+                    <p className="text-[10px] text-slate-400 inline-flex items-center gap-1">
+                      <span>{patient?.name || "—"}</span>
+                      {patient?.patient_code ? (
+                        <span>({patient?.patient_code})</span>
+                      ) : null}
+                      <span aria-hidden="true">•</span>
+                      <span>{new Date().toLocaleDateString("en-IN")}</span>
                     </p>
                   </div>
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                    {selectedItemsCount} Points Selected
+                    <span>{selectedItemsCount}</span> Points Selected
                   </span>
                 </div>
               </div>
@@ -948,10 +1013,12 @@ export default function ReportReviewOverride() {
                             </strong>
                           </div>
                           <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.result_type === "HIGH" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700"
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 ${item.result_type === "HIGH" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700"
                               }`}
                           >
-                            {item.result_type} · {item.raw_value} {p.unit}
+                            <span>{item.result_type}</span>
+                            <span aria-hidden="true">·</span>
+                            <span>{item.raw_value} {p.unit}</span>
                           </span>
                         </div>
 
@@ -959,8 +1026,9 @@ export default function ReportReviewOverride() {
                         <div className="space-y-2 pt-1">
                           {item.sections.map((sec) => (
                             <div key={`${p.id}_${sec.id}`} className="space-y-1">
-                              <h5 className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                                ▸ {sec.title_en}
+                              <h5 className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 inline-flex items-center gap-1">
+                                <span aria-hidden="true">▸</span>
+                                <span>{sec.title_en}</span>
                               </h5>
                               <ul className="space-y-1 pl-3 list-disc">
                                 {sec.items.map((bullet) => (
@@ -969,7 +1037,7 @@ export default function ReportReviewOverride() {
                                     className={`text-[11px] text-slate-700 dark:text-slate-300 leading-snug ${bullet.level > 1 ? "ml-3 list-circle text-slate-500" : ""
                                       }`}
                                   >
-                                    {bullet.text_en}
+                                    <span>{bullet.text_en}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -997,14 +1065,15 @@ export default function ReportReviewOverride() {
                           key={med._id}
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-800 text-[10px] font-medium text-violet-700 dark:text-violet-300"
                         >
-                          {med.name}
+                          <span>{med.name}</span>
                         </span>
                       ))}
                     </div>
                   )}
                   {medicineNote.trim() && (
                     <p className="pt-1 text-[10px] italic text-slate-500 dark:text-slate-400">
-                      Note: {medicineNote}
+                      <span className="font-semibold not-italic">Note:</span>{" "}
+                      <span>{medicineNote}</span>
                     </p>
                   )}
                 </div>
@@ -1040,21 +1109,34 @@ export default function ReportReviewOverride() {
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              You have selected <strong className="text-indigo-600">{selectedItemsCount} content points</strong> across{" "}
-              <strong>{previewSelectedParameters.length} parameters</strong>.
+              <span>You have selected</span>{" "}
+              <strong className="text-indigo-600">
+                <span>{selectedItemsCount}</span> <span>content points</span>
+              </strong>{" "}
+              <span>across</span>{" "}
+              <strong>
+                <span>{previewSelectedParameters.length}</span> <span>parameters</span>
+              </strong>
+              <span>.</span>
             </p>
 
             <div className="p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 text-xs space-y-1.5 text-slate-700 dark:text-slate-200">
-              <p className="font-semibold text-indigo-900 dark:text-indigo-300">Report Freeze Guarantee:</p>
+              <p className="font-semibold text-indigo-900 dark:text-indigo-300">
+                <span>Report Freeze Guarantee:</span>
+              </p>
               <p className="text-[11px] text-slate-500">
-                A permanent version snapshot will be saved. Future master data edits will never alter this client's report.
+                <span>
+                  A permanent version snapshot will be saved. Future master data edits will never alter this client's
+                  report.
+                </span>
               </p>
             </div>
 
             {/* Suggested Wellness Reassessment Date */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Suggested Wellness Reassessment Date <span className="text-slate-400 font-normal">(optional)</span>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 inline-flex items-center gap-1">
+                <span>Suggested Wellness Reassessment Date</span>
+                <span className="text-slate-400 font-normal">(optional)</span>
               </label>
               <input
                 type="date"
@@ -1064,13 +1146,15 @@ export default function ReportReviewOverride() {
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
               {nextVisitDate && (
-                <p className="text-[10px] text-indigo-500">
-                  Wellness reassessment scheduled for:{" "}
-                  {new Date(nextVisitDate).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                <p className="text-[10px] text-indigo-500 inline-flex items-center gap-1">
+                  <span>Wellness reassessment scheduled for:</span>
+                  <span>
+                    {new Date(nextVisitDate).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
                 </p>
               )}
             </div>
@@ -1086,7 +1170,7 @@ export default function ReportReviewOverride() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                    Price (₹) <span className="text-rose-500">*</span>
+                    <span>Price (₹)</span> <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -1099,7 +1183,9 @@ export default function ReportReviewOverride() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Payment Status</label>
+                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                    <span>Payment Status</span>
+                  </label>
                   <select
                     value={reportPaymentStatus}
                     onChange={(e) => setReportPaymentStatus(e.target.value)}
@@ -1112,10 +1198,14 @@ export default function ReportReviewOverride() {
                 </div>
               </div>
               {!reportAmountValid && reportAmount !== "" && (
-                <p className="text-[10px] text-rose-500 font-medium">Please enter a valid non-negative amount.</p>
+                <p className="text-[10px] text-rose-500 font-medium">
+                  <span>Please enter a valid non-negative amount.</span>
+                </p>
               )}
               <p className="text-[10px] text-slate-500 leading-snug">
-                This amount & payment status will be saved to the visit and recorded with this final report.
+                <span>
+                  This amount & payment status will be saved to the visit and recorded with this final report.
+                </span>
               </p>
             </div>
 

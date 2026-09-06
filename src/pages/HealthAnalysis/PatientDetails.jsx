@@ -337,11 +337,13 @@ export default function PatientDetails() {
       render: (v) => (
         <div className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
           <Calendar className="h-3.5 w-3.5 text-slate-400" />
-          {new Date(v.visit_date || v.createdAt).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })}
+          <span>
+            {new Date(v.visit_date || v.createdAt).toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
         </div>
       ),
     },
@@ -353,14 +355,18 @@ export default function PatientDetails() {
         v.next_visit_date ? (
           <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
             <Calendar className="h-3.5 w-3.5" />
-            {new Date(v.next_visit_date).toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}
+            <span>
+              {new Date(v.next_visit_date).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
           </div>
         ) : (
-          <span className="text-xs text-slate-400 italic">—</span>
+          <span className="text-xs text-slate-400 italic">
+            <span>—</span>
+          </span>
         ),
     },
     {
@@ -389,13 +395,15 @@ export default function PatientDetails() {
         <div className="flex items-center gap-1.5 text-xs">
           <span className="font-bold text-slate-800 dark:text-slate-200">{v.total_parameters}</span>
           {v.abnormal_parameters > 0 && (
-            <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
-              {v.abnormal_parameters} Abn.
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+              <span>{v.abnormal_parameters}</span>
+              <span>Abn.</span>
             </span>
           )}
           {v.normal_parameters > 0 && (
-            <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
-              {v.normal_parameters} Norm.
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+              <span>{v.normal_parameters}</span>
+              <span>Norm.</span>
             </span>
           )}
         </div>
@@ -410,18 +418,21 @@ export default function PatientDetails() {
           <div className="flex items-center gap-1.5">
             <Tag className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
             <div className="leading-tight">
-              <span className="font-bold text-emerald-700 dark:text-emerald-300">
-                ₹{Number(v.scan_amount).toLocaleString("en-IN")}
+              <span className="inline-flex items-center font-bold text-emerald-700 dark:text-emerald-300">
+                <span aria-hidden="true">₹</span>
+                <span>{Number(v.scan_amount).toLocaleString("en-IN")}</span>
               </span>
               {v.scan_pricing_name && (
                 <span className="block text-[10px] text-slate-400 font-medium">
-                  {v.scan_pricing_name}
+                  <span>{v.scan_pricing_name}</span>
                 </span>
               )}
             </div>
           </div>
         ) : (
-          <span className="text-xs text-slate-400 italic">—</span>
+          <span className="text-xs text-slate-400 italic">
+            <span>—</span>
+          </span>
         ),
     },
     {
@@ -489,19 +500,25 @@ export default function PatientDetails() {
                 {patientData.patient_code}
               </span>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                {patientData.name}
+                <span>{patientData.name}</span>
               </h1>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                {patientData.age} Yrs · {patientData.gender}
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 inline-flex items-center gap-1">
+                <span>{patientData.age}</span>
+                <span>Yrs</span>
+                <span aria-hidden="true">·</span>
+                <span>{patientData.gender}</span>
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-slate-400" />
-              Registered on {new Date(patientData.createdAt).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
+              <span>Registered on</span>
+              <span>
+                {new Date(patientData.createdAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
             </p>
           </div>
         </div>
@@ -545,21 +562,24 @@ export default function PatientDetails() {
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Client ID</p>
                 <p className="text-base font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
-                  {patientData.patient_code}
+                  <span>{patientData.patient_code}</span>
                 </p>
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Full Name</p>
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 mt-0.5">
-                  {patientData.name}
+                  <span>{patientData.name}</span>
                 </p>
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Age / Gender</p>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
-                  {patientData.age} Years / {patientData.gender}
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5 inline-flex items-center gap-1">
+                  <span>{patientData.age}</span>
+                  <span>Years</span>
+                  <span aria-hidden="true">/</span>
+                  <span>{patientData.gender}</span>
                 </p>
               </div>
 
@@ -568,7 +588,7 @@ export default function PatientDetails() {
                   <Phone className="h-3 w-3 text-slate-400" /> Mobile Number
                 </p>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
-                  {patientData.mobile}
+                  <span>{patientData.mobile}</span>
                 </p>
               </div>
 
@@ -577,7 +597,7 @@ export default function PatientDetails() {
                   <Mail className="h-3 w-3 text-slate-400" /> Email Address
                 </p>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5 truncate" title={patientData.email || "Not Provided"}>
-                  {patientData.email || "—"}
+                  <span>{patientData.email || "—"}</span>
                 </p>
               </div>
 
@@ -586,13 +606,15 @@ export default function PatientDetails() {
                   <Calendar className="h-3 w-3 text-slate-400" /> Date of Birth
                 </p>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
-                  {patientData.dob
-                    ? new Date(patientData.dob).toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })
-                    : "—"}
+                  <span>
+                    {patientData.dob
+                      ? new Date(patientData.dob).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                      : "—"}
+                  </span>
                 </p>
               </div>
 
@@ -602,7 +624,7 @@ export default function PatientDetails() {
                   <Scale className="h-3 w-3 text-indigo-500" /> Weight
                 </p>
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-                  {patientData.weight ? `${patientData.weight} ${patientData.weight_unit || "kg"}` : "—"}
+                  <span>{patientData.weight ? `${patientData.weight} ${patientData.weight_unit || "kg"}` : "—"}</span>
                 </p>
               </div>
 
@@ -611,7 +633,7 @@ export default function PatientDetails() {
                   <Ruler className="h-3 w-3 text-violet-500" /> Height
                 </p>
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-                  {patientData.height ? `${patientData.height} ${patientData.height_unit || "cm"}` : "—"}
+                  <span>{patientData.height ? `${patientData.height} ${patientData.height_unit || "cm"}` : "—"}</span>
                 </p>
               </div>
 
@@ -638,7 +660,7 @@ export default function PatientDetails() {
                 <MapPin className="h-3.5 w-3.5 text-slate-400" /> Residential Address
               </p>
               <p className="text-sm text-slate-700 dark:text-slate-300 mt-1 whitespace-pre-line">
-                {patientData.address || "No address recorded on file."}
+                <span>{patientData.address || "No address recorded on file."}</span>
               </p>
             </div>
           </CardContent>
@@ -658,10 +680,10 @@ export default function PatientDetails() {
                 <div>
                   <p className="text-xs font-semibold text-slate-400">Consultant / Registered By</p>
                   <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-                    {patientData.registered_by?.fullName || patientData.registered_by?.username || "Franchise Consultant"}
+                    <span>{patientData.registered_by?.fullName || patientData.registered_by?.username || "Franchise Consultant"}</span>
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {patientData.registered_by?.email || patientData.registered_by?.role || "Wellness Consultant"}
+                    <span>{patientData.registered_by?.email || patientData.registered_by?.role || "Wellness Consultant"}</span>
                   </p>
                 </div>
                 <span className="p-2 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl text-indigo-600 dark:text-indigo-400">
@@ -681,13 +703,15 @@ export default function PatientDetails() {
                 <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
                   <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Latest Status</p>
                   <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-2 truncate">
-                    {visits.length > 0
-                      ? visits[0].status === "SHARED"
-                        ? "Report Shared"
-                        : visits[0].status === "REPORT_READY"
-                          ? "Report Ready"
-                          : "In Progress"
-                      : "Registered"}
+                    <span>
+                      {visits.length > 0
+                        ? visits[0].status === "SHARED"
+                          ? "Report Shared"
+                          : visits[0].status === "REPORT_READY"
+                            ? "Report Ready"
+                            : "In Progress"
+                        : "Registered"}
+                    </span>
                   </p>
                   <p className="text-[11px] text-slate-500 mt-0.5">Current state</p>
                 </div>
@@ -736,8 +760,10 @@ export default function PatientDetails() {
                 All previously generated health analysis scans and clinical reports for this client.
               </p>
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-              {visits.length} Historical {visits.length === 1 ? "Session" : "Sessions"}
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+              <span>{visits.length}</span>
+              <span>Historical</span>
+              <span>{visits.length === 1 ? "Session" : "Sessions"}</span>
             </span>
           </div>
         </CardHeader>
@@ -750,7 +776,7 @@ export default function PatientDetails() {
                 <Activity className="h-10 w-10 text-indigo-400 mx-auto" />
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No Previous Reports Yet</p>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  No scan sessions or clinical reports have been generated for {patientData?.name ?? "this client"} yet. Click below to start the first scan session.
+                  No scan sessions or clinical reports have been generated for <span>{patientData?.name ?? "this client"}</span> yet. Click below to start the first scan session.
                 </p>
                 <Button onClick={startNewScan} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white mt-2">
                   <Plus className="h-4 w-4 mr-1.5" /> Start First Scan Session
@@ -782,8 +808,17 @@ export default function PatientDetails() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500">
-                    Client: <strong className="text-slate-700 dark:text-slate-300">{patientData.name}</strong> ({patientData.patient_code}) · {patientData.age} Yrs / {patientData.gender}
+                  <p className="text-xs text-slate-500 inline-flex flex-wrap items-center gap-x-1 gap-y-0.5">
+                    <span>Client:</span>
+                    <strong className="text-slate-700 dark:text-slate-300">
+                      <span>{patientData.name}</span>
+                    </strong>
+                    <span>({patientData.patient_code})</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{patientData.age}</span>
+                    <span>Yrs</span>
+                    <span aria-hidden="true">/</span>
+                    <span>{patientData.gender}</span>
                   </p>
                 </div>
               </div>
@@ -851,8 +886,12 @@ export default function PatientDetails() {
                       <p className="text-2xl font-bold text-rose-700 dark:text-rose-300 mt-1">
                         {detailedReport.summary?.abnormal || 0}
                       </p>
-                      <p className="text-[11px] text-rose-600/70">
-                        {detailedReport.summary?.high || 0} High · {detailedReport.summary?.low || 0} Low
+                      <p className="text-[11px] text-rose-600/70 inline-flex flex-wrap items-center gap-x-1">
+                        <span>{detailedReport.summary?.high || 0}</span>
+                        <span>High</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{detailedReport.summary?.low || 0}</span>
+                        <span>Low</span>
                       </p>
                     </div>
 
@@ -882,7 +921,8 @@ export default function PatientDetails() {
                           </div>
                         </div>
                         <span className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
-                          ₹{Number(detailedReport.visit.scan_pricing.amount).toLocaleString("en-IN")}
+                          <span aria-hidden="true">₹</span>
+                          <span>{Number(detailedReport.visit.scan_pricing.amount).toLocaleString("en-IN")}</span>
                         </span>
                       </div>
                     )}
@@ -910,7 +950,8 @@ export default function PatientDetails() {
                               : "text-slate-500"
                               }`}
                           >
-                            All ({detailedReport.parameters?.length || 0})
+                            <span>All</span>
+                            <span>({detailedReport.parameters?.length || 0})</span>
                           </button>
                           <button
                             onClick={() => setParamFilter("abnormal")}
@@ -919,7 +960,8 @@ export default function PatientDetails() {
                               : "text-slate-500"
                               }`}
                           >
-                            Abnormal ({detailedReport.summary?.abnormal || 0})
+                            <span>Abnormal</span>
+                            <span>({detailedReport.summary?.abnormal || 0})</span>
                           </button>
                           <button
                             onClick={() => setParamFilter("normal")}
@@ -928,7 +970,8 @@ export default function PatientDetails() {
                               : "text-slate-500"
                               }`}
                           >
-                            Normal ({detailedReport.summary?.normal || 0})
+                            <span>Normal</span>
+                            <span>({detailedReport.summary?.normal || 0})</span>
                           </button>
                         </div>
 
@@ -979,12 +1022,14 @@ export default function PatientDetails() {
                                   </td>
                                   <td className="py-2.5 px-3.5 text-slate-500">{p.category || "General"}</td>
                                   <td className="py-2.5 px-3.5 font-bold font-mono text-slate-900 dark:text-slate-100">
-                                    {p.raw_value} <span className="text-[10px] font-normal text-slate-500">{p.unit}</span>
+                                    <span>{p.raw_value}</span> <span className="text-[10px] font-normal text-slate-500">{p.unit}</span>
                                   </td>
                                   <td className="py-2.5 px-3.5 text-slate-500 font-mono">
-                                    {p.normal_min !== undefined && p.normal_max !== undefined
-                                      ? `${p.normal_min} – ${p.normal_max} ${p.unit || ""}`
-                                      : "—"}
+                                    <span>
+                                      {p.normal_min !== undefined && p.normal_max !== undefined
+                                        ? `${p.normal_min} – ${p.normal_max} ${p.unit || ""}`
+                                        : "—"}
+                                    </span>
                                   </td>
                                   <td className="py-2.5 px-3.5">
                                     {p.result_type === "HIGH" ? (
@@ -1055,12 +1100,19 @@ export default function PatientDetails() {
                                   </h5>
                                 </div>
                                 <span
-                                  className={`text-xs font-bold px-2 py-0.5 rounded ${item.result_type === "HIGH"
+                                  className={`inline-flex flex-wrap items-center gap-x-1 text-xs font-bold px-2 py-0.5 rounded ${item.result_type === "HIGH"
                                     ? "bg-rose-100 text-rose-700"
                                     : "bg-amber-100 text-amber-700"
                                     }`}
                                 >
-                                  {item.result_type}: {item.raw_value} {p.unit || ""} (Range: {p.normal_min}–{p.normal_max})
+                                  <span>{item.result_type}:</span>
+                                  <span>{item.raw_value}</span>
+                                  <span>{p.unit || ""}</span>
+                                  <span aria-hidden="true">(Range:</span>
+                                  <span>{p.normal_min}</span>
+                                  <span aria-hidden="true">–</span>
+                                  <span>{p.normal_max}</span>
+                                  <span aria-hidden="true">)</span>
                                 </span>
                               </div>
 
@@ -1131,7 +1183,10 @@ export default function PatientDetails() {
             <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold">
                 <Pencil className="h-5 w-5" />
-                <h3 className="text-lg">Edit Client Profile ({patientData.patient_code})</h3>
+                <h3 className="text-lg">
+                  <span>Edit Client Profile</span>
+                  <span> ({patientData.patient_code})</span>
+                </h3>
               </div>
               <button
                 onClick={() => setShowEditModal(false)}

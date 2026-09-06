@@ -164,23 +164,27 @@ export default function UserDetails() {
                                                         <div className="text-sm grid gap-1">
                                                             <p>
                                                                 <span className="font-medium text-muted-foreground">Pickup:</span>{" "}
-                                                                {booking.pickupLocation.apartment}, {booking.pickupLocation.pincode}
+                                                                <span>{booking.pickupLocation.apartment}</span>
+                                                                <span aria-hidden="true">,</span>{" "}
+                                                                <span>{booking.pickupLocation.pincode}</span>
                                                             </p>
                                                             <p>
                                                                 <span className="font-medium text-muted-foreground">Dropoff:</span>{" "}
-                                                                {booking.dropoffLocation.apartment}, {booking.dropoffLocation.pincode}
+                                                                <span>{booking.dropoffLocation.apartment}</span>
+                                                                <span aria-hidden="true">,</span>{" "}
+                                                                <span>{booking.dropoffLocation.pincode}</span>
                                                             </p>
                                                             <p>
                                                                 <span className="font-medium text-muted-foreground">Pickup Time:</span>{" "}
-                                                                {format(new Date(booking.pickupDateTime), "dd MMM yyyy, hh:mm a")}
+                                                                <span>{format(new Date(booking.pickupDateTime), "dd MMM yyyy, hh:mm a")}</span>
                                                             </p>
                                                             <p>
                                                                 <span className="font-medium text-muted-foreground">Dropoff Time:</span>{" "}
-                                                                {format(new Date(booking.dropoffDateTime), "dd MMM yyyy, hh:mm a")}
+                                                                <span>{format(new Date(booking.dropoffDateTime), "dd MMM yyyy, hh:mm a")}</span>
                                                             </p>
                                                             <p>
                                                                 <span className="font-medium text-muted-foreground">Created:</span>{" "}
-                                                                {format(new Date(booking.createdAt), "dd MMM yyyy, hh:mm a")}
+                                                                <span>{format(new Date(booking.createdAt), "dd MMM yyyy, hh:mm a")}</span>
                                                             </p>
                                                         </div>
 
