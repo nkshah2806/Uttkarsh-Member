@@ -21,12 +21,14 @@ import {
   PDFReportViewer,
 } from "./pages/HealthAnalysis";
 import MemberProfilePage from "./pages/MemberProfile";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <>
       <Toaster position="top-right" />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/forgot-password" element={<ForgetPassword />} />
