@@ -44,14 +44,14 @@ export default function ReportDesigner() {
           <CardDescription>Auto-generated report structure designed for A4, color PDF and branding.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-3xl border border-violet-200 bg-gradient-to-br from-white to-violet-50 p-6">
+          <div className="rounded-3xl border border-teal-200 bg-gradient-to-br from-white to-teal-50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-violet-600">UTKARSH Quantum Health</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-teal-600">UTKARSH Quantum Health</p>
                 <h2 className="mt-2 text-2xl font-semibold">Client Health Report</h2>
               </div>
-              <div className="rounded-2xl border border-violet-200 bg-white p-3">
-                <QrCode className="h-8 w-8 text-violet-600" />
+              <div className="rounded-2xl border border-teal-200 bg-white p-3">
+                <QrCode className="h-8 w-8 text-teal-600" />
               </div>
             </div>
             <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">

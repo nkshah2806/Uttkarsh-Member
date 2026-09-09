@@ -293,10 +293,10 @@ export default function ReportReviewOverride() {
     const filtered = getFilteredMedicines();
 
     return (
-      <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50/40 dark:bg-violet-950/20 p-3.5 space-y-2.5">
+      <div className="rounded-xl border border-teal-200 dark:border-teal-800 bg-teal-50/40 dark:bg-teal-950/20 p-3.5 space-y-2.5">
         <div className="flex items-center justify-between">
           <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-            <span className="text-violet-600">
+            <span className="text-teal-600">
               <Pill className="h-3.5 w-3.5" />
             </span>
             Select Medicine(s)
@@ -318,7 +318,7 @@ export default function ReportReviewOverride() {
           <button
             type="button"
             onClick={() => setMedicineDropdownOpen((prev) => !prev)}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             <span className="truncate inline-flex items-center">
               {selected.length === 0 ? (
@@ -378,7 +378,7 @@ export default function ReportReviewOverride() {
                             </span>
                           )}
                         </span>
-                        {isSelected && <Check className="h-4 w-4 text-violet-600 shrink-0" />}
+                        {isSelected && <Check className="h-4 w-4 text-teal-600 shrink-0" />}
                       </button>
                     );
                   })
@@ -394,13 +394,13 @@ export default function ReportReviewOverride() {
             {selected.map((med) => (
               <span
                 key={med._id}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-violet-50 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-800 text-[11px] font-medium text-violet-700 dark:text-violet-300"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-teal-50 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800 text-[11px] font-medium text-teal-700 dark:text-teal-300"
               >
                 {med.name}
                 <button
                   type="button"
                   onClick={() => removeMedicine(med._id)}
-                  className="text-violet-400 hover:text-violet-700 dark:hover:text-violet-200"
+                  className="text-teal-400 hover:text-teal-700 dark:hover:text-teal-200"
                   aria-label={`Remove ${med.name}`}
                 >
                   <X className="h-3 w-3" />
@@ -416,7 +416,7 @@ export default function ReportReviewOverride() {
           onChange={(e) => setMedicineNote(e.target.value)}
           rows={2}
           placeholder="Optional note about the prescribed medicines..."
-          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
         />
       </div>
     );
@@ -582,7 +582,7 @@ export default function ReportReviewOverride() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-24 space-y-4 text-center">
-        <div className="h-12 w-12 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+        <div className="h-12 w-12 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
         <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
           Running Quantum Auto-Analysis Engine...
         </p>
@@ -593,25 +593,25 @@ export default function ReportReviewOverride() {
   return (
     <div className="space-y-5">
       {/* Top Patient & Session Header */}
-      <div className="rounded-2xl bg-gradient-to-r from-indigo-700 via-indigo-800 to-violet-800 p-5 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="rounded-2xl bg-gradient-to-r from-emerald-700 via-emerald-800 to-teal-800 p-5 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-widest font-bold text-indigo-200">
+            <span className="text-xs uppercase tracking-widest font-bold text-emerald-200">
               Report Content Review Studio
             </span>
-            <span className="bg-indigo-900/80 px-2 py-0.5 rounded text-[11px] font-mono">
+            <span className="bg-emerald-900/80 px-2 py-0.5 rounded text-[11px] font-mono">
               Visit #{visitId?.slice(-6).toUpperCase()}
             </span>
           </div>
           <h1 className="text-xl font-bold flex flex-wrap items-baseline gap-x-2">
             <span className="font-bold">{patient?.name || "—"}</span>
             {patient?.patient_code && (
-              <span className="text-sm font-normal text-indigo-200">
+              <span className="text-sm font-normal text-emerald-200">
                 ({patient?.patient_code})
               </span>
             )}
           </h1>
-          <p className="text-xs text-indigo-200 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <p className="text-xs text-emerald-200 flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="inline-flex items-center gap-x-1">
               <span className="font-semibold">Age:</span>
               <span>{patient?.age || "—"}</span>
@@ -652,10 +652,10 @@ export default function ReportReviewOverride() {
 
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
-            <div className="text-xs text-indigo-200 font-semibold">Selected for Report</div>
+            <div className="text-xs text-emerald-200 font-semibold">Selected for Report</div>
             <div className="text-xl font-extrabold text-white">
               <span>{selectedItemsCount}</span>{" "}
-              <span className="text-xs font-normal text-indigo-200">
+              <span className="text-xs font-normal text-emerald-200">
                 <span aria-hidden="true">/</span> <span>{totalItemsCount}</span> <span>Points</span>
               </span>
             </div>
@@ -663,9 +663,9 @@ export default function ReportReviewOverride() {
           <Button
             onClick={() => setShowConfirmModal(true)}
             disabled={saving || selectedItemsCount === 0}
-            className="bg-white text-indigo-700 hover:bg-indigo-50 font-bold px-5 py-2.5 rounded-xl shadow-lg shrink-0 flex items-center gap-2"
+            className="bg-white text-emerald-700 hover:bg-emerald-50 font-bold px-5 py-2.5 rounded-xl shadow-lg shrink-0 flex items-center gap-2"
           >
-            <FileCheck className="h-4 w-4 text-indigo-600" />
+            <FileCheck className="h-4 w-4 text-emerald-600" />
             <span>Generate Final Report</span>
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -690,7 +690,7 @@ export default function ReportReviewOverride() {
                     placeholder="Search parameter, symptoms, recommendations..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-9 pr-4 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                   {searchQuery && (
                     <button
@@ -724,7 +724,7 @@ export default function ReportReviewOverride() {
                     variant="ghost"
                     title="Reset to Defaults"
                     onClick={handleReset}
-                    className="h-8 w-8 p-0 text-slate-500 hover:text-indigo-600"
+                    className="h-8 w-8 p-0 text-slate-500 hover:text-emerald-600"
                   >
                     <RotateCcw className="h-4 w-4" />
                   </Button>
@@ -746,14 +746,14 @@ export default function ReportReviewOverride() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleExpandAll(true)}
-                    className="text-[11px] text-indigo-600 hover:underline font-semibold"
+                    className="text-[11px] text-emerald-600 hover:underline font-semibold"
                   >
                     Expand All
                   </button>
                   <span className="text-slate-300">•</span>
                   <button
                     onClick={() => handleExpandAll(false)}
-                    className="text-[11px] text-indigo-600 hover:underline font-semibold"
+                    className="text-[11px] text-emerald-600 hover:underline font-semibold"
                   >
                     Collapse All
                   </button>
@@ -763,7 +763,7 @@ export default function ReportReviewOverride() {
               {/* Visual Progress Bar */}
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
                 <div
-                  className="bg-indigo-600 h-full transition-all duration-300 rounded-full"
+                  className="bg-emerald-600 h-full transition-all duration-300 rounded-full"
                   style={{ width: `${selectionPercentage}%` }}
                 />
               </div>
@@ -774,13 +774,13 @@ export default function ReportReviewOverride() {
           <Card className="gap-0 border-0 shadow-sm rounded-2xl overflow-hidden py-0">
             <CardHeader className="gap-0 bg-slate-50 dark:bg-slate-800/60 dark:border-slate-800 py-4">
               <CardTitle className="flex flex-wrap items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
-                <span className="h-8 w-8 rounded-lg bg-violet-100 dark:bg-violet-900/50 text-violet-600 flex items-center justify-center shrink-0">
+                <span className="h-8 w-8 rounded-lg bg-teal-100 dark:bg-teal-900/50 text-teal-600 flex items-center justify-center shrink-0">
                   <Pill className="h-4 w-4" />
                 </span>
                 Recommended Medicines
                 <span className="text-xs font-normal text-slate-400">for the whole report</span>
                 {selectedMedicines.length > 0 && (
-                  <span className="ml-auto inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600 bg-violet-100 dark:bg-violet-900/50 px-2 py-0.5 rounded-full">
+                  <span className="ml-auto inline-flex items-center gap-1 text-[11px] font-semibold text-teal-600 bg-teal-100 dark:bg-teal-900/50 px-2 py-0.5 rounded-full">
                     <span>{selectedMedicines.length}</span>
                     <span>selected</span>
                   </span>
@@ -823,7 +823,7 @@ export default function ReportReviewOverride() {
                       className="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        {/* <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded">
+                        {/* <span className="font-mono text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded">
                           {param.code}
                         </span> */}
                         <div>
@@ -884,13 +884,13 @@ export default function ReportReviewOverride() {
                                   className="flex items-center gap-2 cursor-pointer select-none group"
                                 >
                                   {allSelected ? (
-                                    <CheckSquare className="h-4 w-4 text-indigo-600 shrink-0" />
+                                    <CheckSquare className="h-4 w-4 text-emerald-600 shrink-0" />
                                   ) : someSelected ? (
-                                    <MinusSquare className="h-4 w-4 text-indigo-600 shrink-0" />
+                                    <MinusSquare className="h-4 w-4 text-emerald-600 shrink-0" />
                                   ) : (
-                                    <Square className="h-4 w-4 text-slate-400 group-hover:text-indigo-400 shrink-0" />
+                                    <Square className="h-4 w-4 text-slate-400 group-hover:text-emerald-400 shrink-0" />
                                   )}
-                                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                                     {sec.title_en}
                                   </span>
                                 </div>
@@ -916,13 +916,13 @@ export default function ReportReviewOverride() {
                                       onClick={() => toggleItem(param.id, bullet.id)}
                                       className={`flex items-start gap-3 p-3 rounded-xl border text-xs cursor-pointer select-none transition-all ${isSub ? "ml-5 bg-slate-50/50" : ""
                                         } ${isChecked
-                                          ? "bg-indigo-50/60 border-indigo-200 dark:bg-indigo-950/40 dark:border-indigo-800 shadow-xs"
+                                          ? "bg-emerald-50/60 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800 shadow-xs"
                                           : "bg-slate-50/30 border-slate-200/60 opacity-60 dark:bg-slate-900"
                                         }`}
                                     >
                                       <div className="mt-0.5 shrink-0">
                                         {isChecked ? (
-                                          <CheckSquare className="h-4 w-4 text-indigo-600" />
+                                          <CheckSquare className="h-4 w-4 text-emerald-600" />
                                         ) : (
                                           <Square className="h-4 w-4 text-slate-400" />
                                         )}
@@ -960,7 +960,7 @@ export default function ReportReviewOverride() {
         <div className="lg:col-span-5 sticky top-5 space-y-3">
           <Card className="border shadow-lg rounded-2xl overflow-hidden bg-white dark:bg-slate-900 py-0">
             {/* Live Preview Header */}
-            <div className="bg-indigo-600 text-white px-4 py-3 flex items-center justify-between">
+            <div className="bg-emerald-600 text-white px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
                 <span className="text-xs font-bold uppercase tracking-wider">
@@ -975,7 +975,7 @@ export default function ReportReviewOverride() {
               <div className="border-b pb-3 space-y-1">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-extrabold text-sm text-indigo-900 dark:text-indigo-200">
+                    <h3 className="font-extrabold text-sm text-emerald-900 dark:text-emerald-200">
                       QUANTUM HEALTH ANALYSIS REPORT
                     </h3>
                     <p className="text-[10px] text-slate-400 inline-flex items-center gap-1">
@@ -1007,7 +1007,7 @@ export default function ReportReviewOverride() {
                       <div key={p.id} className="border rounded-xl p-3 bg-slate-50/60 dark:bg-slate-800/40 space-y-2">
                         <div className="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-slate-700">
                           <div>
-                            <span className="font-mono font-bold text-indigo-600 text-[11px] mr-1.5">{p.code}</span>
+                            <span className="font-mono font-bold text-emerald-600 text-[11px] mr-1.5">{p.code}</span>
                             <strong className="text-xs text-slate-800 dark:text-slate-100">
                               {p.name_en}
                             </strong>
@@ -1026,7 +1026,7 @@ export default function ReportReviewOverride() {
                         <div className="space-y-2 pt-1">
                           {item.sections.map((sec) => (
                             <div key={`${p.id}_${sec.id}`} className="space-y-1">
-                              <h5 className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 inline-flex items-center gap-1">
+                              <h5 className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-1">
                                 <span aria-hidden="true">▸</span>
                                 <span>{sec.title_en}</span>
                               </h5>
@@ -1053,8 +1053,8 @@ export default function ReportReviewOverride() {
 
               {/* GLOBAL Recommended Medicines in Live Preview (whole report) */}
               {(selectedMedicines.length > 0 || (medicineNote || "").trim()) && (
-                <div className="border border-violet-200 dark:border-violet-800 rounded-xl p-3 bg-violet-50/40 dark:bg-violet-950/20 space-y-1.5">
-                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-violet-600 flex items-center gap-1">
+                <div className="border border-teal-200 dark:border-teal-800 rounded-xl p-3 bg-teal-50/40 dark:bg-teal-950/20 space-y-1.5">
+                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-teal-600 flex items-center gap-1">
                     <Pill className="h-3 w-3" /> Recommended Medicines
                     <span className="text-slate-400 font-normal normal-case">(whole report)</span>
                   </h5>
@@ -1063,7 +1063,7 @@ export default function ReportReviewOverride() {
                       {selectedMedicines.map((med) => (
                         <span
                           key={med._id}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-800 text-[10px] font-medium text-violet-700 dark:text-violet-300"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800 text-[10px] font-medium text-teal-700 dark:text-teal-300"
                         >
                           <span>{med.name}</span>
                         </span>
@@ -1088,7 +1088,7 @@ export default function ReportReviewOverride() {
               <Button
                 onClick={() => setShowConfirmModal(true)}
                 disabled={saving || selectedItemsCount === 0}
-                className="bg-indigo-600 hover:bg-indigo-700 font-bold text-xs"
+                className="bg-emerald-600 hover:bg-emerald-700 font-bold text-xs"
               >
                 <FileCheck className="mr-1.5 h-4 w-4" /> Generate Final Report
               </Button>
@@ -1102,15 +1102,15 @@ export default function ReportReviewOverride() {
       {/* ========================================================================= */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 border border-indigo-100">
-            <div className="flex items-center gap-3 text-indigo-600">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 border border-emerald-100">
+            <div className="flex items-center gap-3 text-emerald-600">
               <Sparkles className="h-6 w-6" />
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">Confirm Final Report Generation</h3>
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               <span>You have selected</span>{" "}
-              <strong className="text-indigo-600">
+              <strong className="text-emerald-600">
                 <span>{selectedItemsCount}</span> <span>content points</span>
               </strong>{" "}
               <span>across</span>{" "}
@@ -1120,8 +1120,8 @@ export default function ReportReviewOverride() {
               <span>.</span>
             </p>
 
-            <div className="p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 text-xs space-y-1.5 text-slate-700 dark:text-slate-200">
-              <p className="font-semibold text-indigo-900 dark:text-indigo-300">
+            <div className="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-100 text-xs space-y-1.5 text-slate-700 dark:text-slate-200">
+              <p className="font-semibold text-emerald-900 dark:text-emerald-300">
                 <span>Report Freeze Guarantee:</span>
               </p>
               <p className="text-[11px] text-slate-500">
@@ -1143,10 +1143,10 @@ export default function ReportReviewOverride() {
                 value={nextVisitDate}
                 onChange={(e) => setNextVisitDate(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               />
               {nextVisitDate && (
-                <p className="text-[10px] text-indigo-500 inline-flex items-center gap-1">
+                <p className="text-[10px] text-emerald-500 inline-flex items-center gap-1">
                   <span>Wellness reassessment scheduled for:</span>
                   <span>
                     {new Date(nextVisitDate).toLocaleDateString(undefined, {
@@ -1179,7 +1179,7 @@ export default function ReportReviewOverride() {
                     value={reportAmount}
                     onChange={(e) => setReportAmount(e.target.value)}
                     placeholder="0"
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1189,7 +1189,7 @@ export default function ReportReviewOverride() {
                   <select
                     value={reportPaymentStatus}
                     onChange={(e) => setReportPaymentStatus(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   >
                     <option value="">Unpaid / Not Collected</option>
                     <option value="PAID">Paid</option>
@@ -1216,7 +1216,7 @@ export default function ReportReviewOverride() {
               <Button
                 onClick={handleGenerateFinalReport}
                 disabled={saving || !reportAmountValid}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
               >
                 {saving ? "Generating..." : "Confirm & View Report"}
               </Button>

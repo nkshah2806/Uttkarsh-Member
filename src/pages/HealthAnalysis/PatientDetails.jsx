@@ -286,7 +286,7 @@ export default function PatientDetails() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[450px] space-y-4">
-        <div className="h-10 w-10 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+        <div className="h-10 w-10 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
         <p className="text-sm font-medium text-slate-500">Loading comprehensive client record...</p>
       </div>
     );
@@ -325,7 +325,7 @@ export default function PatientDetails() {
       label: "Visit ID",
       sortable: true,
       render: (v) => (
-        <span className="font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-950/50 px-2 py-1 rounded">
+        <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50/80 dark:bg-emerald-950/50 px-2 py-1 rounded">
           #{v._id.slice(-6).toUpperCase()}
         </span>
       ),
@@ -379,7 +379,7 @@ export default function PatientDetails() {
             <CheckCircle2 className="h-3 w-3" /> Shared
           </span>
         ) : v.status === "REPORT_READY" ? (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
             <FileText className="h-3 w-3" /> Report Ready
           </span>
         ) : (
@@ -444,7 +444,7 @@ export default function PatientDetails() {
             size="sm"
             variant="outline"
             onClick={() => openReportModal(v._id)}
-            className="h-8 px-2.5 text-xs font-semibold text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:text-indigo-300 dark:border-indigo-800 dark:hover:bg-indigo-950"
+            className="h-8 px-2.5 text-xs font-semibold text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-300 dark:border-emerald-800 dark:hover:bg-emerald-950"
             title="View Full Report Breakdown"
           >
             <Eye className="h-3.5 w-3.5 mr-1" /> View Report
@@ -453,7 +453,7 @@ export default function PatientDetails() {
             size="sm"
             variant="ghost"
             onClick={() => navigate(`/report-pdf/${v._id}`)}
-            className="h-8 w-8 p-0 text-slate-600 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
+            className="h-8 w-8 p-0 text-slate-600 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400"
             title="Open PDF Document Preview"
           >
             <ExternalLink className="h-4 w-4" />
@@ -496,7 +496,7 @@ export default function PatientDetails() {
           </Button>
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="font-mono font-bold text-xs bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 px-2.5 py-0.5 rounded-md">
+              <span className="font-mono font-bold text-xs bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-md">
                 {patientData.patient_code}
               </span>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
@@ -535,7 +535,7 @@ export default function PatientDetails() {
           <Button
             onClick={startNewScan}
             size="sm"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm flex items-center gap-1.5"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm flex items-center gap-1.5"
           >
             <Plus className="h-4 w-4" /> Start New Scan
           </Button>
@@ -549,10 +549,10 @@ export default function PatientDetails() {
           <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                <User className="h-4 w-4 text-indigo-600" />
+                <User className="h-4 w-4 text-emerald-600" />
                 Client Information & Vitals
               </CardTitle>
-              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 Complete Profile
               </span>
             </div>
@@ -561,7 +561,7 @@ export default function PatientDetails() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Client ID</p>
-                <p className="text-base font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
+                <p className="text-base font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
                   <span>{patientData.patient_code}</span>
                 </p>
               </div>
@@ -621,7 +621,7 @@ export default function PatientDetails() {
               {/* Physical Vitals */}
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <Scale className="h-3 w-3 text-indigo-500" /> Weight
+                  <Scale className="h-3 w-3 text-emerald-500" /> Weight
                 </p>
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
                   <span>{patientData.weight ? `${patientData.weight} ${patientData.weight_unit || "kg"}` : "—"}</span>
@@ -630,7 +630,7 @@ export default function PatientDetails() {
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <Ruler className="h-3 w-3 text-violet-500" /> Height
+                  <Ruler className="h-3 w-3 text-teal-500" /> Height
                 </p>
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
                   <span>{patientData.height ? `${patientData.height} ${patientData.height_unit || "cm"}` : "—"}</span>
@@ -671,7 +671,7 @@ export default function PatientDetails() {
           <div>
             <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
               <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                <Stethoscope className="h-4 w-4 text-violet-600" />
+                <Stethoscope className="h-4 w-4 text-teal-600" />
                 Consultation Summary
               </CardTitle>
             </CardHeader>
@@ -686,14 +686,14 @@ export default function PatientDetails() {
                     <span>{patientData.registered_by?.email || patientData.registered_by?.role || "Wellness Consultant"}</span>
                   </p>
                 </div>
-                <span className="p-2 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl text-indigo-600 dark:text-indigo-400">
+                <span className="p-2 bg-emerald-50 dark:bg-emerald-950/60 rounded-xl text-emerald-600 dark:text-emerald-400">
                   <User className="h-5 w-5" />
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-1">
-                <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
-                  <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">Total Scans</p>
+                <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
+                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Total Scans</p>
                   <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">
                     {visits.length}
                   </p>
@@ -739,7 +739,7 @@ export default function PatientDetails() {
           <div className="p-5 pt-0">
             <Button
               onClick={startNewScan}
-              className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold py-2.5 rounded-xl shadow-sm"
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-2.5 rounded-xl shadow-sm"
             >
               <Plus className="h-4 w-4 mr-2" /> Start New Quantum Scan
             </Button>
@@ -753,14 +753,14 @@ export default function PatientDetails() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
-                <FileText className="h-4 w-4 text-indigo-600" />
+                <FileText className="h-4 w-4 text-emerald-600" />
                 Previous Reports & Visit History
               </CardTitle>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 All previously generated health analysis scans and clinical reports for this client.
               </p>
             </div>
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
               <span>{visits.length}</span>
               <span>Historical</span>
               <span>{visits.length === 1 ? "Session" : "Sessions"}</span>
@@ -773,12 +773,12 @@ export default function PatientDetails() {
             data={visits}
             emptyMessage={
               <div className="text-center py-12 space-y-3 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                <Activity className="h-10 w-10 text-indigo-400 mx-auto" />
+                <Activity className="h-10 w-10 text-emerald-400 mx-auto" />
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No Previous Reports Yet</p>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
                   No scan sessions or clinical reports have been generated for <span>{patientData?.name ?? "this client"}</span> yet. Click below to start the first scan session.
                 </p>
-                <Button onClick={startNewScan} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white mt-2">
+                <Button onClick={startNewScan} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white mt-2">
                   <Plus className="h-4 w-4 mr-1.5" /> Start First Scan Session
                 </Button>
               </div>
@@ -794,7 +794,7 @@ export default function PatientDetails() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-sm">
+                <div className="h-10 w-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-sm">
                   <Activity className="h-5 w-5" />
                 </div>
                 <div>
@@ -803,7 +803,7 @@ export default function PatientDetails() {
                       Quantum Health Analysis Report
                     </h3>
                     {selectedVisitId && (
-                      <span className="font-mono text-xs bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 px-2 py-0.5 rounded font-bold">
+                      <span className="font-mono text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded font-bold">
                         #{selectedVisitId.slice(-6).toUpperCase()}
                       </span>
                     )}
@@ -836,7 +836,7 @@ export default function PatientDetails() {
                 <Button
                   size="sm"
                   onClick={() => navigate(`/report-pdf/${selectedVisitId}`)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold"
                 >
                   <ExternalLink className="h-3.5 w-3.5 mr-1" /> Open Full PDF
                 </Button>
@@ -854,7 +854,7 @@ export default function PatientDetails() {
             <div className="p-6 overflow-y-auto space-y-6 flex-1">
               {reportLoading ? (
                 <div className="flex flex-col items-center justify-center py-20 space-y-3">
-                  <div className="h-8 w-8 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+                  <div className="h-8 w-8 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
                   <p className="text-xs font-semibold text-slate-500">Compiling detailed report evaluation...</p>
                 </div>
               ) : !detailedReport ? (
@@ -895,12 +895,12 @@ export default function PatientDetails() {
                       </p>
                     </div>
 
-                    <div className="p-3.5 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                      <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">Selected Guidance</p>
-                      <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300 mt-1">
+                    <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Selected Guidance</p>
+                      <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">
                         {detailedReport.summary?.selected_points_count || 0}
                       </p>
-                      <p className="text-[11px] text-indigo-600/70">Wellness guidance points</p>
+                      <p className="text-[11px] text-emerald-600/70">Wellness guidance points</p>
                     </div>
                   </div>
 
@@ -932,7 +932,7 @@ export default function PatientDetails() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                          <Activity className="h-4 w-4 text-indigo-600" />
+                          <Activity className="h-4 w-4 text-emerald-600" />
                           Evaluated Parameter Values & Health Ranges
                         </h4>
                         <p className="text-xs text-slate-500">
@@ -946,7 +946,7 @@ export default function PatientDetails() {
                           <button
                             onClick={() => setParamFilter("all")}
                             className={`px-2.5 py-1 rounded font-semibold transition-all ${paramFilter === "all"
-                              ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs"
+                              ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-300 shadow-xs"
                               : "text-slate-500"
                               }`}
                           >
@@ -981,7 +981,7 @@ export default function PatientDetails() {
                           placeholder="Search parameters..."
                           value={paramSearch}
                           onChange={(e) => setParamSearch(e.target.value)}
-                          className="px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 w-36 sm:w-44 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          className="px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 w-36 sm:w-44 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                         />
                       </div>
                     </div>
@@ -1092,7 +1092,7 @@ export default function PatientDetails() {
                             >
                               <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-mono font-bold text-xs bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 px-2 py-0.5 rounded">
+                                  <span className="font-mono font-bold text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded">
                                     {p.code}
                                   </span>
                                   <h5 className="font-bold text-sm text-slate-900 dark:text-slate-100">
@@ -1126,7 +1126,7 @@ export default function PatientDetails() {
                                       key={sec.id}
                                       className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700/60 text-xs space-y-1.5"
                                     >
-                                      <p className="font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wide text-[11px]">
+                                      <p className="font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide text-[11px]">
                                         {secTitle}
                                       </p>
                                       <ul className="space-y-1 text-slate-700 dark:text-slate-300 pl-3 list-disc">
@@ -1166,7 +1166,7 @@ export default function PatientDetails() {
                 <Button
                   size="sm"
                   onClick={() => navigate(`/report-pdf/${selectedVisitId}`)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
                 >
                   <ExternalLink className="h-4 w-4 mr-1.5" /> Open Full PDF Report
                 </Button>
@@ -1181,7 +1181,7 @@ export default function PatientDetails() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
                 <Pencil className="h-5 w-5" />
                 <h3 className="text-lg">
                   <span>Edit Client Profile</span>
@@ -1206,7 +1206,7 @@ export default function PatientDetails() {
                   required
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -1222,7 +1222,7 @@ export default function PatientDetails() {
                     max="150"
                     value={editForm.age}
                     onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -1232,7 +1232,7 @@ export default function PatientDetails() {
                   <select
                     value={editForm.gender}
                     onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="Male">Male (पुरुष)</option>
                     <option value="Female">Female (महिला)</option>
@@ -1252,7 +1252,7 @@ export default function PatientDetails() {
                     maxLength={10}
                     value={editForm.mobile}
                     onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value.replace(/\D/g, "") })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -1264,7 +1264,7 @@ export default function PatientDetails() {
                     placeholder="client@example.com"
                     value={editForm.email}
                     onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -1277,7 +1277,7 @@ export default function PatientDetails() {
                   type="date"
                   value={editForm.dob}
                   onChange={(e) => setEditForm({ ...editForm, dob: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -1294,7 +1294,7 @@ export default function PatientDetails() {
                     placeholder="e.g. 68"
                     value={editForm.weight}
                     onChange={(e) => setEditForm({ ...editForm, weight: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -1309,7 +1309,7 @@ export default function PatientDetails() {
                     placeholder="e.g. 172"
                     value={editForm.height}
                     onChange={(e) => setEditForm({ ...editForm, height: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -1322,7 +1322,7 @@ export default function PatientDetails() {
                   rows={2}
                   value={editForm.address}
                   onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -1333,7 +1333,7 @@ export default function PatientDetails() {
                 <Button
                   type="submit"
                   disabled={submittingEdit}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5"
                 >
                   {submittingEdit ? "Saving..." : "Save Changes"}
                 </Button>

@@ -214,7 +214,7 @@ export default function PatientRegistration() {
       key: "patient_code",
       label: "Client ID",
       render: (row) => (
-        <span className="font-mono font-bold text-xs bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 px-2 py-1 rounded-md border border-indigo-200/60 dark:border-indigo-800">
+        <span className="font-mono font-bold text-xs bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 px-2 py-1 rounded-md border border-emerald-200/60 dark:border-emerald-800">
           {row.patient_code}
         </span>
       ),
@@ -225,7 +225,7 @@ export default function PatientRegistration() {
       render: (row) => (
         <button
           onClick={() => navigate(`/patients/${row._id}`)}
-          className="text-left font-semibold text-slate-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors"
+          className="text-left font-semibold text-slate-900 dark:text-slate-100 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors"
         >
           {row.name}
         </button>
@@ -291,7 +291,7 @@ export default function PatientRegistration() {
         }
         if (st === "REPORT_READY") {
           return (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
               <FileText className="h-3 w-3" /> Report Ready
             </span>
           );
@@ -321,7 +321,7 @@ export default function PatientRegistration() {
             size="sm"
             variant="outline"
             onClick={() => navigate(`/patients/${row._id}`)}
-            className="h-8 px-2.5 text-xs font-semibold text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:text-indigo-300 dark:border-indigo-800 dark:hover:bg-indigo-950"
+            className="h-8 px-2.5 text-xs font-semibold text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-300 dark:border-emerald-800 dark:hover:bg-emerald-950"
             title="View Complete Client Profile & History"
           >
             <Eye className="h-3.5 w-3.5 mr-1" /> View Details
@@ -332,10 +332,10 @@ export default function PatientRegistration() {
             size="sm"
             variant="ghost"
             onClick={() => startNewScan(row._id)}
-            className="h-8 px-2 text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/50 dark:text-slate-300 dark:hover:text-indigo-400"
+            className="h-8 px-2 text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50/50 dark:text-slate-300 dark:hover:text-emerald-400"
             title="Start New Scan Session"
           >
-            <Activity className="h-3.5 w-3.5 mr-1 text-indigo-500" /> New Scan
+            <Activity className="h-3.5 w-3.5 mr-1 text-emerald-500" /> New Scan
           </Button>
 
           {/* Edit Patient */}
@@ -344,7 +344,7 @@ export default function PatientRegistration() {
             variant="ghost"
             title="Edit Client"
             onClick={() => openEditModal(row)}
-            className="h-8 w-8 p-0 text-slate-500 hover:text-indigo-600"
+            className="h-8 w-8 p-0 text-slate-500 hover:text-emerald-600"
           >
             <Pencil className="h-3.5 w-3.5" />
           </Button>
@@ -367,17 +367,17 @@ export default function PatientRegistration() {
   return (
     <div className="space-y-6">
       {/* Page Header Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 p-6 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 p-6 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-indigo-200 font-semibold">Quantum Health System</p>
+          <p className="text-xs uppercase tracking-widest text-emerald-200 font-semibold">Quantum Health System</p>
           <h1 className="text-2xl font-bold mt-1">Client Registration</h1>
-          <p className="text-sm text-indigo-100 mt-1">
+          <p className="text-sm text-emerald-100 mt-1">
             Clean client directory overview. Click View Details on any client to see their full profile and report history.
           </p>
         </div>
         <Button
           onClick={openRegisterModal}
-          className="bg-white text-indigo-700 hover:bg-indigo-50 font-bold px-5 py-2.5 rounded-xl shadow-md shrink-0 flex items-center gap-2"
+          className="bg-white text-emerald-700 hover:bg-emerald-50 font-bold px-5 py-2.5 rounded-xl shadow-md shrink-0 flex items-center gap-2"
         >
           <Plus className="h-5 w-5" />
           <span>Register New Client</span>
@@ -395,7 +395,7 @@ export default function PatientRegistration() {
             CreateExportRender={() => (
               <Button
                 onClick={openRegisterModal}
-                className="bg-indigo-600 text-white hover:bg-indigo-700 font-semibold px-4 py-2 rounded-xl shadow-xs shrink-0 flex items-center gap-2 text-xs"
+                className="bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-4 py-2 rounded-xl shadow-xs shrink-0 flex items-center gap-2 text-xs"
               >
                 <Plus className="h-4 w-4" />
                 <span>Add Client</span>
@@ -411,7 +411,7 @@ export default function PatientRegistration() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in fade-in zoom-in duration-150">
             <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
                 <UserPlus className="h-5 w-5" />
                 <h3 className="text-lg">
                   {editingPatient ? `Edit Client (${editingPatient.patient_code})` : "Register New Client"}
@@ -436,7 +436,7 @@ export default function PatientRegistration() {
                   placeholder="e.g. Ramesh Kumar"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -453,7 +453,7 @@ export default function PatientRegistration() {
                     placeholder="42"
                     value={form.age}
                     onChange={(e) => setForm({ ...form, age: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -463,7 +463,7 @@ export default function PatientRegistration() {
                   <select
                     value={form.gender}
                     onChange={(e) => setForm({ ...form, gender: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="Male">Male (पुरुष)</option>
                     <option value="Female">Female (महिला)</option>
@@ -484,7 +484,7 @@ export default function PatientRegistration() {
                     maxLength={10}
                     value={form.mobile}
                     onChange={(e) => setForm({ ...form, mobile: e.target.value.replace(/\D/g, "") })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -496,7 +496,7 @@ export default function PatientRegistration() {
                     placeholder="client@example.com"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -509,7 +509,7 @@ export default function PatientRegistration() {
                   type="date"
                   value={form.dob}
                   onChange={(e) => setForm({ ...form, dob: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -528,7 +528,7 @@ export default function PatientRegistration() {
                       placeholder="e.g. 68"
                       value={form.weight}
                       onChange={(e) => setForm({ ...form, weight: e.target.value })}
-                      className="w-full rounded-l-lg border border-r-0 border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full rounded-l-lg border border-r-0 border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                     <span className="bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 rounded-r-lg">
                       kg
@@ -549,7 +549,7 @@ export default function PatientRegistration() {
                       placeholder="e.g. 172"
                       value={form.height}
                       onChange={(e) => setForm({ ...form, height: e.target.value })}
-                      className="w-full rounded-l-lg border border-r-0 border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full rounded-l-lg border border-r-0 border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                     <span className="bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 rounded-r-lg">
                       cm
@@ -568,7 +568,7 @@ export default function PatientRegistration() {
                   placeholder="Street, City, State, Pin Code..."
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -583,7 +583,7 @@ export default function PatientRegistration() {
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5"
                 >
                   {submitting
                     ? "Saving..."

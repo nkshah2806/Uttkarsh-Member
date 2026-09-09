@@ -89,7 +89,7 @@ export default function ReportEntry() {
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-violet-600">
+            <div className="flex items-center gap-2 text-teal-600">
               <CircleDollarSign className="h-5 w-5" />
               <p className="font-semibold">Report Notes</p>
             </div>

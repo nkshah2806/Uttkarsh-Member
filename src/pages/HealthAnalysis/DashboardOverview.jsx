@@ -162,7 +162,7 @@ function ChartTooltip({ active, payload, label }) {
 
 const STATUS_STYLES = {
   DATA_ENTRY: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  REPORT_READY: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
+  REPORT_READY: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
   SHARED: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
 };
 
@@ -223,8 +223,8 @@ export default function DashboardOverview() {
   /* ---------------- Quick actions ---------------- */
   const quickActions = [
     { label: "Register New Client", icon: UserPlus, to: "/patients", accent: "from-emerald-500 to-green-500" },
-    { label: "Enter Machine Data", icon: ScanLine, to: null, needsVisit: "DATA_ENTRY", accent: "from-sky-500 to-cyan-500" },
-    { label: "Generate Report", icon: FileText, to: null, needsVisit: "REPORT_READY", accent: "from-violet-500 to-fuchsia-500" },
+    { label: "Enter Machine Data", icon: ScanLine, to: null, needsVisit: "DATA_ENTRY", accent: "from-teal-500 to-emerald-500" },
+    { label: "Generate Report", icon: FileText, to: null, needsVisit: "REPORT_READY", accent: "from-emerald-500 to-teal-500" },
     { label: "View Clients", icon: Eye, to: "/patients", accent: "from-rose-500 to-pink-500" },
     { label: "Previous Reports", icon: History, to: "/clients", accent: "from-amber-500 to-orange-500" },
   ];
@@ -288,7 +288,7 @@ export default function DashboardOverview() {
   return (
     <div className="space-y-6">
       {/* ============ Hero ============ */}
-      <div className="overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-600 via-teal-600 to-sky-600 p-6 text-white shadow-lg dark:border-emerald-800">
+      <div className="overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-800 p-6 text-white shadow-lg dark:border-emerald-800">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-emerald-100">
@@ -389,8 +389,8 @@ export default function DashboardOverview() {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         <StatCard loading={isLoading} title="Total Clients" value={summary.totalPatients ?? "—"} icon={Users} accent="from-emerald-500 to-green-500" hint={`${summary.patientsThisMonth ?? 0} this month`} />
         <StatCard loading={isLoading} title="New Clients" value={summary.patientsToday ?? "—"} icon={UserPlus} accent="from-teal-500 to-emerald-500" hint="today" />
-        <StatCard loading={isLoading} title="Total Reports" value={summary.totalReports ?? "—"} icon={FileText} accent="from-sky-500 to-cyan-500" hint={`${summary.reportsToday ?? 0} today`} />
-        <StatCard loading={isLoading} title="Reports This Month" value={summary.reportsThisMonth ?? "—"} icon={Activity} accent="from-violet-500 to-fuchsia-500" hint={`${summary.reportsThisWeek ?? 0} this week`} />
+        <StatCard loading={isLoading} title="Total Reports" value={summary.totalReports ?? "—"} icon={FileText} accent="from-teal-500 to-emerald-500" hint={`${summary.reportsToday ?? 0} today`} />
+        <StatCard loading={isLoading} title="Reports This Month" value={summary.reportsThisMonth ?? "—"} icon={Activity} accent="from-emerald-500 to-teal-500" hint={`${summary.reportsThisWeek ?? 0} this week`} />
         <StatCard loading={isLoading} title="Pending Reports" value={(summary.pendingVisits ?? 0) + (summary.reportReadyVisits ?? 0)} icon={Clock} accent="from-amber-500 to-orange-500" hint="need data entry or review" />
       </div>
 
@@ -413,8 +413,8 @@ export default function DashboardOverview() {
                       <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="gradReports" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-slate-200 dark:text-slate-700" />
@@ -422,7 +422,7 @@ export default function DashboardOverview() {
                   <YAxis allowDecimals={false} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                   <Tooltip content={<ChartTooltip />} />
                   <Area type="monotone" dataKey="patients" name="Clients" stroke="#10b981" fill="url(#gradPatients)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="reports" name="Reports" stroke="#0ea5e9" fill="url(#gradReports)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="reports" name="Reports" stroke="#14b8a6" fill="url(#gradReports)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
@@ -527,7 +527,7 @@ export default function DashboardOverview() {
                     >
                       <span
                         className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${act.type === "report_generated"
-                          ? "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400"
+                          ? "bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-400"
                           : "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400"
                           }`}
                       >
@@ -626,11 +626,11 @@ export default function DashboardOverview() {
                 {lists.recentReports.map((r) => (
                   <button
                     key={r._id}
-                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-left transition-colors hover:border-sky-300 hover:bg-sky-50/50 dark:border-slate-700 dark:hover:border-sky-700 dark:hover:bg-sky-900/10"
+                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-left transition-colors hover:border-teal-300 hover:bg-teal-50/50 dark:border-slate-700 dark:hover:border-teal-700 dark:hover:bg-teal-900/10"
                     onClick={() => r.visit_id && navigate(`/report-pdf/${r.visit_id}`)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300">
                         <FileText className="h-4 w-4" />
                       </div>
                       <div>

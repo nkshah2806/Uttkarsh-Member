@@ -165,16 +165,16 @@ export default function QuantumDataEntry() {
   return (
     <div className="space-y-5">
       {/* Patient Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 p-5 text-white shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 p-5 text-white shadow-md">
         <div>
-          <p className="text-xs uppercase tracking-widest font-bold text-violet-200">
+          <p className="text-xs uppercase tracking-widest font-bold text-teal-200">
             Quantum Scan · Visit #{visitId?.slice(-6).toUpperCase()}
           </p>
           <h1 className="text-xl font-bold mt-1">
             {patient?.name}
-            <span className="ml-2 text-sm font-normal text-violet-200">({patient?.patient_code})</span>
+            <span className="ml-2 text-sm font-normal text-teal-200">({patient?.patient_code})</span>
           </h1>
-          <p className="text-xs text-violet-200 mt-0.5 inline-flex flex-wrap items-center gap-x-1.5">
+          <p className="text-xs text-teal-200 mt-0.5 inline-flex flex-wrap items-center gap-x-1.5">
             <span>Age:</span>
             <span>{patient?.age ?? "—"}</span>
             <span aria-hidden="true">|</span>
@@ -191,7 +191,7 @@ export default function QuantumDataEntry() {
                 {Number(visit.scan_pricing.amount).toLocaleString("en-IN")}
               </span>
               {visit.scan_pricing.name && (
-                <span className="text-[10px] font-medium text-violet-100 uppercase tracking-wide">
+                <span className="text-[10px] font-medium text-teal-100 uppercase tracking-wide">
                   · {visit.scan_pricing.name}
                 </span>
               )}
@@ -205,7 +205,7 @@ export default function QuantumDataEntry() {
           <Button
             onClick={handleSaveAndAnalyze}
             disabled={saving}
-            className="bg-white text-indigo-600 hover:bg-indigo-50 font-bold text-sm px-5"
+            className="bg-white text-emerald-600 hover:bg-emerald-50 font-bold text-sm px-5"
           >
             <Activity className="mr-2 h-4 w-4" />
             {saving ? "Saving..." : "Save & Run Analysis"}
@@ -219,9 +219,9 @@ export default function QuantumDataEntry() {
           <p className="text-2xl font-bold">{parameters.length}</p>
           <p className="text-xs text-slate-500 mt-0.5">Total Parameters</p>
         </div>
-        <div className="bg-indigo-50 dark:bg-indigo-950/40 rounded-xl border border-indigo-200 p-4 text-center shadow-sm">
-          <p className="text-2xl font-bold text-indigo-700">{entered}</p>
-          <p className="text-xs text-indigo-500 mt-0.5">Values Entered</p>
+        <div className="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 p-4 text-center shadow-sm">
+          <p className="text-2xl font-bold text-emerald-700">{entered}</p>
+          <p className="text-xs text-emerald-500 mt-0.5">Values Entered</p>
         </div>
         <div className={`rounded-xl border p-4 text-center shadow-sm ${abnormal > 0 ? "bg-rose-50 border-rose-200 dark:bg-rose-950/40" : "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40"}`}>
           <p className={`text-2xl font-bold ${abnormal > 0 ? "text-rose-700" : "text-emerald-700"}`}>{abnormal}</p>
@@ -236,7 +236,7 @@ export default function QuantumDataEntry() {
             type="button"
             onClick={() => setCategoryDropdownOpen((open) => !open)}
             className={`inline-flex items-center gap-2 text-xs px-3.5 py-2 rounded-lg font-semibold transition-all border cursor-pointer ${selectedCategories.length > 0
-              ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+              ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
               : "bg-white dark:bg-slate-800 text-slate-600 border hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-300"
               }`}
           >
@@ -265,7 +265,7 @@ export default function QuantumDataEntry() {
                   <button
                     type="button"
                     onClick={() => setSelectedCategories([])}
-                    className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
+                    className="text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
                   >
                     Clear ({selectedCategories.length})
                   </button>
@@ -278,7 +278,7 @@ export default function QuantumDataEntry() {
                     type="checkbox"
                     checked={selectedCategories.length === 0}
                     onChange={() => setSelectedCategories([])}
-                    className="h-3.5 w-3.5 rounded accent-indigo-600"
+                    className="h-3.5 w-3.5 rounded accent-emerald-600"
                   />
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex-1">
                     All Categories
@@ -305,7 +305,7 @@ export default function QuantumDataEntry() {
                             checked ? prev.filter((c) => c !== cat) : [...prev, cat]
                           )
                         }
-                        className="h-3.5 w-3.5 rounded accent-indigo-600"
+                        className="h-3.5 w-3.5 rounded accent-emerald-600"
                       />
                       <span className="text-xs font-medium text-slate-700 dark:text-slate-200 flex-1 truncate">
                         {cat}
@@ -328,13 +328,13 @@ export default function QuantumDataEntry() {
             {selectedCategories.map((cat) => (
               <span
                 key={cat}
-                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-900 rounded-full pl-2.5 pr-1.5 py-1"
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-900 rounded-full pl-2.5 pr-1.5 py-1"
               >
                 {cat}
                 <button
                   type="button"
                   onClick={() => setSelectedCategories((prev) => prev.filter((c) => c !== cat))}
-                  className="p-0.5 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 cursor-pointer"
+                  className="p-0.5 rounded-full hover:bg-emerald-200 dark:hover:bg-emerald-800 cursor-pointer"
                   aria-label={`Remove ${cat} filter`}
                 >
                   <X className="h-3 w-3" />
@@ -368,7 +368,7 @@ export default function QuantumDataEntry() {
           placeholder="Search by code, name or category..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
         {searchQuery && (
           <button
@@ -405,7 +405,7 @@ export default function QuantumDataEntry() {
                         status === "LOW" ? "bg-amber-50/40 dark:bg-amber-950/10" : ""
                         }`}
                     >
-                      <td className="px-4 py-2.5 font-mono text-xs font-bold text-indigo-600">{p.code}</td>
+                      <td className="px-4 py-2.5 font-mono text-xs font-bold text-emerald-600">{p.code}</td>
                       <td className="px-4 py-2.5">
                         <div className="font-medium text-slate-800 dark:text-white">
                           {p.name_en}
@@ -428,7 +428,7 @@ export default function QuantumDataEntry() {
                           className={`w-full rounded-lg border px-3 py-1.5 text-sm font-semibold text-center bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 transition-colors ${status === "HIGH" ? "border-rose-300 focus:ring-rose-400" :
                             status === "LOW" ? "border-amber-300 focus:ring-amber-400" :
                               status === "NORMAL" ? "border-emerald-300 focus:ring-emerald-400" :
-                                "border-slate-200 focus:ring-indigo-400"
+                                "border-slate-200 focus:ring-emerald-400"
                             }`}
                         />
                       </td>

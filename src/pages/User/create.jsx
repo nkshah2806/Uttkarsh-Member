@@ -141,21 +141,24 @@ export default function UserEdit() {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-      toast.success(response.data.meta.message);
+      toast.success(
+        response.data.message || "Profile picture updated successfully"
+      );
+
+      // The server stores the image as a server-relative /uploads/users/... ref.
+      const newImage = response.data.data?.image || response.data.data?.url || "";
 
       // Update localStorage if the updated user is the logged-in user
       const currentUser = JSON.parse(localStorage.getItem("UserDetails"));
-      if (currentUser && currentUser._id === id) {
-        // The new image path should come from the response, adjust as per your API
-        const newImage = response.data.data?.image || file.name;
+      if (currentUser && currentUser._id === id && newImage) {
         const newUserDetails = { ...currentUser, image: newImage };
         localStorage.setItem("UserDetails", JSON.stringify(newUserDetails));
       }
       // Optionally update the defaultImage state
-      setDefaultImage(response.data.data?.image || file.name);
+      if (newImage) setDefaultImage(newImage);
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Upload failed. Try again.");
+      toast.error(error?.response?.data?.message || "Upload failed. Try again.");
     }
   };
   // ...existing code...

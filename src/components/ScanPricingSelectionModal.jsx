@@ -88,7 +88,7 @@ export default function ScanPricingSelectionModal({
                                                 {p.name || "Scan Price"}
                                             </span>
                                             {p.is_default && (
-                                                <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                                                <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                                                     Default
                                                 </span>
                                             )}

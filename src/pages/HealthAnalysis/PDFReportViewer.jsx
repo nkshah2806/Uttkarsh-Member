@@ -142,7 +142,7 @@ export default function PDFReportViewer() {
       {/* Top Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 rounded-2xl border shadow-sm p-4 sticky top-0 z-20">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-1 rounded-full bg-indigo-600" />
+          <div className="h-8 w-1 rounded-full bg-emerald-600" />
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Quantum Health Report</p>
             <p className="text-sm font-bold text-slate-800 dark:text-white">{"Visit #{id}".replace("{id}", visitId?.slice(-6).toUpperCase())}</p>
@@ -185,7 +185,7 @@ export default function PDFReportViewer() {
       {/* Report Preview */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 space-y-4 bg-white dark:bg-slate-900 rounded-2xl border shadow-sm">
-          <div className="h-10 w-10 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+          <div className="h-10 w-10 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
           <p className="text-sm text-slate-500">
             Compiling your report...
           </p>

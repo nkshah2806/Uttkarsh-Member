@@ -232,9 +232,9 @@ const ReusableTable = forwardRef(
       if (sort.key !== key)
         return <ArrowDownUp className="ml-1 size-4 text-gray-500 shrink-0" />;
       return sort.direction === "asc" ? (
-        <ArrowUpNarrowWide className="ml-1 size-4 shrink-0 text-indigo-600" />
+        <ArrowUpNarrowWide className="ml-1 size-4 shrink-0 text-emerald-600" />
       ) : (
-        <ArrowDownWideNarrow className="ml-1 size-4 shrink-0 text-indigo-600" />
+        <ArrowDownWideNarrow className="ml-1 size-4 shrink-0 text-emerald-600" />
       );
     };
 
@@ -363,7 +363,7 @@ const ReusableTable = forwardRef(
         <div className="w-full rounded-lg border">
           {isLoading ? (
             <div className="flex justify-center items-center h-48">
-              <Loader2 className="animate-spin size-10 text-indigo-600" />
+              <Loader2 className="animate-spin size-10 text-emerald-600" />
             </div>
           ) : (
             <Table>
