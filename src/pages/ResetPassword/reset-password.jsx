@@ -1,10 +1,12 @@
 import { GalleryVerticalEnd } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { LoginForm } from "@/components/login-form";
 import login from "../../assets/login.jpg";
 import { ResetPasswordForm } from "@/components/reset-password-form";
 import { useParams } from "react-router-dom";
 
 export default function ResetPassword() {
+  const { t } = useTranslation();
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -13,7 +15,7 @@ export default function ResetPassword() {
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <GalleryVerticalEnd className="size-4" />
             </div>
-            Utkarsh Corporation
+            {t("demo.brand.company")}
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
@@ -25,7 +27,7 @@ export default function ResetPassword() {
       <div className="relative hidden bg-muted lg:block">
         <img
           src={login}
-          alt="login banner"
+          alt={t("demo.loginPage.loginBannerAlt")}
           className="absolute inset-0 h-full w-full object-cover"
         />
       </div>

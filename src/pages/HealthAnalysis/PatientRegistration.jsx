@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import ReusableTable from "@/components/ReusableTable";
+import LocalizedText from "@/components/LocalizedText";
 
 export default function PatientRegistration() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [patients, setPatients] = useState([]);
@@ -71,7 +74,7 @@ export default function PatientRegistration() {
       const res = await axiosInstance.get("v1/patients");
       setPatients(res.data.data || []);
     } catch (err) {
-      toast.error("Failed to load clients");
+      toast.error(t("demo.patientRegistration.toastLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -121,14 +124,18 @@ export default function PatientRegistration() {
       if (editingPatient) {
         // Edit Patient
         await axiosInstance.put(`v1/patients/${editingPatient._id}`, form);
-        toast.success(`Client details updated for ${editingPatient.patient_code}`);
+        toast.success(
+          t("demo.patientRegistration.toastUpdated", { code: editingPatient.patient_code })
+        );
         setShowModal(false);
         fetchPatients();
       } else {
         // Create Patient
         const patientRes = await axiosInstance.post("v1/patients", form);
         const newPatient = patientRes.data.data;
-        toast.success(`Client Registered: ${newPatient.patient_code}`);
+        toast.success(
+          t("demo.patientRegistration.toastRegistered", { code: newPatient.patient_code })
+        );
 
         setShowModal(false);
         setSubmitting(false);
@@ -138,7 +145,7 @@ export default function PatientRegistration() {
         await choosePricingAndStartScan(newPatient._id);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to save client details");
+      toast.error(err.response?.data?.message || t("demo.patientRegistration.toastSaveFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -148,11 +155,13 @@ export default function PatientRegistration() {
     if (!deletingPatient) return;
     try {
       await axiosInstance.delete(`v1/patients/${deletingPatient._id}`);
-      toast.success(`Deleted client ${deletingPatient.patient_code}`);
+      toast.success(
+        t("demo.patientRegistration.toastDeleted", { code: deletingPatient.patient_code })
+      );
       setDeletingPatient(null);
       fetchPatients();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete client record");
+      toast.error(err.response?.data?.message || t("demo.patientRegistration.toastDeleteFailed"));
     }
   };
 
@@ -165,7 +174,7 @@ export default function PatientRegistration() {
       });
       navigate(`/quantum-scan/${visitRes.data.data._id}`);
     } catch (err) {
-      toast.error("Failed to start new scan");
+      toast.error(t("demo.patientRegistration.toastScanStartFailed"));
       setStartingScan(false);
     }
   };
@@ -175,7 +184,7 @@ export default function PatientRegistration() {
       setStartingScan(true);
       const pricings = await scanPricingService.getActiveScanPricings();
       if (pricings.length === 0) {
-        toast.info("No active scan price configured. Scan will be recorded without an amount.");
+        toast.info(t("demo.patientRegistration.toastNoActivePrice"));
         await launchVisit(patientId, undefined);
         return;
       }
@@ -191,7 +200,7 @@ export default function PatientRegistration() {
       setPricingModalOpen(true);
       setStartingScan(false);
     } catch (err) {
-      toast.error("Failed to start new scan");
+      toast.error(t("demo.patientRegistration.toastScanStartFailed"));
       setStartingScan(false);
     }
   };
@@ -212,7 +221,7 @@ export default function PatientRegistration() {
   const headers = [
     {
       key: "patient_code",
-      label: "Client ID",
+      label: t("demo.patientRegistration.colClientId"),
       render: (row) => (
         <span className="font-mono font-bold text-xs bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 px-2 py-1 rounded-md border border-emerald-200/60 dark:border-emerald-800">
           {row.patient_code}
@@ -221,31 +230,31 @@ export default function PatientRegistration() {
     },
     {
       key: "name",
-      label: "Client Name",
+      label: t("demo.patientRegistration.colClientName"),
       render: (row) => (
         <button
           onClick={() => navigate(`/patients/${row._id}`)}
           className="text-left font-semibold text-slate-900 dark:text-slate-100 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors"
         >
-          {row.name}
+          <LocalizedText value={row.name} />
         </button>
       ),
     },
     {
       key: "age",
-      label: "Age / Gender",
+      label: t("demo.patientRegistration.colAgeGender"),
       render: (row) => (
         <span className="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 font-medium">
           <span>{row.age}</span>
-          <span>Yrs</span>
+          <span>{t("demo.patientRegistration.yrs")}</span>
           <span aria-hidden="true">/</span>
-          <span>{row.gender}</span>
+          <LocalizedText value={row.gender} />
         </span>
       ),
     },
     {
       key: "mobile",
-      label: "Mobile Number",
+      label: t("demo.patientRegistration.colMobile"),
       render: (row) => (
         <span className="text-xs font-mono text-slate-700 dark:text-slate-300 font-medium">
           {row.mobile}
@@ -254,7 +263,7 @@ export default function PatientRegistration() {
     },
     {
       key: "createdAt",
-      label: "Registration Date",
+      label: t("demo.patientRegistration.colRegDate"),
       render: (row) => (
         <span className="flex items-center gap-1.5 text-xs text-slate-500">
           <Calendar className="h-3.5 w-3.5 text-slate-400" />
@@ -270,49 +279,52 @@ export default function PatientRegistration() {
     },
     {
       key: "registered_by",
-      label: "Consultant Name",
+      label: t("demo.patientRegistration.colConsultant"),
       render: (row) => (
         <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-          <span>{row.registered_by?.fullName || row.registered_by?.username || "Franchise Consultant"}</span>
+          <LocalizedText
+            value={row.registered_by?.fullName || row.registered_by?.username}
+            fallback={t("demo.patientRegistration.franchiseConsultant")}
+          />
         </span>
       ),
     },
     {
       key: "latest_status",
-      label: "Status",
+      label: t("demo.patientRegistration.colStatus"),
       render: (row) => {
         const st = row.latest_status;
         if (st === "SHARED") {
           return (
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              <CheckCircle2 className="h-3 w-3" /> Report Shared
+              <CheckCircle2 className="h-3 w-3" /> {t("demo.patientRegistration.statusShared")}
             </span>
           );
         }
         if (st === "REPORT_READY") {
           return (
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              <FileText className="h-3 w-3" /> Report Ready
+              <FileText className="h-3 w-3" /> {t("demo.patientRegistration.statusReportReady")}
             </span>
           );
         }
         if (st === "DATA_ENTRY") {
           return (
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-              <Clock className="h-3 w-3" /> In Progress
+              <Clock className="h-3 w-3" /> {t("demo.patientRegistration.statusInProgress")}
             </span>
           );
         }
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            Registered
+            {t("demo.patientRegistration.statusRegistered")}
           </span>
         );
       },
     },
     {
       key: "actions",
-      label: "Actions",
+      label: t("demo.patientRegistration.colActions"),
       filterable: false,
       render: (row) => (
         <div className="flex items-center justify-end gap-1.5">
@@ -322,9 +334,9 @@ export default function PatientRegistration() {
             variant="outline"
             onClick={() => navigate(`/patients/${row._id}`)}
             className="h-8 px-2.5 text-xs font-semibold text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-300 dark:border-emerald-800 dark:hover:bg-emerald-950"
-            title="View Complete Client Profile & History"
+            title={t("demo.patientRegistration.viewDetailsTitle")}
           >
-            <Eye className="h-3.5 w-3.5 mr-1" /> View Details
+            <Eye className="h-3.5 w-3.5 mr-1" /> {t("demo.patientRegistration.viewDetails")}
           </Button>
 
           {/* New Scan Button */}
@@ -333,16 +345,16 @@ export default function PatientRegistration() {
             variant="ghost"
             onClick={() => startNewScan(row._id)}
             className="h-8 px-2 text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50/50 dark:text-slate-300 dark:hover:text-emerald-400"
-            title="Start New Scan Session"
+            title={t("demo.patientRegistration.newScanTitle")}
           >
-            <Activity className="h-3.5 w-3.5 mr-1 text-emerald-500" /> New Scan
+            <Activity className="h-3.5 w-3.5 mr-1 text-emerald-500" /> {t("demo.patientRegistration.newScan")}
           </Button>
 
           {/* Edit Patient */}
           <Button
             size="sm"
             variant="ghost"
-            title="Edit Client"
+            title={t("demo.patientRegistration.editClientTitle")}
             onClick={() => openEditModal(row)}
             className="h-8 w-8 p-0 text-slate-500 hover:text-emerald-600"
           >
@@ -353,7 +365,7 @@ export default function PatientRegistration() {
           <Button
             size="sm"
             variant="ghost"
-            title="Delete Client Record"
+            title={t("demo.patientRegistration.deleteClientTitle")}
             onClick={() => setDeletingPatient(row)}
             className="h-8 w-8 p-0 text-slate-500 hover:text-rose-600"
           >
@@ -369,10 +381,10 @@ export default function PatientRegistration() {
       {/* Page Header Banner */}
       <div className="rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 p-6 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-emerald-200 font-semibold">Quantum Health System</p>
-          <h1 className="text-2xl font-bold mt-1">Client Registration</h1>
+          <p className="text-xs uppercase tracking-widest text-emerald-200 font-semibold">{t("demo.patientRegistration.bannerTag")}</p>
+          <h1 className="text-2xl font-bold mt-1">{t("demo.patientRegistration.title")}</h1>
           <p className="text-sm text-emerald-100 mt-1">
-            Clean client directory overview. Click View Details on any client to see their full profile and report history.
+            {t("demo.patientRegistration.bannerDesc")}
           </p>
         </div>
         <Button
@@ -380,7 +392,7 @@ export default function PatientRegistration() {
           className="bg-white text-emerald-700 hover:bg-emerald-50 font-bold px-5 py-2.5 rounded-xl shadow-md shrink-0 flex items-center gap-2"
         >
           <Plus className="h-5 w-5" />
-          <span>Register New Client</span>
+          <span>{t("demo.patientRegistration.registerNewClient")}</span>
         </Button>
       </div>
 
@@ -391,14 +403,14 @@ export default function PatientRegistration() {
             headers={headers}
             data={patients}
             loading={loading}
-            Search="Search by Client ID, Name, Mobile, Email..."
+            Search={t("demo.patientRegistration.searchPlaceholder")}
             CreateExportRender={() => (
               <Button
                 onClick={openRegisterModal}
                 className="bg-emerald-600 text-white hover:bg-emerald-700 font-semibold px-4 py-2 rounded-xl shadow-xs shrink-0 flex items-center gap-2 text-xs"
               >
                 <Plus className="h-4 w-4" />
-                <span>Add Client</span>
+                <span>{t("demo.patientRegistration.addClient")}</span>
               </Button>
             )}
             pagination={true}
@@ -414,7 +426,9 @@ export default function PatientRegistration() {
               <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
                 <UserPlus className="h-5 w-5" />
                 <h3 className="text-lg">
-                  {editingPatient ? `Edit Client (${editingPatient.patient_code})` : "Register New Client"}
+                  {editingPatient
+                    ? t("demo.patientRegistration.editClientHeading", { code: editingPatient.patient_code })
+                    : t("demo.patientRegistration.registerNewClient")}
                 </h3>
               </div>
               <button
@@ -428,12 +442,12 @@ export default function PatientRegistration() {
             <form onSubmit={handleSavePatient} className="space-y-4 text-sm">
               <div>
                 <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                  Client Name *
+                  {t("demo.patientRegistration.clientNameLabel")}
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Ramesh Kumar"
+                  placeholder={t("demo.patientRegistration.clientNamePh")}
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -443,7 +457,7 @@ export default function PatientRegistration() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Age *
+                    {t("demo.patientRegistration.ageLabel")}
                   </label>
                   <input
                     type="number"
@@ -458,16 +472,16 @@ export default function PatientRegistration() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Gender *
+                    {t("demo.patientRegistration.genderLabel")}
                   </label>
                   <select
                     value={form.gender}
                     onChange={(e) => setForm({ ...form, gender: e.target.value })}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="Male">Male (पुरुष)</option>
-                    <option value="Female">Female (महिला)</option>
-                    <option value="Other">Other</option>
+                    <option value="Male">{t("demo.patientRegistration.genderMale")}</option>
+                    <option value="Female">{t("demo.patientRegistration.genderFemale")}</option>
+                    <option value="Other">{t("demo.patientRegistration.genderOther")}</option>
                   </select>
                 </div>
               </div>
@@ -475,12 +489,12 @@ export default function PatientRegistration() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Mobile Number *
+                    {t("demo.patientRegistration.mobileLabel")}
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="10-digit mobile number"
+                    placeholder={t("demo.patientRegistration.mobilePh")}
                     maxLength={10}
                     value={form.mobile}
                     onChange={(e) => setForm({ ...form, mobile: e.target.value.replace(/\D/g, "") })}
@@ -489,11 +503,11 @@ export default function PatientRegistration() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Email Address
+                    {t("demo.patientRegistration.emailLabel")}
                   </label>
                   <input
                     type="email"
-                    placeholder="client@example.com"
+                    placeholder={t("demo.patientRegistration.emailPh")}
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -503,7 +517,7 @@ export default function PatientRegistration() {
 
               <div>
                 <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                  Date of Birth
+                  {t("demo.patientRegistration.dobLabel")}
                 </label>
                 <input
                   type="date"
@@ -517,7 +531,7 @@ export default function PatientRegistration() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Weight (kg)
+                    {t("demo.patientRegistration.weightLabel")}
                   </label>
                   <div className="flex items-center">
                     <input
@@ -525,7 +539,7 @@ export default function PatientRegistration() {
                       step="any"
                       min="0.5"
                       max="300"
-                      placeholder="e.g. 68"
+                      placeholder={t("demo.patientRegistration.weightPh")}
                       value={form.weight}
                       onChange={(e) => setForm({ ...form, weight: e.target.value })}
                       className="w-full rounded-l-lg border border-r-0 border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -538,7 +552,7 @@ export default function PatientRegistration() {
 
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Height (cm)
+                    {t("demo.patientRegistration.heightLabel")}
                   </label>
                   <div className="flex items-center">
                     <input
@@ -546,7 +560,7 @@ export default function PatientRegistration() {
                       step="any"
                       min="20"
                       max="300"
-                      placeholder="e.g. 172"
+                      placeholder={t("demo.patientRegistration.heightPh")}
                       value={form.height}
                       onChange={(e) => setForm({ ...form, height: e.target.value })}
                       className="w-full rounded-l-lg border border-r-0 border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -561,11 +575,11 @@ export default function PatientRegistration() {
               {/* Address Field */}
               <div>
                 <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                  Full Address
+                  {t("demo.patientRegistration.addressLabel")}
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Street, City, State, Pin Code..."
+                  placeholder={t("demo.patientRegistration.addressPh")}
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -578,7 +592,7 @@ export default function PatientRegistration() {
                   variant="outline"
                   onClick={() => setShowModal(false)}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   type="submit"
@@ -586,10 +600,10 @@ export default function PatientRegistration() {
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5"
                 >
                   {submitting
-                    ? "Saving..."
+                    ? t("demo.patientRegistration.saving")
                     : editingPatient
-                      ? "Update Client Details"
-                      : "Save & Proceed to Scan"}
+                      ? t("demo.patientRegistration.updateClient")
+                      : t("demo.patientRegistration.saveAndProceed")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -604,15 +618,14 @@ export default function PatientRegistration() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl border border-rose-100 dark:border-rose-900/50">
             <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
               <AlertTriangle className="h-6 w-6 shrink-0" />
-              <h3 className="text-lg font-bold">Delete Client Record</h3>
+              <h3 className="text-lg font-bold">{t("demo.patientRegistration.deleteTitle")}</h3>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Are you sure you want to delete client record <strong className="text-slate-900 dark:text-slate-100">{deletingPatient.patient_code} - {deletingPatient.name}</strong>?
-              This action cannot be undone.
+              {t("demo.patientRegistration.deleteConfirmPrefix")} <strong className="text-slate-900 dark:text-slate-100">{deletingPatient.patient_code} - <LocalizedText value={deletingPatient.name} /></strong>{t("demo.patientRegistration.deleteConfirmSuffix")}
             </p>
             <div className="flex justify-end gap-3 pt-2">
-              <Button variant="outline" onClick={() => setDeletingPatient(null)}>Cancel</Button>
-              <Button variant="destructive" onClick={confirmDeletePatient}>Confirm Delete</Button>
+              <Button variant="outline" onClick={() => setDeletingPatient(null)}>{t("common.cancel")}</Button>
+              <Button variant="destructive" onClick={confirmDeletePatient}>{t("demo.patientRegistration.confirmDelete")}</Button>
             </div>
           </div>
         </div>

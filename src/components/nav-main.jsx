@@ -15,11 +15,13 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export function NavMain({ items }) {
+  const { t } = useTranslation();
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
+      <SidebarGroupLabel>{t("demo.nav.mainMenu")}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) =>
           item?.items?.length > 0 ? (

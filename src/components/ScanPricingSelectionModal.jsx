@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tag, X, CheckCircle2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import LocalizedText from "@/components/LocalizedText";
 
 /**
  * Modal that lets a consultant pick the scan price plan for a NEW scan
@@ -21,6 +23,7 @@ export default function ScanPricingSelectionModal({
     onConfirm,
     submitting = false,
 }) {
+    const { t } = useTranslation();
     const [selectedId, setSelectedId] = useState("");
 
     useEffect(() => {
@@ -44,10 +47,10 @@ export default function ScanPricingSelectionModal({
                         </div>
                         <div>
                             <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">
-                                Select Scan Price
+                                {t("demo.scanPricing.title")}
                             </h3>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                                Choose the price plan for this scan session
+                                {t("demo.scanPricing.subtitle")}
                             </p>
                         </div>
                     </div>
@@ -72,8 +75,8 @@ export default function ScanPricingSelectionModal({
                                 disabled={submitting}
                                 onClick={() => setSelectedId(p._id)}
                                 className={`w-full text-left rounded-xl border p-3.5 transition-colors ${isSelected
-                                        ? "border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 ring-1 ring-emerald-500"
-                                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-600"
+                                    ? "border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 ring-1 ring-emerald-500"
+                                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-600"
                                     }`}
                             >
                                 <div className="flex items-start justify-between gap-3">
@@ -81,28 +84,28 @@ export default function ScanPricingSelectionModal({
                                         <div className="flex items-center gap-2 flex-wrap">
                                             <span
                                                 className={`font-bold text-sm ${isSelected
-                                                        ? "text-emerald-800 dark:text-emerald-300"
-                                                        : "text-slate-900 dark:text-slate-100"
+                                                    ? "text-emerald-800 dark:text-emerald-300"
+                                                    : "text-slate-900 dark:text-slate-100"
                                                     }`}
                                             >
-                                                {p.name || "Scan Price"}
+                                                <LocalizedText value={p.name} fallback={t("demo.scanPricing.scanPrice")} />
                                             </span>
                                             {p.is_default && (
                                                 <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                                                    Default
+                                                    {t("demo.scanPricing.default")}
                                                 </span>
                                             )}
                                         </div>
                                         {p.description && (
                                             <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                                                {p.description}
+                                                <LocalizedText value={p.description} />
                                             </p>
                                         )}
                                     </div>
                                     <span
                                         className={`shrink-0 font-bold text-base ${isSelected
-                                                ? "text-emerald-700 dark:text-emerald-300"
-                                                : "text-slate-800 dark:text-slate-200"
+                                            ? "text-emerald-700 dark:text-emerald-300"
+                                            : "text-slate-800 dark:text-slate-200"
                                             }`}
                                     >
                                         ₹{Number(p.amount ?? 0).toLocaleString("en-IN")}
@@ -113,7 +116,7 @@ export default function ScanPricingSelectionModal({
                     })}
                     <p className="text-[11px] text-slate-400 flex items-center gap-1 pt-1">
                         <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                        The selected amount will be recorded on this scan & its reports.
+                        {t("demo.scanPricing.recordedNote")}
                     </p>
                 </div>
 
@@ -122,18 +125,18 @@ export default function ScanPricingSelectionModal({
                     <div className="text-xs text-slate-500 dark:text-slate-400">
                         {selected ? (
                             <>
-                                Charging{" "}
+                                {t("demo.scanPricing.charging")}{" "}
                                 <span className="font-bold text-emerald-700 dark:text-emerald-300">
                                     ₹{Number(selected.amount ?? 0).toLocaleString("en-IN")}
                                 </span>
                             </>
                         ) : (
-                            "No price selected"
+                            t("demo.scanPricing.noPrice")
                         )}
                     </div>
                     <div className="flex items-center gap-2">
                         <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={submitting}>
-                            Cancel
+                            {t("demo.scanPricing.cancel")}
                         </Button>
                         <Button
                             type="button"
@@ -142,7 +145,7 @@ export default function ScanPricingSelectionModal({
                             onClick={() => selected && onConfirm(selected._id)}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
                         >
-                            {submitting ? "Starting Scan..." : "Start Scan"}
+                            {submitting ? t("demo.scanPricing.starting") : t("demo.scanPricing.start")}
                         </Button>
                     </div>
                 </div>

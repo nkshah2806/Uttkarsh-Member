@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import user from "../assets/user.png";
@@ -15,6 +16,7 @@ export function ImageUploader({
   handleUploadProfile,
   deleteDefaultImage,
 }) {
+  const { t } = useTranslation();
   const MAX_FILES = 10;
   const MAX_FILE_SIZE_MB = 5;
   const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
@@ -45,11 +47,15 @@ export function ImageUploader({
   const validateFiles = (files) => {
     return files.filter((file) => {
       if (!ALLOWED_TYPES.includes(file.type)) {
-        toast.error(`${file.name} is not a valid image.`);
+        toast.error(
+          t("demo.shared.imageUploader.invalidImage", { name: file.name })
+        );
         return false;
       }
       if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-        toast.error(`${file.name} exceeds 5MB.`);
+        toast.error(
+          t("demo.shared.imageUploader.exceedsSize", { name: file.name })
+        );
         return false;
       }
       return true;
@@ -63,7 +69,9 @@ export function ImageUploader({
     const totalFilesCount = selectedFilesRef.current.length + validFiles.length;
 
     if (multiple && totalFilesCount > MAX_FILES) {
-      toast.error(`You can upload up to ${MAX_FILES} images only.`);
+      toast.error(
+        t("demo.shared.imageUploader.maxImages", { max: MAX_FILES })
+      );
       return;
     }
     const previewURLs = validFiles.map((file) => URL.createObjectURL(file));
@@ -100,19 +108,19 @@ export function ImageUploader({
       }
 
       onImageChange && onImageChange(selectedFilesRef.current);
-      
+
       // Simulate server request for deletion (this should be replaced with your API request)
       const serverResponse = await new Promise((resolve) =>
         setTimeout(() => resolve({ status: 200 }), 1000) // Simulate 1 second delay
       );
 
       if (serverResponse.status === 200) {
-        toast.success("Image deleted successfully.");
+        toast.success(t("demo.shared.imageUploader.imageDeleted"));
       } else {
-        toast.error("Failed to delete image.");
+        toast.error(t("demo.shared.imageUploader.deleteImageFailed"));
       }
     } catch (error) {
-      toast.error("An error occurred while deleting the image.");
+      toast.error(t("demo.shared.imageUploader.deleteError"));
     } finally {
       setIsDeleting(false); // Reset deleting state
     }
@@ -126,7 +134,9 @@ export function ImageUploader({
       if (!validFiles.length) return;
       const totalFilesCount = selectedFilesRef.current.length + validFiles.length;
       if (multiple && totalFilesCount > MAX_FILES) {
-        toast.error(`You can upload up to ${MAX_FILES} images only.`);
+        toast.error(
+          t("demo.shared.imageUploader.maxImages", { max: MAX_FILES })
+        );
         return;
       }
       const previewURLs = validFiles.map((file) => URL.createObjectURL(file));
@@ -161,7 +171,7 @@ export function ImageUploader({
           >
             <UploadCloud size={45} />
             <p className="text-sm text-gray-500 mt-2 text-center">
-              Drag & drop or click to upload
+              {t("demo.shared.imageUploader.dropzone")}
             </p>
             <Input
               className="hidden"
@@ -185,7 +195,7 @@ export function ImageUploader({
                   currentTarget.onerror = null;
                   currentTarget.src = user;
                 }}
-                alt={`Preview ${index}`}
+                alt={t("demo.shared.imageUploader.preview", { index })}
                 className={`w-full h-full object-cover ${isServicesPath ? "rounded-md" : "rounded-full"}`}
               />
               {multiple && (

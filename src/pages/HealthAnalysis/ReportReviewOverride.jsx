@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import axiosInstance from "@/lib/axios";
+import LocalizedText from "@/components/LocalizedText";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -27,8 +29,10 @@ import {
   Check,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PageLoader } from "@/components/Loader";
 
 export default function ReportReviewOverride() {
+  const { t } = useTranslation();
   const { visitId } = useParams();
   const navigate = useNavigate();
 
@@ -176,7 +180,7 @@ export default function ReportReviewOverride() {
       setSelections(initialMap);
       setExpandedParams(initialExpanded);
     } catch (err) {
-      toast.error("Failed to load visit analysis data");
+      toast.error(t("demo.reportReviewOverride.toastLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -235,7 +239,7 @@ export default function ReportReviewOverride() {
       });
     });
     setSelections(initialMap);
-    toast.success("Selections reset to recommended defaults.");
+    toast.success(t("demo.reportReviewOverride.toastReset"));
   };
 
   // Toggle parameter accordion
@@ -299,8 +303,8 @@ export default function ReportReviewOverride() {
             <span className="text-teal-600">
               <Pill className="h-3.5 w-3.5" />
             </span>
-            Select Medicine(s)
-            <span className="text-slate-400 font-normal">(optional)</span>
+            {t("demo.reportReviewOverride.selectMedicines")}
+            <span className="text-slate-400 font-normal">{t("demo.reportReviewOverride.optional")}</span>
           </label>
           {selected.length > 0 && (
             <button
@@ -308,7 +312,7 @@ export default function ReportReviewOverride() {
               onClick={clearMedicines}
               className="text-[10px] text-slate-400 hover:text-red-500 underline underline-offset-2"
             >
-              Clear all
+              {t("demo.reportReviewOverride.clearAll")}
             </button>
           )}
         </div>
@@ -322,12 +326,16 @@ export default function ReportReviewOverride() {
           >
             <span className="truncate inline-flex items-center">
               {selected.length === 0 ? (
-                <span>Search & select medicines...</span>
+                <span>{t("demo.reportReviewOverride.searchSelectMedicines")}</span>
               ) : (
                 <span className="inline-flex items-center gap-1">
                   <span>{selected.length}</span>
-                  <span>medicine{selected.length > 1 ? "s" : ""}</span>
-                  <span>selected</span>
+                  <span>
+                    {selected.length > 1
+                      ? t("demo.reportReviewOverride.medicinePlural")
+                      : t("demo.reportReviewOverride.medicineSingular")}
+                  </span>
+                  <span>{t("demo.reportReviewOverride.selected")}</span>
                 </span>
               )}
             </span>
@@ -345,7 +353,7 @@ export default function ReportReviewOverride() {
                   type="text"
                   value={search}
                   onChange={(e) => setMedicineSearch(e.target.value)}
-                  placeholder="Type to search medicines..."
+                  placeholder={t("demo.reportReviewOverride.typeToSearchMedicines")}
                   className="w-full bg-transparent text-xs text-slate-700 dark:text-slate-200 outline-none placeholder:text-slate-400"
                 />
               </div>
@@ -353,9 +361,9 @@ export default function ReportReviewOverride() {
                 {filtered.length === 0 ? (
                   <p className="px-3 py-3 text-[11px] text-slate-400">
                     {activeMedicines.length === 0 ? (
-                      <span>No active medicines available. Please ask admin to add medicines.</span>
+                      <span>{t("demo.reportReviewOverride.noActiveMedicines")}</span>
                     ) : (
-                      <span>No medicines found</span>
+                      <span>{t("demo.reportReviewOverride.noMedicinesFound")}</span>
                     )}
                   </p>
                 ) : (
@@ -370,11 +378,11 @@ export default function ReportReviewOverride() {
                       >
                         <span className="flex-1 min-w-0">
                           <span className="block text-xs font-medium text-slate-800 dark:text-slate-100 truncate">
-                            {med.name}
+                            <LocalizedText value={med.name} />
                           </span>
                           {med.dosage && (
                             <span className="block text-[10px] text-slate-400 truncate">
-                              {med.dosage}
+                              <LocalizedText value={med.dosage} />
                             </span>
                           )}
                         </span>
@@ -396,12 +404,12 @@ export default function ReportReviewOverride() {
                 key={med._id}
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-teal-50 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800 text-[11px] font-medium text-teal-700 dark:text-teal-300"
               >
-                {med.name}
+                <LocalizedText value={med.name} />
                 <button
                   type="button"
                   onClick={() => removeMedicine(med._id)}
                   className="text-teal-400 hover:text-teal-700 dark:hover:text-teal-200"
-                  aria-label={`Remove ${med.name}`}
+                  aria-label={t("demo.reportReviewOverride.removeMedicineAria", { name: med.name })}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -415,7 +423,7 @@ export default function ReportReviewOverride() {
           value={note}
           onChange={(e) => setMedicineNote(e.target.value)}
           rows={2}
-          placeholder="Optional note about the prescribed medicines..."
+          placeholder={t("demo.reportReviewOverride.medicineNotePlaceholder")}
           className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
         />
       </div>
@@ -462,10 +470,10 @@ export default function ReportReviewOverride() {
         },
       });
 
-      toast.success("Selections saved! Generating final report...");
+      toast.success(t("demo.reportReviewOverride.toastSaveSuccess"));
       navigate(`/report-pdf/${visitId}`);
     } catch (err) {
-      toast.error("Failed to save report selections");
+      toast.error(t("demo.reportReviewOverride.toastSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -581,12 +589,10 @@ export default function ReportReviewOverride() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-24 space-y-4 text-center">
-        <div className="h-12 w-12 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
-        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-          Running Quantum Auto-Analysis Engine...
-        </p>
-      </div>
+      <PageLoader
+        label={t("demo.reportReviewOverride.loadingEngine")}
+        minHeight="60vh"
+      />
     );
   }
 
@@ -597,10 +603,11 @@ export default function ReportReviewOverride() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs uppercase tracking-widest font-bold text-emerald-200">
-              Report Content Review Studio
+              {t("demo.reportReviewOverride.studioTitle")}
             </span>
             <span className="bg-emerald-900/80 px-2 py-0.5 rounded text-[11px] font-mono">
-              Visit #{visitId?.slice(-6).toUpperCase()}
+              {t("demo.reportReviewOverride.visitLabel")}
+              {visitId?.slice(-6).toUpperCase()}
             </span>
           </div>
           <h1 className="text-xl font-bold flex flex-wrap items-baseline gap-x-2">
@@ -613,25 +620,25 @@ export default function ReportReviewOverride() {
           </h1>
           <p className="text-xs text-emerald-200 flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="inline-flex items-center gap-x-1">
-              <span className="font-semibold">Age:</span>
+              <span className="font-semibold">{t("demo.reportReviewOverride.ageLabel")}</span>
               <span>{patient?.age || "—"}</span>
-              <span>Yrs</span>
+              <span>{t("demo.reportReviewOverride.yrsShort")}</span>
             </span>
             <span aria-hidden="true">|</span>
             <span className="inline-flex items-center gap-x-1">
-              <span className="font-semibold">Gender:</span>
+              <span className="font-semibold">{t("demo.reportReviewOverride.genderLabel")}</span>
               <span>{patient?.gender || "—"}</span>
             </span>
             <span aria-hidden="true">|</span>
             <span className="inline-flex items-center gap-x-1">
-              <span className="font-semibold">Mobile:</span>
+              <span className="font-semibold">{t("demo.reportReviewOverride.mobileLabel")}</span>
               <span>{patient?.mobile || "—"}</span>
             </span>
             {patient?.weight ? (
               <>
                 <span aria-hidden="true">|</span>
                 <span className="inline-flex items-center gap-x-1">
-                  <span className="font-semibold">Weight:</span>
+                  <span className="font-semibold">{t("demo.reportReviewOverride.weightLabel")}</span>
                   <span>{patient.weight}</span>
                   <span>{patient.weight_unit || "kg"}</span>
                 </span>
@@ -641,7 +648,7 @@ export default function ReportReviewOverride() {
               <>
                 <span aria-hidden="true">|</span>
                 <span className="inline-flex items-center gap-x-1">
-                  <span className="font-semibold">Height:</span>
+                  <span className="font-semibold">{t("demo.reportReviewOverride.heightLabel")}</span>
                   <span>{patient.height}</span>
                   <span>{patient.height_unit || "cm"}</span>
                 </span>
@@ -652,11 +659,11 @@ export default function ReportReviewOverride() {
 
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
-            <div className="text-xs text-emerald-200 font-semibold">Selected for Report</div>
+            <div className="text-xs text-emerald-200 font-semibold">{t("demo.reportReviewOverride.selectedForReport")}</div>
             <div className="text-xl font-extrabold text-white">
               <span>{selectedItemsCount}</span>{" "}
               <span className="text-xs font-normal text-emerald-200">
-                <span aria-hidden="true">/</span> <span>{totalItemsCount}</span> <span>Points</span>
+                <span aria-hidden="true">/</span> <span>{totalItemsCount}</span> <span>{t("demo.reportReviewOverride.points")}</span>
               </span>
             </div>
           </div>
@@ -666,7 +673,7 @@ export default function ReportReviewOverride() {
             className="bg-white text-emerald-700 hover:bg-emerald-50 font-bold px-5 py-2.5 rounded-xl shadow-lg shrink-0 flex items-center gap-2"
           >
             <FileCheck className="h-4 w-4 text-emerald-600" />
-            <span>Generate Final Report</span>
+            <span>{t("demo.reportReviewOverride.generateFinalReport")}</span>
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
@@ -687,7 +694,7 @@ export default function ReportReviewOverride() {
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                   <input
                     type="text"
-                    placeholder="Search parameter, symptoms, recommendations..."
+                    placeholder={t("demo.reportReviewOverride.searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-9 pr-4 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -709,7 +716,7 @@ export default function ReportReviewOverride() {
                     onClick={() => handleSelectAll(true)}
                     className="h-8 px-2.5 text-xs font-semibold"
                   >
-                    Select All
+                    {t("demo.reportReviewOverride.selectAll")}
                   </Button>
                   <Button
                     size="sm"
@@ -717,12 +724,12 @@ export default function ReportReviewOverride() {
                     onClick={() => handleSelectAll(false)}
                     className="h-8 px-2.5 text-xs font-semibold"
                   >
-                    Deselect All
+                    {t("demo.reportReviewOverride.deselectAll")}
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
-                    title="Reset to Defaults"
+                    title={t("demo.reportReviewOverride.resetToDefaults")}
                     onClick={handleReset}
                     className="h-8 w-8 p-0 text-slate-500 hover:text-emerald-600"
                   >
@@ -736,9 +743,9 @@ export default function ReportReviewOverride() {
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-200">
                     <span>{selectedItemsCount}</span>
-                    <span>of</span>
+                    <span>{t("demo.reportReviewOverride.of")}</span>
                     <span>{totalItemsCount}</span>
-                    <span>items selected</span>
+                    <span>{t("demo.reportReviewOverride.itemsSelected")}</span>
                   </span>
                   <span className="text-slate-400">({selectionPercentage}%)</span>
                 </div>
@@ -748,14 +755,14 @@ export default function ReportReviewOverride() {
                     onClick={() => handleExpandAll(true)}
                     className="text-[11px] text-emerald-600 hover:underline font-semibold"
                   >
-                    Expand All
+                    {t("demo.reportReviewOverride.expandAll")}
                   </button>
                   <span className="text-slate-300">•</span>
                   <button
                     onClick={() => handleExpandAll(false)}
                     className="text-[11px] text-emerald-600 hover:underline font-semibold"
                   >
-                    Collapse All
+                    {t("demo.reportReviewOverride.collapseAll")}
                   </button>
                 </div>
               </div>
@@ -777,12 +784,12 @@ export default function ReportReviewOverride() {
                 <span className="h-8 w-8 rounded-lg bg-teal-100 dark:bg-teal-900/50 text-teal-600 flex items-center justify-center shrink-0">
                   <Pill className="h-4 w-4" />
                 </span>
-                Recommended Medicines
-                <span className="text-xs font-normal text-slate-400">for the whole report</span>
+                {t("demo.reportReviewOverride.recommendedMedicines")}
+                <span className="text-xs font-normal text-slate-400">{t("demo.reportReviewOverride.forWholeReport")}</span>
                 {selectedMedicines.length > 0 && (
                   <span className="ml-auto inline-flex items-center gap-1 text-[11px] font-semibold text-teal-600 bg-teal-100 dark:bg-teal-900/50 px-2 py-0.5 rounded-full">
                     <span>{selectedMedicines.length}</span>
-                    <span>selected</span>
+                    <span>{t("demo.reportReviewOverride.selected")}</span>
                   </span>
                 )}
               </CardTitle>
@@ -798,9 +805,9 @@ export default function ReportReviewOverride() {
               <CardContent className="py-16 text-center text-slate-400 space-y-2">
                 <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto" />
                 <p className="font-semibold text-slate-700 dark:text-slate-200 text-sm">
-                  No abnormal items found matching criteria.
+                  {t("demo.reportReviewOverride.noAbnormalItems")}
                 </p>
-                <p className="text-xs">All parameters are within normal ranges or filtered out.</p>
+                <p className="text-xs">{t("demo.reportReviewOverride.allNormalOrFiltered")}</p>
               </CardContent>
             </Card>
           ) : (
@@ -828,10 +835,10 @@ export default function ReportReviewOverride() {
                         </span> */}
                         <div>
                           <span className="font-bold text-sm text-slate-900 dark:text-white">
-                            {param.name_en}
+                            <LocalizedText value={param.name_en} />
                           </span>
                           <span className="text-xs text-slate-400 ml-2 inline-flex items-center gap-1">
-                            <span className="font-semibold">Normal:</span>
+                            <span className="font-semibold">{t("demo.reportReviewOverride.normalLabel")}</span>
                             <span>{param.normal_min}–{param.normal_max}</span>
                             <span>{param.unit}</span>
                           </span>
@@ -891,15 +898,15 @@ export default function ReportReviewOverride() {
                                     <Square className="h-4 w-4 text-slate-400 group-hover:text-emerald-400 shrink-0" />
                                   )}
                                   <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                                    {sec.title_en}
+                                    <LocalizedText value={sec.title_en} />
                                   </span>
                                 </div>
 
                                 <span className="text-[10px] font-mono text-slate-400 inline-flex items-center gap-1">
                                   <span>{selectedSecItems.length}</span>
-                                  <span aria-hidden="true">of</span>
+                                  <span aria-hidden="true">{t("demo.reportReviewOverride.of")}</span>
                                   <span>{secItems.length}</span>
-                                  <span>selected</span>
+                                  <span>{t("demo.reportReviewOverride.selected")}</span>
                                 </span>
                               </div>
 
@@ -930,7 +937,7 @@ export default function ReportReviewOverride() {
 
                                       <div className="flex-1 min-w-0">
                                         <p className="font-medium text-slate-900 dark:text-white leading-relaxed">
-                                          <span>{bullet.text_en}</span>
+                                          <LocalizedText value={bullet.text_en} />
                                         </p>
                                       </div>
 
@@ -964,7 +971,7 @@ export default function ReportReviewOverride() {
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
                 <span className="text-xs font-bold uppercase tracking-wider">
-                  Live Selected Report Preview
+                  {t("demo.reportReviewOverride.livePreview")}
                 </span>
               </div>
             </div>
@@ -976,7 +983,7 @@ export default function ReportReviewOverride() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-extrabold text-sm text-emerald-900 dark:text-emerald-200">
-                      QUANTUM HEALTH ANALYSIS REPORT
+                      {t("demo.reportReviewOverride.reportHeading")}
                     </h3>
                     <p className="text-[10px] text-slate-400 inline-flex items-center gap-1">
                       <span>{patient?.name || "—"}</span>
@@ -988,7 +995,7 @@ export default function ReportReviewOverride() {
                     </p>
                   </div>
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                    <span>{selectedItemsCount}</span> Points Selected
+                    <span>{selectedItemsCount}</span> {t("demo.reportReviewOverride.pointsSelected")}
                   </span>
                 </div>
               </div>
@@ -997,7 +1004,7 @@ export default function ReportReviewOverride() {
               {previewSelectedParameters.length === 0 ? (
                 <div className="py-20 text-center text-slate-400 space-y-2">
                   <AlertCircle className="h-8 w-8 text-slate-300 mx-auto" />
-                  <p className="text-xs">No points selected yet. Select items on the left to build the report.</p>
+                  <p className="text-xs">{t("demo.reportReviewOverride.noPointsSelected")}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -1007,9 +1014,8 @@ export default function ReportReviewOverride() {
                       <div key={p.id} className="border rounded-xl p-3 bg-slate-50/60 dark:bg-slate-800/40 space-y-2">
                         <div className="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-slate-700">
                           <div>
-                            <span className="font-mono font-bold text-emerald-600 text-[11px] mr-1.5">{p.code}</span>
                             <strong className="text-xs text-slate-800 dark:text-slate-100">
-                              {p.name_en}
+                              <LocalizedText value={p.name_en} />
                             </strong>
                           </div>
                           <span
@@ -1028,7 +1034,7 @@ export default function ReportReviewOverride() {
                             <div key={`${p.id}_${sec.id}`} className="space-y-1">
                               <h5 className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-1">
                                 <span aria-hidden="true">▸</span>
-                                <span>{sec.title_en}</span>
+                                <LocalizedText value={sec.title_en} />
                               </h5>
                               <ul className="space-y-1 pl-3 list-disc">
                                 {sec.items.map((bullet) => (
@@ -1037,7 +1043,7 @@ export default function ReportReviewOverride() {
                                     className={`text-[11px] text-slate-700 dark:text-slate-300 leading-snug ${bullet.level > 1 ? "ml-3 list-circle text-slate-500" : ""
                                       }`}
                                   >
-                                    <span>{bullet.text_en}</span>
+                                    <LocalizedText value={bullet.text_en} />
                                   </li>
                                 ))}
                               </ul>
@@ -1055,8 +1061,8 @@ export default function ReportReviewOverride() {
               {(selectedMedicines.length > 0 || (medicineNote || "").trim()) && (
                 <div className="border border-teal-200 dark:border-teal-800 rounded-xl p-3 bg-teal-50/40 dark:bg-teal-950/20 space-y-1.5">
                   <h5 className="text-[10px] font-bold uppercase tracking-wider text-teal-600 flex items-center gap-1">
-                    <Pill className="h-3 w-3" /> Recommended Medicines
-                    <span className="text-slate-400 font-normal normal-case">(whole report)</span>
+                    <Pill className="h-3 w-3" /> {t("demo.reportReviewOverride.recommendedMedicines")}
+                    <span className="text-slate-400 font-normal normal-case">{t("demo.reportReviewOverride.wholeReportParen")}</span>
                   </h5>
                   {selectedMedicines.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
@@ -1065,14 +1071,14 @@ export default function ReportReviewOverride() {
                           key={med._id}
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800 text-[10px] font-medium text-teal-700 dark:text-teal-300"
                         >
-                          <span>{med.name}</span>
+                          <LocalizedText value={med.name} />
                         </span>
                       ))}
                     </div>
                   )}
                   {medicineNote.trim() && (
                     <p className="pt-1 text-[10px] italic text-slate-500 dark:text-slate-400">
-                      <span className="font-semibold not-italic">Note:</span>{" "}
+                      <span className="font-semibold not-italic">{t("demo.reportReviewOverride.noteLabel")}</span>{" "}
                       <span>{medicineNote}</span>
                     </p>
                   )}
@@ -1083,14 +1089,14 @@ export default function ReportReviewOverride() {
             {/* Bottom Finalize Button */}
             <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t flex items-center justify-between">
               <span className="text-xs text-slate-500">
-                Ready to freeze snapshot?
+                {t("demo.reportReviewOverride.readyToFreeze")}
               </span>
               <Button
                 onClick={() => setShowConfirmModal(true)}
                 disabled={saving || selectedItemsCount === 0}
                 className="bg-emerald-600 hover:bg-emerald-700 font-bold text-xs"
               >
-                <FileCheck className="mr-1.5 h-4 w-4" /> Generate Final Report
+                <FileCheck className="mr-1.5 h-4 w-4" /> {t("demo.reportReviewOverride.generateFinalReport")}
               </Button>
             </div>
           </Card>
@@ -1105,29 +1111,28 @@ export default function ReportReviewOverride() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 border border-emerald-100">
             <div className="flex items-center gap-3 text-emerald-600">
               <Sparkles className="h-6 w-6" />
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Confirm Final Report Generation</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t("demo.reportReviewOverride.confirmTitle")}</h3>
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              <span>You have selected</span>{" "}
+              <span>{t("demo.reportReviewOverride.youHaveSelected")}</span>{" "}
               <strong className="text-emerald-600">
-                <span>{selectedItemsCount}</span> <span>content points</span>
+                <span>{selectedItemsCount}</span> <span>{t("demo.reportReviewOverride.contentPoints")}</span>
               </strong>{" "}
-              <span>across</span>{" "}
+              <span>{t("demo.reportReviewOverride.across")}</span>{" "}
               <strong>
-                <span>{previewSelectedParameters.length}</span> <span>parameters</span>
+                <span>{previewSelectedParameters.length}</span> <span>{t("demo.reportReviewOverride.parameters")}</span>
               </strong>
               <span>.</span>
             </p>
 
             <div className="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-100 text-xs space-y-1.5 text-slate-700 dark:text-slate-200">
               <p className="font-semibold text-emerald-900 dark:text-emerald-300">
-                <span>Report Freeze Guarantee:</span>
+                <span>{t("demo.reportReviewOverride.freezeGuarantee")}</span>
               </p>
               <p className="text-[11px] text-slate-500">
                 <span>
-                  A permanent version snapshot will be saved. Future master data edits will never alter this client's
-                  report.
+                  {t("demo.reportReviewOverride.freezeGuaranteeDesc")}
                 </span>
               </p>
             </div>
@@ -1135,8 +1140,8 @@ export default function ReportReviewOverride() {
             {/* Suggested Wellness Reassessment Date */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 inline-flex items-center gap-1">
-                <span>Suggested Wellness Reassessment Date</span>
-                <span className="text-slate-400 font-normal">(optional)</span>
+                <span>{t("demo.reportReviewOverride.reassessmentDate")}</span>
+                <span className="text-slate-400 font-normal">{t("demo.reportReviewOverride.optional")}</span>
               </label>
               <input
                 type="date"
@@ -1147,7 +1152,7 @@ export default function ReportReviewOverride() {
               />
               {nextVisitDate && (
                 <p className="text-[10px] text-emerald-500 inline-flex items-center gap-1">
-                  <span>Wellness reassessment scheduled for:</span>
+                  <span>{t("demo.reportReviewOverride.reassessmentScheduled")}</span>
                   <span>
                     {new Date(nextVisitDate).toLocaleDateString(undefined, {
                       year: "numeric",
@@ -1164,13 +1169,13 @@ export default function ReportReviewOverride() {
               <div className="flex items-center gap-1.5">
                 <span className="text-sm">💰</span>
                 <p className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wide">
-                  Report Price Confirmation
+                  {t("demo.reportReviewOverride.priceConfirmation")}
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                    <span>Price (₹)</span> <span className="text-rose-500">*</span>
+                    <span>{t("demo.reportReviewOverride.priceLabel")}</span> <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -1184,41 +1189,41 @@ export default function ReportReviewOverride() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
-                    <span>Payment Status</span>
+                    <span>{t("demo.reportReviewOverride.paymentStatusLabel")}</span>
                   </label>
                   <select
                     value={reportPaymentStatus}
                     onChange={(e) => setReportPaymentStatus(e.target.value)}
                     className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   >
-                    <option value="">Unpaid / Not Collected</option>
-                    <option value="PAID">Paid</option>
-                    <option value="PENDING">Pending</option>
+                    <option value="">{t("demo.reportReviewOverride.unpaidNotCollected")}</option>
+                    <option value="PAID">{t("demo.reportReviewOverride.paid")}</option>
+                    <option value="PENDING">{t("demo.reportReviewOverride.pending")}</option>
                   </select>
                 </div>
               </div>
               {!reportAmountValid && reportAmount !== "" && (
                 <p className="text-[10px] text-rose-500 font-medium">
-                  <span>Please enter a valid non-negative amount.</span>
+                  <span>{t("demo.reportReviewOverride.invalidAmount")}</span>
                 </p>
               )}
               <p className="text-[10px] text-slate-500 leading-snug">
                 <span>
-                  This amount & payment status will be saved to the visit and recorded with this final report.
+                  {t("demo.reportReviewOverride.priceNote")}
                 </span>
               </p>
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t">
               <Button variant="outline" onClick={() => setShowConfirmModal(false)}>
-                Back to Review
+                {t("demo.reportReviewOverride.backToReview")}
               </Button>
               <Button
                 onClick={handleGenerateFinalReport}
                 disabled={saving || !reportAmountValid}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
               >
-                {saving ? "Generating..." : "Confirm & View Report"}
+                {saving ? t("demo.reportReviewOverride.generating") : t("demo.reportReviewOverride.confirmViewReport")}
               </Button>
             </div>
           </div>

@@ -35,6 +35,8 @@ import {
 import DateRangeFilter from "./DateRangeFilter";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LocalizedText from "@/components/LocalizedText";
 const defaultLimitOptions = [5, 10, 25, 50, 100];
 
 const ReusableTable = forwardRef(
@@ -75,6 +77,7 @@ const ReusableTable = forwardRef(
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
       return () => {
@@ -125,7 +128,7 @@ const ReusableTable = forwardRef(
           err?.response?.data?.meta?.message ||
           err?.response?.data?.message ||
           err?.message ||
-          "Something went wrong";
+          t("demo.reusableTable.genericError");
         toast.error(msg);
       },
     });
@@ -254,7 +257,7 @@ const ReusableTable = forwardRef(
       setPage(1);
     };
 
-    const searchPlaceholder = typeof Search === "string" ? Search : "Search...";
+    const searchPlaceholder = typeof Search === "string" ? Search : `${t("demo.table.searchPlaceholder")}`;
 
     return (
       <>
@@ -287,14 +290,14 @@ const ReusableTable = forwardRef(
                   value={isActive === undefined ? "" : String(isActive)}
                 >
                   <SelectTrigger className="max-w-max">
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue placeholder={t("demo.reusableTable.selectStatus")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem key="active" value="true">
-                      Active
+                      {t("demo.reusableTable.active")}
                     </SelectItem>
                     <SelectItem key="inactive" value="false">
-                      Inactive
+                      {t("demo.reusableTable.inactive")}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -305,33 +308,33 @@ const ReusableTable = forwardRef(
                   value={status === undefined ? "" : status}
                 >
                   <SelectTrigger className="max-w-max">
-                    <SelectValue placeholder="Select Booking Status" />
+                    <SelectValue placeholder={t("demo.reusableTable.selectBookingStatus")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem key="confirmed" value="confirmed">
-                      Confirmed
+                      {t("demo.reusableTable.confirmed")}
                     </SelectItem>
                     <SelectItem key="completed" value="completed">
-                      Completed
+                      {t("demo.reusableTable.completed")}
                     </SelectItem>
                     <SelectItem key="booked" value="booked">
-                      Booked
+                      {t("demo.reusableTable.booked")}
                     </SelectItem>
                     <SelectItem key="cancelled" value="cancelled">
-                      Cancelled
+                      {t("demo.reusableTable.cancelled")}
                     </SelectItem>
                     <SelectItem key="request for refund" value="request for refund">
-                      Request for Refund
+                      {t("demo.reusableTable.requestRefund")}
                     </SelectItem>
                     <SelectItem key="refunded" value="refunded">
-                      Refunded
+                      {t("demo.reusableTable.refunded")}
                     </SelectItem>
                   </SelectContent>
                 </Select>
               )}
               {(search || status || isActive !== undefined || dateRange[0]) && (
                 <Button variant="outline" size="sm" onClick={handleClearFilters}>
-                  Clear Filters
+                  {t("demo.reusableTable.clearFilters")}
                 </Button>
               )}
             </div>
@@ -347,7 +350,7 @@ const ReusableTable = forwardRef(
             )}
             {viewAll && (
               <Button className="ms-auto" variant="outline" onClick={() => navigate('/booking')}>
-                View All
+                {t("demo.reusableTable.viewAll")}
               </Button>
             )}
           </div>
@@ -356,7 +359,7 @@ const ReusableTable = forwardRef(
         {selectedRows.length > 0 && (
           <div className="mb-4 text-sm font-medium inline-flex items-center gap-1">
             <span>{selectedRows.length}</span>
-            <span>row(s) selected</span>
+            <span>{t("demo.reusableTable.rowsSelected")}</span>
           </div>
         )}
 
@@ -400,7 +403,7 @@ const ReusableTable = forwardRef(
                       colSpan={headers.length + (selectable ? 1 : 0)}
                       className="text-center py-8 text-gray-400"
                     >
-                      No data found
+                      {t("demo.reusableTable.noData")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -426,7 +429,13 @@ const ReusableTable = forwardRef(
                               ? header.render(row)
                               : customCellRender[header.key]
                                 ? customCellRender[header.key](row[header.key], row)
-                                : row[header.key] ?? "—"}
+                                : row[header.key] === null ||
+                                  row[header.key] === undefined ||
+                                  row[header.key] === ""
+                                  ? "—"
+                                  : typeof row[header.key] === "object"
+                                    ? JSON.stringify(row[header.key])
+                                    : <LocalizedText value={row[header.key]} />}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -442,11 +451,11 @@ const ReusableTable = forwardRef(
           <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between mt-4">
             <div className="flex items-center gap-2">
               <label htmlFor="pageSize" className="text-sm flex-none text-muted-foreground">
-                Rows per page:
+                {t("demo.table.rowsPerPage")}
               </label>
               <Select onValueChange={handleLimitChange} value={String(limit)}>
                 <SelectTrigger className="w-[80px]">
-                  <SelectValue placeholder="Size" />
+                  <SelectValue placeholder={t("demo.reusableTable.sizePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {limitOptions.map((opt) => (
@@ -467,8 +476,8 @@ const ReusableTable = forwardRef(
               pageClassName="border rounded-md cursor-pointer"
               activeClassName="active bg-primary dark:bg-gray-800 border-primary dark:border-gray-800 text-white font-bold"
               pageLinkClassName="px-3 py-1 bg-transparent text-sm inline-block"
-              previousLabel="Prev"
-              nextLabel="Next"
+              previousLabel={t("demo.table.prev")}
+              nextLabel={t("demo.table.next")}
               breakLabel="..."
               previousLinkClassName="px-3 py-1 bg-transparent text-sm inline-block"
               nextLinkClassName="px-3 py-1 bg-transparent text-sm inline-block"

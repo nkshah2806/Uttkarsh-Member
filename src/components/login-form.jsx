@@ -9,8 +9,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export function LoginForm({ className, ...props }) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -40,12 +42,12 @@ export function LoginForm({ className, ...props }) {
       // the route guard can immediately decide which pages are reachable.
       localStorage.setItem("memberApprovalStatus", userData?.approval_status || "pending");
       localStorage.setItem("memberIsActive", userData?.isActive !== false ? "true" : "false");
-      toast.success("Login successful");
+      toast.success(t("demo.loginForm.loginSuccess"));
       // The PrivateRoute guard redirects incomplete / not-yet-approved
       // members to the Personal Details page automatically.
       navigate("/dashboard");
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Login failed");
+      toast.error(error?.response?.data?.message || t("demo.loginForm.loginFailed"));
     } finally {
       setLoading(false);
     }
@@ -58,19 +60,19 @@ export function LoginForm({ className, ...props }) {
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center mb-5">
-        <h1 className="text-3xl font-bold">Member Login</h1>
+        <h1 className="text-3xl font-bold">{t("demo.loginForm.title")}</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          Enter your email
+          {t("demo.loginForm.subtitle")}
         </p>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-3">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("demo.loginForm.email")}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
-            {...register("email", { required: "Email is required" })}
+            placeholder={t("demo.loginForm.emailPlaceholder")}
+            {...register("email", { required: t("demo.loginForm.emailRequired") })}
           />
           {errors.email && (
             <p className="text-red-500 text-sm">{errors.email.message}</p>
@@ -78,19 +80,19 @@ export function LoginForm({ className, ...props }) {
         </div>
 
         <div className="grid gap-3">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t("demo.loginForm.password")}</Label>
           <div className="flex items-center justify-between relative">
             <Input
               id="password"
               type={passVisible ? "password" : "text"}
-              placeholder="Enter your password"
-              {...register("password", { required: "Password is required" })}
+              placeholder={t("demo.loginForm.passwordPlaceholder")}
+              {...register("password", { required: t("demo.loginForm.passwordRequired") })}
             />
             <button
               type="button"
               onClick={handlePasswordVisible}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label="Show password"
+              aria-label={t("demo.loginForm.showPassword")}
             >
               {passVisible ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -109,13 +111,13 @@ export function LoginForm({ className, ...props }) {
           size="lg"
           disabled={loading}
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? t("demo.loginForm.loggingIn") : t("demo.loginForm.login")}
         </Button>
         <Link
           to="/forgot-password"
           className="text-[14px] font-medium hover:text-gray-500 duration-300 transition-all"
         >
-          Forgot your password?
+          {t("demo.loginForm.forgotLink")}
         </Link>
       </div>
     </form>

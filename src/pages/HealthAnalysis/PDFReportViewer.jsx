@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, Share2, Loader2 } from "lucide-react";
+import { Loader } from "@/components/Loader";
 import { toast } from "sonner";
 import {
   openReportForPdfSave,
@@ -11,6 +13,7 @@ import {
 
 export default function PDFReportViewer() {
   const { visitId } = useParams();
+  const { t, i18n } = useTranslation();
 
   const [reportHtml, setReportHtml] = useState("");
   const [reportId, setReportId] = useState(null);
@@ -32,7 +35,7 @@ export default function PDFReportViewer() {
         const res = await axiosInstance.post(
           `v1/visits/${visitId}/generate-pdf`,
           {
-            lang: "en",
+            lang: i18n.language,
           }
         );
         if (!isMountedRef.current) return;
@@ -40,7 +43,7 @@ export default function PDFReportViewer() {
         setReportId(res.data.report_id);
       } catch (err) {
         if (isMountedRef.current) {
-          toast.error("Failed to compile report. Please try again.");
+          toast.error(t("demo.pdfReportViewer.toastCompileFailed"));
         }
       } finally {
         if (isMountedRef.current) {
@@ -48,7 +51,7 @@ export default function PDFReportViewer() {
         }
       }
     },
-    [visitId]
+    [visitId, i18n.language, t]
   );
 
   useEffect(() => {
@@ -88,19 +91,19 @@ export default function PDFReportViewer() {
   const handleDownloadPdf = async () => {
     if (pdfBusy) return; // prevent duplicate clicks while generating
     if (loading || !reportHtml) {
-      toast.error("Report is not ready yet. Please wait for it to compile.");
+      toast.error(t("demo.pdfReportViewer.toastNotReady"));
       return;
     }
     setPdfBusy(true);
     try {
       const win = openReportForPdfSave(reportHtml, reportTitle);
       if (!win) {
-        toast.error("Could not open the print window. Please allow pop-ups for this site and try again.");
+        toast.error(t("demo.pdfReportViewer.toastPopupBlocked"));
       } else {
-        toast.success("Choose “Save as PDF” as the destination to download the report.");
+        toast.success(t("demo.pdfReportViewer.toastSaveAsPdf"));
       }
     } catch (err) {
-      toast.error("Failed to open PDF download. Please try again.");
+      toast.error(t("demo.pdfReportViewer.toastDownloadFailed"));
     } finally {
       setPdfBusy(false);
     }
@@ -110,7 +113,7 @@ export default function PDFReportViewer() {
   const handleWhatsApp = async () => {
     if (pdfBusy) return; // prevent duplicate clicks while generating
     if (loading || !reportId || !reportHtml) {
-      toast.error("Report is not ready yet. Please wait for it to compile.");
+      toast.error(t("demo.pdfReportViewer.toastNotReady"));
       return;
     }
     setPdfBusy(true);
@@ -126,12 +129,12 @@ export default function PDFReportViewer() {
         },
       });
       if (started) {
-        toast.success("PDF generated. Save it, attach it to the WhatsApp chat, and send it with the message.");
+        toast.success(t("demo.pdfReportViewer.toastWhatsappReady"));
       } else {
-        toast.error("Could not open the print window. Please allow pop-ups for this site and try again.");
+        toast.error(t("demo.pdfReportViewer.toastPopupBlocked"));
       }
     } catch (err) {
-      toast.error("Failed to generate WhatsApp link");
+      toast.error(t("demo.pdfReportViewer.toastWhatsappFailed"));
     } finally {
       setPdfBusy(false);
     }
@@ -144,14 +147,14 @@ export default function PDFReportViewer() {
         <div className="flex items-center gap-3">
           <div className="h-8 w-1 rounded-full bg-emerald-600" />
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Quantum Health Report</p>
-            <p className="text-sm font-bold text-slate-800 dark:text-white">{"Visit #{id}".replace("{id}", visitId?.slice(-6).toUpperCase())}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t("demo.pdfReportViewer.headerLabel")}</p>
+            <p className="text-sm font-bold text-slate-800 dark:text-white">{t("demo.pdfReportViewer.visitLabel", { id: visitId?.slice(-6).toUpperCase() })}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={handlePrint}>
-            <Printer className="mr-1.5 h-4 w-4" /> Print
+            <Printer className="mr-1.5 h-4 w-4" /> {t("demo.pdfReportViewer.print")}
           </Button>
           <Button
             variant="outline"
@@ -164,7 +167,7 @@ export default function PDFReportViewer() {
             ) : (
               <Download className="mr-1.5 h-4 w-4" />
             )}
-            Download PDF
+            {t("demo.pdfReportViewer.downloadPdf")}
           </Button>
           <Button
             size="sm"
@@ -177,23 +180,20 @@ export default function PDFReportViewer() {
             ) : (
               <Share2 className="mr-1.5 h-4 w-4" />
             )}
-            Share via WhatsApp
+            {t("demo.pdfReportViewer.shareWhatsapp")}
           </Button>
         </div>
       </div>
 
       {/* Report Preview */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 space-y-4 bg-white dark:bg-slate-900 rounded-2xl border shadow-sm">
-          <div className="h-10 w-10 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
-          <p className="text-sm text-slate-500">
-            Compiling your report...
-          </p>
+        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-2xl border shadow-sm">
+          <Loader size={40} label={t("demo.pdfReportViewer.compiling")} style={{ flexDirection: "column" }} />
         </div>
       ) : (
         <div className="bg-white p-4 rounded-2xl shadow-lg border overflow-hidden max-w-4xl mx-auto">
           <iframe
-            title="Report Preview"
+            title={t("demo.pdfReportViewer.iframeTitle")}
             srcDoc={reportHtml}
             className="w-full border-0"
             style={{ height: "80vh", minHeight: 600 }}

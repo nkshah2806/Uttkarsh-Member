@@ -1,4 +1,6 @@
+import React from "react";
 import { createColumnHelper } from "@tanstack/react-table";
+import LocalizedText from "@/components/LocalizedText";
 const columnHelper = createColumnHelper();
 const safeString = (value) => {
   if (typeof value === "object") {
@@ -28,15 +30,26 @@ export const generateTableColumns = (headers) => {
           return (
             <ul className="list-disc pl-4">
               {value.map((item, i) => (
-                <li key={i}>{safeString(item)}</li>
+                <li key={i}>
+                  <LocalizedText value={item} fallback={safeString(item)} />
+                </li>
               ))}
             </ul>
           );
         }
         if (typeof value === "object" && value !== null) {
-          return Object.values(value).map(safeString).join(", ");
+          return (
+            <span>
+              {Object.values(value).map((v, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && ", "}
+                  <LocalizedText value={v} fallback={safeString(v)} />
+                </React.Fragment>
+              ))}
+            </span>
+          );
         }
-        return safeString(value);
+        return <LocalizedText value={value} fallback={safeString(value)} />;
       },
     })
   );

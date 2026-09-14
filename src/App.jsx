@@ -22,8 +22,10 @@ import {
 } from "./pages/HealthAnalysis";
 import MemberProfilePage from "./pages/MemberProfile";
 import ScrollToTop from "./components/ScrollToTop";
+import { useTranslation } from "react-i18next";
 
 function App() {
+  const { t } = useTranslation();
   return (
     <>
       <Toaster position="top-right" />
@@ -57,7 +59,7 @@ function App() {
             </Route>
             <Route path="/user/:id" element={<UserDetails />} />
           </Route>
-          <Route path="*" element={<div>404 Not Found</div>} />
+          <Route path="*" element={<div>{t("common.notFound")}</div>} />
         </Routes>
       </BrowserRouter>
     </>

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import axiosInstance from "@/lib/axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { scanPricingService } from "@/services/scanPricingService";
 import ScanPricingSelectionModal from "@/components/ScanPricingSelectionModal";
+import { Loader, PageLoader } from "@/components/Loader";
 import {
   ArrowLeft,
   User,
@@ -40,8 +42,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import ReusableTable from "@/components/ReusableTable";
+import LocalizedText from "@/components/LocalizedText";
 
 export default function PatientDetails() {
+  const { t, i18n } = useTranslation();
   const { patientId } = useParams();
   const navigate = useNavigate();
 
@@ -94,7 +98,7 @@ export default function PatientDetails() {
         setStats(res.data.data.stats || {});
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to load client details");
+      toast.error(err.response?.data?.message || t("demo.patientDetails.toastLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -123,11 +127,11 @@ export default function PatientDetails() {
     try {
       setSubmittingEdit(true);
       await axiosInstance.put(`v1/patients/${patientId}`, editForm);
-      toast.success("Client details updated successfully");
+      toast.success(t("demo.patientDetails.toastUpdateSuccess"));
       setShowEditModal(false);
       fetchPatientProfile();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update client details");
+      toast.error(err.response?.data?.message || t("demo.patientDetails.toastUpdateFailed"));
     } finally {
       setSubmittingEdit(false);
     }
@@ -142,7 +146,7 @@ export default function PatientDetails() {
       });
       navigate(`/quantum-scan/${visitRes.data.data._id}`);
     } catch (err) {
-      toast.error("Failed to start new scan");
+      toast.error(t("demo.patientDetails.toastStartScanFailed"));
       setStartingScan(false);
     }
   };
@@ -152,7 +156,7 @@ export default function PatientDetails() {
       setStartingScan(true);
       const pricings = await scanPricingService.getActiveScanPricings();
       if (pricings.length === 0) {
-        toast.info("No active scan price configured. Scan will be recorded without an amount.");
+        toast.info(t("demo.patientDetails.toastNoPrice"));
         await launchVisit(undefined);
         return;
       }
@@ -167,7 +171,7 @@ export default function PatientDetails() {
       setPricingModalOpen(true);
       setStartingScan(false);
     } catch (err) {
-      toast.error("Failed to start new scan");
+      toast.error(t("demo.patientDetails.toastStartScanFailed"));
       setStartingScan(false);
     }
   };
@@ -191,7 +195,7 @@ export default function PatientDetails() {
         setDetailedReport(res.data.data);
       }
     } catch (err) {
-      toast.error("Failed to load full report details");
+      toast.error(t("demo.patientDetails.toastReportLoadFailed"));
     } finally {
       setReportLoading(false);
     }
@@ -201,7 +205,7 @@ export default function PatientDetails() {
   const handlePrintReport = async (visitId) => {
     try {
       const res = await axiosInstance.post(`v1/visits/${visitId}/generate-pdf`, {
-        lang: "en",
+        lang: i18n.language,
       });
       const win = window.open("", "_blank");
       if (!win) return;
@@ -223,14 +227,14 @@ export default function PatientDetails() {
         setTimeout(() => win.print(), 200);
       }, 350);
     } catch (err) {
-      toast.error("Failed to prepare report for printing");
+      toast.error(t("demo.patientDetails.toastPrintFailed"));
     }
   };
 
   const handleDownloadReport = async (visitId) => {
     try {
       const res = await axiosInstance.post(`v1/visits/${visitId}/generate-pdf`, {
-        lang: "en",
+        lang: i18n.language,
       });
       const blob = new Blob([res.data.html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
@@ -241,22 +245,22 @@ export default function PatientDetails() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success("Report file downloaded successfully");
+      toast.success(t("demo.patientDetails.toastDownloadSuccess"));
     } catch (err) {
-      toast.error("Failed to download report");
+      toast.error(t("demo.patientDetails.toastDownloadFailed"));
     }
   };
 
   const handleWhatsAppShare = async (reportId) => {
     if (!reportId) {
-      toast.info("Please generate the PDF report preview first to share via WhatsApp");
+      toast.info(t("demo.patientDetails.toastWhatsappFirst"));
       return;
     }
     try {
       const res = await axiosInstance.post(`v1/visits/reports/${reportId}/share/whatsapp`);
       window.open(res.data.whatsappUrl, "_blank");
     } catch (err) {
-      toast.error("Failed to generate WhatsApp share link");
+      toast.error(t("demo.patientDetails.toastWhatsappFailed"));
     }
   };
 
@@ -266,16 +270,16 @@ export default function PatientDetails() {
     const heightInMeters = Number(height) / 100;
     if (heightInMeters <= 0) return null;
     const bmi = (Number(weight) / (heightInMeters * heightInMeters)).toFixed(1);
-    let category = "Normal";
+    let category = t("demo.patientDetails.bmiNormal");
     let color = "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800";
     if (bmi < 18.5) {
-      category = "Underweight";
+      category = t("demo.patientDetails.bmiUnderweight");
       color = "text-amber-600 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800";
     } else if (bmi >= 25 && bmi < 30) {
-      category = "Overweight";
+      category = t("demo.patientDetails.bmiOverweight");
       color = "text-orange-600 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800";
     } else if (bmi >= 30) {
-      category = "Obese";
+      category = t("demo.patientDetails.bmiObese");
       color = "text-rose-600 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800";
     }
     return { value: bmi, category, color };
@@ -285,10 +289,7 @@ export default function PatientDetails() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[450px] space-y-4">
-        <div className="h-10 w-10 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
-        <p className="text-sm font-medium text-slate-500">Loading comprehensive client record...</p>
-      </div>
+      <PageLoader label={t("demo.patientDetails.loading")} minHeight="28rem" />
     );
   }
 
@@ -296,9 +297,9 @@ export default function PatientDetails() {
     return (
       <div className="text-center py-16 space-y-4">
         <AlertCircle className="h-12 w-12 text-rose-500 mx-auto" />
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Client Record Not Found</h2>
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t("demo.patientDetails.notFound")}</h2>
         <Button onClick={() => navigate("/patients")} variant="outline">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Client List
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t("demo.patientDetails.backToClientList")}
         </Button>
       </div>
     );
@@ -322,7 +323,7 @@ export default function PatientDetails() {
   const headers = [
     {
       key: "_id",
-      label: "Visit ID",
+      label: t("demo.patientDetails.colVisitId"),
       sortable: true,
       render: (v) => (
         <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50/80 dark:bg-emerald-950/50 px-2 py-1 rounded">
@@ -332,7 +333,7 @@ export default function PatientDetails() {
     },
     {
       key: "visit_date",
-      label: "Visit Date",
+      label: t("demo.patientDetails.colVisitDate"),
       sortable: true,
       render: (v) => (
         <div className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
@@ -349,7 +350,7 @@ export default function PatientDetails() {
     },
     {
       key: "next_visit_date",
-      label: "Suggested Reassessment",
+      label: t("demo.patientDetails.colSuggestedReassessment"),
       sortable: true,
       render: (v) =>
         v.next_visit_date ? (
@@ -371,39 +372,39 @@ export default function PatientDetails() {
     },
     {
       key: "status",
-      label: "Status",
+      label: t("demo.patientDetails.colStatus"),
       sortable: true,
       render: (v) =>
         v.status === "SHARED" ? (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            <CheckCircle2 className="h-3 w-3" /> Shared
+            <CheckCircle2 className="h-3 w-3" /> {t("demo.patientDetails.statusShared")}
           </span>
         ) : v.status === "REPORT_READY" ? (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            <FileText className="h-3 w-3" /> Report Ready
+            <FileText className="h-3 w-3" /> {t("demo.patientDetails.statusReportReady")}
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-            <Clock className="h-3 w-3" /> In Progress
+            <Clock className="h-3 w-3" /> {t("demo.patientDetails.statusInProgress")}
           </span>
         ),
     },
     {
       key: "parameters",
-      label: "Parameters",
+      label: t("demo.patientDetails.colParameters"),
       render: (v) => (
         <div className="flex items-center gap-1.5 text-xs">
           <span className="font-bold text-slate-800 dark:text-slate-200">{v.total_parameters}</span>
           {v.abnormal_parameters > 0 && (
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
               <span>{v.abnormal_parameters}</span>
-              <span>Abn.</span>
+              <span>{t("demo.patientDetails.colAbn")}</span>
             </span>
           )}
           {v.normal_parameters > 0 && (
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
               <span>{v.normal_parameters}</span>
-              <span>Norm.</span>
+              <span>{t("demo.patientDetails.colNorm")}</span>
             </span>
           )}
         </div>
@@ -411,7 +412,7 @@ export default function PatientDetails() {
     },
     {
       key: "scan_amount",
-      label: "Amount",
+      label: t("demo.patientDetails.colAmount"),
       sortable: true,
       render: (v) =>
         v.scan_amount !== null && v.scan_amount !== undefined ? (
@@ -424,7 +425,7 @@ export default function PatientDetails() {
               </span>
               {v.scan_pricing_name && (
                 <span className="block text-[10px] text-slate-400 font-medium">
-                  <span>{v.scan_pricing_name}</span>
+                  <LocalizedText value={v.scan_pricing_name} />
                 </span>
               )}
             </div>
@@ -437,7 +438,7 @@ export default function PatientDetails() {
     },
     {
       key: "actions",
-      label: "Actions",
+      label: t("demo.patientDetails.colActions"),
       render: (v) => (
         <div className="flex items-center gap-1.5 flex-wrap">
           <Button
@@ -445,16 +446,16 @@ export default function PatientDetails() {
             variant="outline"
             onClick={() => openReportModal(v._id)}
             className="h-8 px-2.5 text-xs font-semibold text-emerald-600 border-emerald-200 hover:bg-emerald-50 dark:text-emerald-300 dark:border-emerald-800 dark:hover:bg-emerald-950"
-            title="View Full Report Breakdown"
+            title={t("demo.patientDetails.actionViewBreakdown")}
           >
-            <Eye className="h-3.5 w-3.5 mr-1" /> View Report
+            <Eye className="h-3.5 w-3.5 mr-1" /> {t("demo.patientDetails.actionViewReport")}
           </Button>
           <Button
             size="sm"
             variant="ghost"
             onClick={() => navigate(`/report-pdf/${v._id}`)}
             className="h-8 w-8 p-0 text-slate-600 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400"
-            title="Open PDF Document Preview"
+            title={t("demo.patientDetails.actionOpenPdf")}
           >
             <ExternalLink className="h-4 w-4" />
           </Button>
@@ -463,7 +464,7 @@ export default function PatientDetails() {
             variant="ghost"
             onClick={() => handleDownloadReport(v._id)}
             className="h-8 w-8 p-0 text-slate-600 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400"
-            title="Download Report File"
+            title={t("demo.patientDetails.actionDownload")}
           >
             <Download className="h-4 w-4" />
           </Button>
@@ -472,7 +473,7 @@ export default function PatientDetails() {
             variant="ghost"
             onClick={() => handlePrintReport(v._id)}
             className="h-8 w-8 p-0 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-            title="Print Report"
+            title={t("demo.patientDetails.actionPrint")}
           >
             <Printer className="h-4 w-4" />
           </Button>
@@ -490,7 +491,7 @@ export default function PatientDetails() {
             size="icon"
             onClick={() => navigate("/patients")}
             className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
-            title="Back to Client List"
+            title={t("demo.patientDetails.backToClientList")}
           >
             <ArrowLeft className="h-5 w-5 text-slate-600 dark:text-slate-300" />
           </Button>
@@ -500,18 +501,18 @@ export default function PatientDetails() {
                 {patientData.patient_code}
               </span>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                <span>{patientData.name}</span>
+                <LocalizedText value={patientData.name} />
               </h1>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 inline-flex items-center gap-1">
                 <span>{patientData.age}</span>
-                <span>Yrs</span>
+                <span>{t("demo.patientDetails.yearsShort")}</span>
                 <span aria-hidden="true">·</span>
-                <span>{patientData.gender}</span>
+                <LocalizedText value={patientData.gender} />
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-slate-400" />
-              <span>Registered on</span>
+              <span>{t("demo.patientDetails.registeredOn")}</span>
               <span>
                 {new Date(patientData.createdAt).toLocaleDateString("en-IN", {
                   day: "numeric",
@@ -530,14 +531,14 @@ export default function PatientDetails() {
             size="sm"
             className="font-medium text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700"
           >
-            <Pencil className="h-4 w-4 mr-1.5 text-slate-500" /> Edit Profile
+            <Pencil className="h-4 w-4 mr-1.5 text-slate-500" /> {t("demo.patientDetails.editProfile")}
           </Button>
           <Button
             onClick={startNewScan}
             size="sm"
             className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm flex items-center gap-1.5"
           >
-            <Plus className="h-4 w-4" /> Start New Scan
+            <Plus className="h-4 w-4" /> {t("demo.patientDetails.startNewScan")}
           </Button>
         </div>
       </div>
@@ -550,42 +551,42 @@ export default function PatientDetails() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
                 <User className="h-4 w-4 text-emerald-600" />
-                Client Information & Vitals
+                {t("demo.patientDetails.clientInfoVitals")}
               </CardTitle>
               <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                Complete Profile
+                {t("demo.patientDetails.completeProfile")}
               </span>
             </div>
           </CardHeader>
           <CardContent className="p-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Client ID</p>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("demo.patientDetails.clientId")}</p>
                 <p className="text-base font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
                   <span>{patientData.patient_code}</span>
                 </p>
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Full Name</p>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("demo.patientDetails.fullName")}</p>
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 mt-0.5">
-                  <span>{patientData.name}</span>
+                  <LocalizedText value={patientData.name} />
                 </p>
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Age / Gender</p>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("demo.patientDetails.ageGender")}</p>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5 inline-flex items-center gap-1">
                   <span>{patientData.age}</span>
-                  <span>Years</span>
+                  <span>{t("demo.patientDetails.years")}</span>
                   <span aria-hidden="true">/</span>
-                  <span>{patientData.gender}</span>
+                  <LocalizedText value={patientData.gender} />
                 </p>
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <Phone className="h-3 w-3 text-slate-400" /> Mobile Number
+                  <Phone className="h-3 w-3 text-slate-400" /> {t("demo.patientDetails.mobileNumber")}
                 </p>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                   <span>{patientData.mobile}</span>
@@ -594,16 +595,16 @@ export default function PatientDetails() {
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <Mail className="h-3 w-3 text-slate-400" /> Email Address
+                  <Mail className="h-3 w-3 text-slate-400" /> {t("demo.patientDetails.emailAddress")}
                 </p>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5 truncate" title={patientData.email || "Not Provided"}>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5 truncate" title={patientData.email || t("demo.patientDetails.notProvided")}>
                   <span>{patientData.email || "—"}</span>
                 </p>
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <Calendar className="h-3 w-3 text-slate-400" /> Date of Birth
+                  <Calendar className="h-3 w-3 text-slate-400" /> {t("demo.patientDetails.dateOfBirth")}
                 </p>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                   <span>
@@ -621,7 +622,7 @@ export default function PatientDetails() {
               {/* Physical Vitals */}
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <Scale className="h-3 w-3 text-emerald-500" /> Weight
+                  <Scale className="h-3 w-3 text-emerald-500" /> {t("demo.patientDetails.weight")}
                 </p>
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
                   <span>{patientData.weight ? `${patientData.weight} ${patientData.weight_unit || "kg"}` : "—"}</span>
@@ -630,7 +631,7 @@ export default function PatientDetails() {
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <Ruler className="h-3 w-3 text-teal-500" /> Height
+                  <Ruler className="h-3 w-3 text-teal-500" /> {t("demo.patientDetails.height")}
                 </p>
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
                   <span>{patientData.height ? `${patientData.height} ${patientData.height_unit || "cm"}` : "—"}</span>
@@ -639,7 +640,7 @@ export default function PatientDetails() {
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <HeartPulse className="h-3 w-3 text-emerald-500" /> Calculated BMI
+                  <HeartPulse className="h-3 w-3 text-emerald-500" /> {t("demo.patientDetails.calculatedBmi")}
                 </p>
                 {bmiInfo ? (
                   <div className="flex items-center gap-2 mt-0.5">
@@ -657,10 +658,10 @@ export default function PatientDetails() {
             {/* Address */}
             <div className="mt-4 p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5 text-slate-400" /> Residential Address
+                <MapPin className="h-3.5 w-3.5 text-slate-400" /> {t("demo.patientDetails.residentialAddress")}
               </p>
               <p className="text-sm text-slate-700 dark:text-slate-300 mt-1 whitespace-pre-line">
-                <span>{patientData.address || "No address recorded on file."}</span>
+                <span>{patientData.address || t("demo.patientDetails.noAddress")}</span>
               </p>
             </div>
           </CardContent>
@@ -672,18 +673,18 @@ export default function PatientDetails() {
             <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
               <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
                 <Stethoscope className="h-4 w-4 text-teal-600" />
-                Consultation Summary
+                {t("demo.patientDetails.consultationSummary")}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
               <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                 <div>
-                  <p className="text-xs font-semibold text-slate-400">Consultant / Registered By</p>
+                  <p className="text-xs font-semibold text-slate-400">{t("demo.patientDetails.consultantRegisteredBy")}</p>
                   <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-                    <span>{patientData.registered_by?.fullName || patientData.registered_by?.username || "Franchise Consultant"}</span>
+                    <span>{patientData.registered_by?.fullName || patientData.registered_by?.username || t("demo.patientDetails.franchiseConsultant")}</span>
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    <span>{patientData.registered_by?.email || patientData.registered_by?.role || "Wellness Consultant"}</span>
+                    <span>{patientData.registered_by?.email || patientData.registered_by?.role || t("demo.patientDetails.wellnessConsultant")}</span>
                   </p>
                 </div>
                 <span className="p-2 bg-emerald-50 dark:bg-emerald-950/60 rounded-xl text-emerald-600 dark:text-emerald-400">
@@ -693,39 +694,39 @@ export default function PatientDetails() {
 
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
-                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Total Scans</p>
+                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{t("demo.patientDetails.totalScans")}</p>
                   <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">
                     {visits.length}
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Sessions logged</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{t("demo.patientDetails.sessionsLogged")}</p>
                 </div>
 
                 <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
-                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Latest Status</p>
+                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{t("demo.patientDetails.latestStatus")}</p>
                   <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-2 truncate">
                     <span>
                       {visits.length > 0
                         ? visits[0].status === "SHARED"
-                          ? "Report Shared"
+                          ? t("demo.patientDetails.reportShared")
                           : visits[0].status === "REPORT_READY"
-                            ? "Report Ready"
-                            : "In Progress"
-                        : "Registered"}
+                            ? t("demo.patientDetails.reportReady")
+                            : t("demo.patientDetails.inProgress")
+                        : t("demo.patientDetails.registered")}
                     </span>
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Current state</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{t("demo.patientDetails.currentState")}</p>
                 </div>
               </div>
 
               <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-xs space-y-1.5 border border-slate-100 dark:border-slate-800">
                 <div className="flex justify-between text-slate-500">
-                  <span>First Registration:</span>
+                  <span>{t("demo.patientDetails.firstRegistration")}</span>
                   <span className="font-semibold text-slate-700 dark:text-slate-300">
                     {new Date(patientData.createdAt).toLocaleDateString("en-IN")}
                   </span>
                 </div>
                 <div className="flex justify-between text-slate-500">
-                  <span>Last Visit Date:</span>
+                  <span>{t("demo.patientDetails.lastVisitDate")}</span>
                   <span className="font-semibold text-slate-700 dark:text-slate-300">
                     {visits.length > 0
                       ? new Date(visits[0].visit_date || visits[0].createdAt).toLocaleDateString("en-IN")
@@ -741,7 +742,7 @@ export default function PatientDetails() {
               onClick={startNewScan}
               className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-2.5 rounded-xl shadow-sm"
             >
-              <Plus className="h-4 w-4 mr-2" /> Start New Quantum Scan
+              <Plus className="h-4 w-4 mr-2" /> {t("demo.patientDetails.startNewQuantumScan")}
             </Button>
           </div>
         </Card>
@@ -754,16 +755,16 @@ export default function PatientDetails() {
             <div>
               <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
                 <FileText className="h-4 w-4 text-emerald-600" />
-                Previous Reports & Visit History
+                {t("demo.patientDetails.previousReports")}
               </CardTitle>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                All previously generated health analysis scans and clinical reports for this client.
+                {t("demo.patientDetails.previousReportsDesc")}
               </p>
             </div>
             <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
               <span>{visits.length}</span>
-              <span>Historical</span>
-              <span>{visits.length === 1 ? "Session" : "Sessions"}</span>
+              <span>{t("demo.patientDetails.historical")}</span>
+              <span>{visits.length === 1 ? t("demo.patientDetails.session") : t("demo.patientDetails.sessions")}</span>
             </span>
           </div>
         </CardHeader>
@@ -774,12 +775,14 @@ export default function PatientDetails() {
             emptyMessage={
               <div className="text-center py-12 space-y-3 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
                 <Activity className="h-10 w-10 text-emerald-400 mx-auto" />
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No Previous Reports Yet</p>
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{t("demo.patientDetails.noPreviousReports")}</p>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  No scan sessions or clinical reports have been generated for <span>{patientData?.name ?? "this client"}</span> yet. Click below to start the first scan session.
+                  {t("demo.patientDetails.noPreviousReportsDesc")}{" "}
+                  <span>{patientData?.name ?? t("demo.patientDetails.thisClient")}</span>{" "}
+                  {t("demo.patientDetails.noPreviousReportsDesc2")}
                 </p>
                 <Button onClick={startNewScan} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white mt-2">
-                  <Plus className="h-4 w-4 mr-1.5" /> Start First Scan Session
+                  <Plus className="h-4 w-4 mr-1.5" /> {t("demo.patientDetails.startFirstScan")}
                 </Button>
               </div>
             }
@@ -800,7 +803,7 @@ export default function PatientDetails() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                      Quantum Health Analysis Report
+                      {t("demo.patientDetails.reportTitle")}
                     </h3>
                     {selectedVisitId && (
                       <span className="font-mono text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded font-bold">
@@ -809,16 +812,16 @@ export default function PatientDetails() {
                     )}
                   </div>
                   <p className="text-xs text-slate-500 inline-flex flex-wrap items-center gap-x-1 gap-y-0.5">
-                    <span>Client:</span>
+                    <span>{t("demo.patientDetails.clientLabel")}</span>
                     <strong className="text-slate-700 dark:text-slate-300">
-                      <span>{patientData.name}</span>
+                      <LocalizedText value={patientData.name} />
                     </strong>
                     <span>({patientData.patient_code})</span>
                     <span aria-hidden="true">·</span>
                     <span>{patientData.age}</span>
-                    <span>Yrs</span>
+                    <span>{t("demo.patientDetails.yearsShort")}</span>
                     <span aria-hidden="true">/</span>
-                    <span>{patientData.gender}</span>
+                    <LocalizedText value={patientData.gender} />
                   </p>
                 </div>
               </div>
@@ -830,7 +833,7 @@ export default function PatientDetails() {
                   onClick={() => handlePrintReport(selectedVisitId)}
                   className="hidden sm:flex items-center gap-1 text-xs"
                 >
-                  <Printer className="h-3.5 w-3.5" /> Print
+                  <Printer className="h-3.5 w-3.5" /> {t("demo.patientDetails.print")}
                 </Button>
 
                 <Button
@@ -838,7 +841,7 @@ export default function PatientDetails() {
                   onClick={() => navigate(`/report-pdf/${selectedVisitId}`)}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold"
                 >
-                  <ExternalLink className="h-3.5 w-3.5 mr-1" /> Open Full PDF
+                  <ExternalLink className="h-3.5 w-3.5 mr-1" /> {t("demo.patientDetails.openFullPdf")}
                 </Button>
 
                 <button
@@ -853,54 +856,53 @@ export default function PatientDetails() {
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-6 flex-1">
               {reportLoading ? (
-                <div className="flex flex-col items-center justify-center py-20 space-y-3">
-                  <div className="h-8 w-8 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
-                  <p className="text-xs font-semibold text-slate-500">Compiling detailed report evaluation...</p>
+                <div className="flex flex-col items-center justify-center py-20">
+                  <Loader size={36} label={t("demo.patientDetails.compiling")} style={{ flexDirection: "column" }} />
                 </div>
               ) : !detailedReport ? (
                 <div className="text-center py-12 text-slate-500">
-                  Failed to load report data.
+                  {t("demo.patientDetails.reportLoadFailed")}
                 </div>
               ) : (
                 <>
                   {/* Report Summary Scorecards */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
-                      <p className="text-xs font-semibold text-slate-400">Total Evaluated</p>
+                      <p className="text-xs font-semibold text-slate-400">{t("demo.patientDetails.totalEvaluated")}</p>
                       <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">
                         {detailedReport.summary?.total || 0}
                       </p>
-                      <p className="text-[11px] text-slate-500">Quantum parameters</p>
+                      <p className="text-[11px] text-slate-500">{t("demo.patientDetails.quantumParameters")}</p>
                     </div>
 
                     <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Normal Parameters</p>
+                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{t("demo.patientDetails.normalParameters")}</p>
                       <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">
                         {detailedReport.summary?.normal || 0}
                       </p>
-                      <p className="text-[11px] text-emerald-600/70">Within healthy limits</p>
+                      <p className="text-[11px] text-emerald-600/70">{t("demo.patientDetails.withinHealthyLimits")}</p>
                     </div>
 
                     <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-800">
-                      <p className="text-xs font-semibold text-rose-600 dark:text-rose-400">Abnormal / Alerts</p>
+                      <p className="text-xs font-semibold text-rose-600 dark:text-rose-400">{t("demo.patientDetails.abnormalAlerts")}</p>
                       <p className="text-2xl font-bold text-rose-700 dark:text-rose-300 mt-1">
                         {detailedReport.summary?.abnormal || 0}
                       </p>
                       <p className="text-[11px] text-rose-600/70 inline-flex flex-wrap items-center gap-x-1">
                         <span>{detailedReport.summary?.high || 0}</span>
-                        <span>High</span>
+                        <span>{t("demo.patientDetails.high")}</span>
                         <span aria-hidden="true">·</span>
                         <span>{detailedReport.summary?.low || 0}</span>
-                        <span>Low</span>
+                        <span>{t("demo.patientDetails.low")}</span>
                       </p>
                     </div>
 
                     <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Selected Guidance</p>
+                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{t("demo.patientDetails.selectedGuidance")}</p>
                       <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">
                         {detailedReport.summary?.selected_points_count || 0}
                       </p>
-                      <p className="text-[11px] text-emerald-600/70">Wellness guidance points</p>
+                      <p className="text-[11px] text-emerald-600/70">{t("demo.patientDetails.wellnessGuidancePoints")}</p>
                     </div>
                   </div>
 
@@ -913,10 +915,10 @@ export default function PatientDetails() {
                           <Tag className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                           <div>
                             <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-                              {detailedReport.visit.scan_pricing.name || "Scan Price"}
+                              {detailedReport.visit.scan_pricing.name || t("demo.patientDetails.scanPrice")}
                             </p>
                             <p className="text-[10px] text-emerald-600/70">
-                              Amount charged on this scan session
+                              {t("demo.patientDetails.amountCharged")}
                             </p>
                           </div>
                         </div>
@@ -933,10 +935,10 @@ export default function PatientDetails() {
                       <div>
                         <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                           <Activity className="h-4 w-4 text-emerald-600" />
-                          Evaluated Parameter Values & Health Ranges
+                          {t("demo.patientDetails.evaluatedParameters")}
                         </h4>
                         <p className="text-xs text-slate-500">
-                          Comprehensive analysis of all machine parameters evaluated during this session.
+                          {t("demo.patientDetails.evaluatedParametersDesc")}
                         </p>
                       </div>
 
@@ -950,7 +952,7 @@ export default function PatientDetails() {
                               : "text-slate-500"
                               }`}
                           >
-                            <span>All</span>
+                            <span>{t("demo.patientDetails.filterAll")}</span>
                             <span>({detailedReport.parameters?.length || 0})</span>
                           </button>
                           <button
@@ -960,7 +962,7 @@ export default function PatientDetails() {
                               : "text-slate-500"
                               }`}
                           >
-                            <span>Abnormal</span>
+                            <span>{t("demo.patientDetails.filterAbnormal")}</span>
                             <span>({detailedReport.summary?.abnormal || 0})</span>
                           </button>
                           <button
@@ -970,7 +972,7 @@ export default function PatientDetails() {
                               : "text-slate-500"
                               }`}
                           >
-                            <span>Normal</span>
+                            <span>{t("demo.patientDetails.filterNormal")}</span>
                             <span>({detailedReport.summary?.normal || 0})</span>
                           </button>
                         </div>
@@ -978,7 +980,7 @@ export default function PatientDetails() {
                         {/* Search */}
                         <input
                           type="text"
-                          placeholder="Search parameters..."
+                          placeholder={t("demo.patientDetails.searchParameters")}
                           value={paramSearch}
                           onChange={(e) => setParamSearch(e.target.value)}
                           className="px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 w-36 sm:w-44 focus:outline-none focus:ring-1 focus:ring-emerald-500"
@@ -992,12 +994,11 @@ export default function PatientDetails() {
                         <table className="w-full text-left text-xs">
                           <thead className="bg-slate-50 dark:bg-slate-800/80 sticky top-0 z-10 text-slate-500 font-semibold border-b">
                             <tr>
-                              <th className="py-2.5 px-3.5">Code</th>
-                              <th className="py-2.5 px-3.5">Parameter Name</th>
-                              <th className="py-2.5 px-3.5">Category</th>
-                              <th className="py-2.5 px-3.5">Observed Value</th>
-                              <th className="py-2.5 px-3.5">Reference Range*</th>
-                              <th className="py-2.5 px-3.5">Assessment Status</th>
+                              <th className="py-2.5 px-3.5">{t("demo.patientDetails.thParameterName")}</th>
+                              <th className="py-2.5 px-3.5">{t("demo.patientDetails.thCategory")}</th>
+                              <th className="py-2.5 px-3.5">{t("demo.patientDetails.thObservedValue")}</th>
+                              <th className="py-2.5 px-3.5">{t("demo.patientDetails.thReferenceRange")}</th>
+                              <th className="py-2.5 px-3.5">{t("demo.patientDetails.thAssessmentStatus")}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1014,13 +1015,10 @@ export default function PatientDetails() {
                                       : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
                                   }
                                 >
-                                  <td className="py-2.5 px-3.5 font-mono font-bold text-slate-500">
-                                    {p.code || "—"}
-                                  </td>
                                   <td className="py-2.5 px-3.5 font-semibold text-slate-800 dark:text-slate-200">
                                     {displayName}
                                   </td>
-                                  <td className="py-2.5 px-3.5 text-slate-500">{p.category || "General"}</td>
+                                  <td className="py-2.5 px-3.5 text-slate-500">{p.category || t("demo.patientDetails.general")}</td>
                                   <td className="py-2.5 px-3.5 font-bold font-mono text-slate-900 dark:text-slate-100">
                                     <span>{p.raw_value}</span> <span className="text-[10px] font-normal text-slate-500">{p.unit}</span>
                                   </td>
@@ -1034,15 +1032,15 @@ export default function PatientDetails() {
                                   <td className="py-2.5 px-3.5">
                                     {p.result_type === "HIGH" ? (
                                       <span className="inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
-                                        <TrendingUp className="h-3 w-3" /> HIGH
+                                        <TrendingUp className="h-3 w-3" /> {t("demo.patientDetails.scoreHigh")}
                                       </span>
                                     ) : p.result_type === "LOW" ? (
                                       <span className="inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-                                        <TrendingDown className="h-3 w-3" /> LOW
+                                        <TrendingDown className="h-3 w-3" /> {t("demo.patientDetails.scoreLow")}
                                       </span>
                                     ) : (
                                       <span className="inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                                        <CheckCircle2 className="h-3 w-3" /> NORMAL
+                                        <CheckCircle2 className="h-3 w-3" /> {t("demo.patientDetails.scoreNormal")}
                                       </span>
                                     )}
                                   </td>
@@ -1060,17 +1058,17 @@ export default function PatientDetails() {
                     <div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                         <Sparkles className="h-4 w-4 text-amber-500" />
-                        Selected Wellness Information & Ayurvedic Lifestyle Guidance in Report
+                        {t("demo.patientDetails.selectedWellness")}
                       </h4>
                       <p className="text-xs text-slate-500">
-                        The specific guidance points and remedies chosen for inclusion in this client's final report.
+                        {t("demo.patientDetails.selectedWellnessDesc")}
                       </p>
                     </div>
 
                     {(detailedReport.abnormal_analysis || []).length === 0 ? (
                       <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
                         <CheckCircle2 className="h-4 w-4 shrink-0" />
-                        All evaluated parameters are within the normal range for this session. No abnormal alerts triggered.
+                        {t("demo.patientDetails.allNormal")}
                       </div>
                     ) : (
                       <div className="space-y-3.5">
@@ -1092,9 +1090,6 @@ export default function PatientDetails() {
                             >
                               <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-700/60">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-mono font-bold text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded">
-                                    {p.code}
-                                  </span>
                                   <h5 className="font-bold text-sm text-slate-900 dark:text-slate-100">
                                     {paramName}
                                   </h5>
@@ -1108,7 +1103,8 @@ export default function PatientDetails() {
                                   <span>{item.result_type}:</span>
                                   <span>{item.raw_value}</span>
                                   <span>{p.unit || ""}</span>
-                                  <span aria-hidden="true">(Range:</span>
+                                  <span aria-hidden="true">(</span>
+                                  <span>{t("demo.patientDetails.range")}</span>
                                   <span>{p.normal_min}</span>
                                   <span aria-hidden="true">–</span>
                                   <span>{p.normal_max}</span>
@@ -1127,12 +1123,12 @@ export default function PatientDetails() {
                                       className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700/60 text-xs space-y-1.5"
                                     >
                                       <p className="font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide text-[11px]">
-                                        {secTitle}
+                                        <LocalizedText value={secTitle} />
                                       </p>
                                       <ul className="space-y-1 text-slate-700 dark:text-slate-300 pl-3 list-disc">
                                         {selectedItems.map((it) => (
                                           <li key={it.id} className="leading-relaxed">
-                                            {it.text_en}
+                                            <LocalizedText value={it.text_en} />
                                           </li>
                                         ))}
                                       </ul>
@@ -1153,7 +1149,7 @@ export default function PatientDetails() {
             {/* Modal Footer */}
             <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/60 flex items-center justify-between">
               <Button variant="outline" size="sm" onClick={() => setReportModalOpen(false)}>
-                Close Viewer
+                {t("demo.patientDetails.closeViewer")}
               </Button>
               <div className="flex items-center gap-2">
                 <Button
@@ -1161,14 +1157,14 @@ export default function PatientDetails() {
                   variant="outline"
                   onClick={() => handleDownloadReport(selectedVisitId)}
                 >
-                  <Download className="h-4 w-4 mr-1.5" /> Download Report
+                  <Download className="h-4 w-4 mr-1.5" /> {t("demo.patientDetails.downloadReport")}
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => navigate(`/report-pdf/${selectedVisitId}`)}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
                 >
-                  <ExternalLink className="h-4 w-4 mr-1.5" /> Open Full PDF Report
+                  <ExternalLink className="h-4 w-4 mr-1.5" /> {t("demo.patientDetails.openFullPdfReport")}
                 </Button>
               </div>
             </div>
@@ -1184,7 +1180,7 @@ export default function PatientDetails() {
               <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
                 <Pencil className="h-5 w-5" />
                 <h3 className="text-lg">
-                  <span>Edit Client Profile</span>
+                  <span>{t("demo.patientDetails.editClientProfile")}</span>
                   <span> ({patientData.patient_code})</span>
                 </h3>
               </div>
@@ -1199,7 +1195,7 @@ export default function PatientDetails() {
             <form onSubmit={handleSaveEdit} className="space-y-4 text-sm">
               <div>
                 <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                  Full Name *
+                  {t("demo.patientDetails.labelFullName")}
                 </label>
                 <input
                   type="text"
@@ -1213,7 +1209,7 @@ export default function PatientDetails() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Age *
+                    {t("demo.patientDetails.labelAge")}
                   </label>
                   <input
                     type="number"
@@ -1227,16 +1223,16 @@ export default function PatientDetails() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Gender *
+                    {t("demo.patientDetails.labelGender")}
                   </label>
                   <select
                     value={editForm.gender}
                     onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-white dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="Male">Male (पुरुष)</option>
-                    <option value="Female">Female (महिला)</option>
-                    <option value="Other">Other</option>
+                    <option value="Male">{t("demo.patientDetails.genderMale")}</option>
+                    <option value="Female">{t("demo.patientDetails.genderFemale")}</option>
+                    <option value="Other">{t("demo.patientDetails.genderOther")}</option>
                   </select>
                 </div>
               </div>
@@ -1244,7 +1240,7 @@ export default function PatientDetails() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Mobile Number *
+                    {t("demo.patientDetails.labelMobile")}
                   </label>
                   <input
                     type="text"
@@ -1257,7 +1253,7 @@ export default function PatientDetails() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Email Address
+                    {t("demo.patientDetails.labelEmail")}
                   </label>
                   <input
                     type="email"
@@ -1271,7 +1267,7 @@ export default function PatientDetails() {
 
               <div>
                 <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                  Date of Birth
+                  {t("demo.patientDetails.labelDob")}
                 </label>
                 <input
                   type="date"
@@ -1284,7 +1280,7 @@ export default function PatientDetails() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Weight (kg)
+                    {t("demo.patientDetails.labelWeight")}
                   </label>
                   <input
                     type="number"
@@ -1299,7 +1295,7 @@ export default function PatientDetails() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Height (cm)
+                    {t("demo.patientDetails.labelHeight")}
                   </label>
                   <input
                     type="number"
@@ -1316,7 +1312,7 @@ export default function PatientDetails() {
 
               <div>
                 <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                  Full Residential Address
+                  {t("demo.patientDetails.labelAddress")}
                 </label>
                 <textarea
                   rows={2}
@@ -1328,14 +1324,14 @@ export default function PatientDetails() {
 
               <div className="flex justify-end gap-3 pt-2">
                 <Button type="button" variant="outline" onClick={() => setShowEditModal(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   type="submit"
                   disabled={submittingEdit}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5"
                 >
-                  {submittingEdit ? "Saving..." : "Save Changes"}
+                  {submittingEdit ? t("demo.patientDetails.saving") : t("demo.patientDetails.saveChanges")}
                 </Button>
               </div>
             </form>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -11,45 +12,46 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, AlertTriangle, CheckCircle2, CircleDollarSign } from "lucide-react";
 
-const parameters = [
-  { name: "Body Temperature", value: "98.6°F", tone: "normal", statusLabel: "Normal" },
-  { name: "Blood Pressure", value: "124/82", tone: "high", statusLabel: "High" },
-  { name: "Hemoglobin", value: "12.8 g/dL", tone: "low", statusLabel: "Low" },
-  { name: "Blood Sugar", value: "94 mg/dL", tone: "normal", statusLabel: "Normal" },
-];
-
 export default function ReportEntry() {
+  const { t } = useTranslation();
+
+  const parameters = [
+    { name: t("demo.reportEntry.paramBodyTemperature"), value: "98.6°F", tone: "normal", statusLabel: t("demo.reportEntry.statusNormal") },
+    { name: t("demo.reportEntry.paramBloodPressure"), value: "124/82", tone: "high", statusLabel: t("demo.reportEntry.statusHigh") },
+    { name: t("demo.reportEntry.paramHemoglobin"), value: "12.8 g/dL", tone: "low", statusLabel: t("demo.reportEntry.statusLow") },
+    { name: t("demo.reportEntry.paramBloodSugar"), value: "94 mg/dL", tone: "normal", statusLabel: t("demo.reportEntry.statusNormal") },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Quantum Report Entry</h1>
-          <p className="text-sm text-muted-foreground">Capture 250–300 parameters with auto status, color coding and notes.</p>
+          <h1 className="text-2xl font-semibold">{t("demo.reportEntry.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("demo.reportEntry.subtitle")}</p>
         </div>
         <Button className="gap-2">
-          <Sparkles className="h-4 w-4" /> Generate Report
+          <Sparkles className="h-4 w-4" /> {t("demo.reportEntry.generateReport")}
         </Button>
       </div>
 
       <Card className="border-0 shadow-sm">
         <CardHeader>
-          <CardTitle>Client & Report Details</CardTitle>
-          <CardDescription>Core intake details for the health report workflow.</CardDescription>
+          <CardTitle>{t("demo.reportEntry.clientDetailsTitle")}</CardTitle>
+          <CardDescription>{t("demo.reportEntry.clientDetailsDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
-          <Input placeholder="Client Name" />
-          <Input placeholder="Report ID" />
-          <Input placeholder="Consultant Name" />
-          <Input placeholder="Date" />
-          <Textarea className="md:col-span-2" placeholder="Wellness notes and observations" />
+          <Input placeholder={t("demo.reportEntry.phClientName")} />
+          <Input placeholder={t("demo.reportEntry.phReportId")} />
+          <Input placeholder={t("demo.reportEntry.phConsultantName")} />
+          <Input placeholder={t("demo.reportEntry.phDate")} />
+          <Textarea className="md:col-span-2" placeholder={t("demo.reportEntry.phWellnessNotes")} />
         </CardContent>
       </Card>
 
       <Card className="border-0 shadow-sm">
         <CardHeader>
-          <CardTitle>Parameter Entry</CardTitle>
-          <CardDescription>Prototype layout for master-driven entries and status tagging.</CardDescription>
+          <CardTitle>{t("demo.reportEntry.parameterEntryTitle")}</CardTitle>
+          <CardDescription>{t("demo.reportEntry.parameterEntryDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
@@ -73,27 +75,27 @@ export default function ReportEntry() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-emerald-600">
               <CheckCircle2 className="h-5 w-5" />
-              <p className="font-semibold">Auto Status</p>
+              <p className="font-semibold">{t("demo.reportEntry.autoStatus")}</p>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">Normal, Low and High flags based on the master parameter range.</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("demo.reportEntry.autoStatusDesc")}</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-amber-600">
               <AlertTriangle className="h-5 w-5" />
-              <p className="font-semibold">Color Coding</p>
+              <p className="font-semibold">{t("demo.reportEntry.colorCoding")}</p>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">Visual indicators for urgency and interpretation.</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("demo.reportEntry.colorCodingDesc")}</p>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-teal-600">
               <CircleDollarSign className="h-5 w-5" />
-              <p className="font-semibold">Report Notes</p>
+              <p className="font-semibold">{t("demo.reportEntry.reportNotes")}</p>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">Capture final guidance and consultant recommendations.</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("demo.reportEntry.reportNotesDesc")}</p>
           </CardContent>
         </Card>
       </div>

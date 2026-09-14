@@ -7,8 +7,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export function ResetPasswordForm({ className, ...props }) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -28,10 +30,10 @@ export function ResetPasswordForm({ className, ...props }) {
         otp,
         password: data.password,
       });
-      toast.success("Password update successful!");
+      toast.success(t("demo.resetForm.success"));
       navigate("/");
     } catch (error) {
-      toast.error("Password update failed. Please try again.");
+      toast.error(t("demo.resetForm.failed"));
     } finally {
       setLoading(false);
     }
@@ -44,19 +46,19 @@ export function ResetPasswordForm({ className, ...props }) {
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center mb-5">
-        <h1 className="text-3xl font-bold">Reset your password</h1>
+        <h1 className="text-3xl font-bold">{t("demo.resetForm.title")}</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          Set a new password to continue logging into your account.
+          {t("demo.resetForm.subtitle")}
         </p>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-3">
-          <Label htmlFor="password">New Password</Label>
+          <Label htmlFor="password">{t("demo.resetForm.newPassword")}</Label>
           <Input
             id="password"
             type="text"
-            placeholder="Enter new password"
-            {...register("password", { required: "New Password is required" })}
+            placeholder={t("demo.resetForm.newPasswordPlaceholder")}
+            {...register("password", { required: t("demo.resetForm.newPasswordRequired") })}
           />
           {errors.password && (
             <p className="text-red-500 text-sm">{errors.password.message}</p>
@@ -70,7 +72,7 @@ export function ResetPasswordForm({ className, ...props }) {
           size="lg"
           disabled={loading}
         >
-          Submit
+          {t("demo.resetForm.submit")}
         </Button>
       </div>
     </form>

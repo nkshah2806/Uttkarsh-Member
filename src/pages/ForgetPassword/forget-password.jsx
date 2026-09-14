@@ -1,9 +1,11 @@
 import { GalleryVerticalEnd } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import login from "../../assets/login.jpg";
 import { ForgetPasswordForm } from "@/components/forget-password-form";
 import logo from "../../assets/logo.png"
 
 export default function ForgetPassword() {
+  const { t } = useTranslation();
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -12,7 +14,7 @@ export default function ForgetPassword() {
             <div className="flex h-15 w-15 items-center justify-center">
               <img src={logo} alt="" />
             </div>
-            Utkarsh Corporation
+            {t("demo.brand.company")}
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
@@ -24,7 +26,7 @@ export default function ForgetPassword() {
       <div className="relative hidden bg-muted lg:block">
         <img
           src={login}
-          alt="login banner"
+          alt={t("demo.loginPage.loginBannerAlt")}
           className="absolute inset-0 h-full w-full object-cover"
         />
       </div>

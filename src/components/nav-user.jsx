@@ -15,10 +15,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     localStorage.removeItem("UserDetails");
@@ -74,7 +76,7 @@ export function NavUser({ user }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
-              Log out
+              {t("demo.navUser.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

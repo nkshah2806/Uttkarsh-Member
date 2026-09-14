@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, ChevronDown, ChevronUp, FileSpreadsheet, IndianRupee, ListFilter, Search, X } from "lucide-react";
 import { toast } from "sonner";
+import LocalizedText from "@/components/LocalizedText";
+import { Loader } from "@/components/Loader";
 
 export default function QuantumDataEntry() {
   const { visitId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [patient, setPatient] = useState(null);
   const [visit, setVisit] = useState(null);
@@ -67,7 +71,7 @@ export default function QuantumDataEntry() {
       });
       setResultsMap(map);
     } catch (err) {
-      toast.error("Failed to load scan data");
+      toast.error(t("demo.quantumDataEntry.toastLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -89,15 +93,15 @@ export default function QuantumDataEntry() {
         .map(([parameter_id, raw_value]) => ({ parameter_id, raw_value: Number(raw_value) }));
 
       if (results.length === 0) {
-        toast.error("Please enter at least one parameter value.");
+        toast.error(t("demo.quantumDataEntry.toastNoValues"));
         return;
       }
 
       await axiosInstance.post(`v1/visits/${visitId}/results`, { results });
-      toast.success("Data saved! Running auto-analysis...");
+      toast.success(t("demo.quantumDataEntry.toastSaved"));
       navigate(`/report-review/${visitId}`);
     } catch (err) {
-      toast.error("Failed to save scan results");
+      toast.error(t("demo.quantumDataEntry.toastSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -118,17 +122,17 @@ export default function QuantumDataEntry() {
       }, []);
 
     if (!rows.length) {
-      toast.error("No valid rows found. Format: CODE, VALUE");
+      toast.error(t("demo.quantumDataEntry.toastNoValidRows"));
       return;
     }
 
     try {
       await axiosInstance.post(`v1/visits/${visitId}/results/import`, { rows });
-      toast.success(`Imported ${rows.length} values!`);
+      toast.success(t("demo.quantumDataEntry.toastImported", { count: rows.length }));
       setShowCsvModal(false);
       fetchData();
     } catch (err) {
-      toast.error("CSV import failed");
+      toast.error(t("demo.quantumDataEntry.toastCsvFailed"));
     }
   };
 
@@ -156,8 +160,8 @@ export default function QuantumDataEntry() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-16 text-muted-foreground">
-        Loading quantum parameters...
+      <div className="flex items-center justify-center p-16">
+        <Loader size={36} label={t("demo.quantumDataEntry.loading")} />
       </div>
     );
   }
@@ -168,20 +172,20 @@ export default function QuantumDataEntry() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 p-5 text-white shadow-md">
         <div>
           <p className="text-xs uppercase tracking-widest font-bold text-teal-200">
-            Quantum Scan · Visit #{visitId?.slice(-6).toUpperCase()}
+            {t("demo.quantumDataEntry.scanVisit", { code: visitId?.slice(-6).toUpperCase() })}
           </p>
           <h1 className="text-xl font-bold mt-1">
             {patient?.name}
             <span className="ml-2 text-sm font-normal text-teal-200">({patient?.patient_code})</span>
           </h1>
           <p className="text-xs text-teal-200 mt-0.5 inline-flex flex-wrap items-center gap-x-1.5">
-            <span>Age:</span>
+            <span>{t("demo.quantumDataEntry.ageLabel")}</span>
             <span>{patient?.age ?? "—"}</span>
             <span aria-hidden="true">|</span>
-            <span>Gender:</span>
+            <span>{t("demo.quantumDataEntry.genderLabel")}</span>
             <span>{patient?.gender ?? "—"}</span>
             <span aria-hidden="true">|</span>
-            <span>Mobile:</span>
+            <span>{t("demo.quantumDataEntry.mobileLabel")}</span>
             <span>{patient?.mobile ?? "—"}</span>
           </p>
           {visit?.scan_pricing?.amount != null && (
@@ -192,7 +196,7 @@ export default function QuantumDataEntry() {
               </span>
               {visit.scan_pricing.name && (
                 <span className="text-[10px] font-medium text-teal-100 uppercase tracking-wide">
-                  · {visit.scan_pricing.name}
+                  · <LocalizedText value={visit.scan_pricing.name} />
                 </span>
               )}
             </div>
@@ -200,7 +204,7 @@ export default function QuantumDataEntry() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="secondary" size="sm" onClick={() => setShowCsvModal(true)} className="text-xs">
-            <FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> CSV Upload
+            <FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" /> {t("demo.quantumDataEntry.csvUpload")}
           </Button>
           <Button
             onClick={handleSaveAndAnalyze}
@@ -208,7 +212,7 @@ export default function QuantumDataEntry() {
             className="bg-white text-emerald-600 hover:bg-emerald-50 font-bold text-sm px-5"
           >
             <Activity className="mr-2 h-4 w-4" />
-            {saving ? "Saving..." : "Save & Run Analysis"}
+            {saving ? t("demo.quantumDataEntry.saving") : t("demo.quantumDataEntry.saveAndRun")}
           </Button>
         </div>
       </div>
@@ -217,15 +221,15 @@ export default function QuantumDataEntry() {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white dark:bg-slate-900 rounded-xl border p-4 text-center shadow-sm">
           <p className="text-2xl font-bold">{parameters.length}</p>
-          <p className="text-xs text-slate-500 mt-0.5">Total Parameters</p>
+          <p className="text-xs text-slate-500 mt-0.5">{t("demo.quantumDataEntry.totalParameters")}</p>
         </div>
         <div className="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 p-4 text-center shadow-sm">
           <p className="text-2xl font-bold text-emerald-700">{entered}</p>
-          <p className="text-xs text-emerald-500 mt-0.5">Values Entered</p>
+          <p className="text-xs text-emerald-500 mt-0.5">{t("demo.quantumDataEntry.valuesEntered")}</p>
         </div>
         <div className={`rounded-xl border p-4 text-center shadow-sm ${abnormal > 0 ? "bg-rose-50 border-rose-200 dark:bg-rose-950/40" : "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40"}`}>
           <p className={`text-2xl font-bold ${abnormal > 0 ? "text-rose-700" : "text-emerald-700"}`}>{abnormal}</p>
-          <p className={`text-xs mt-0.5 ${abnormal > 0 ? "text-rose-500" : "text-emerald-500"}`}>Abnormal</p>
+          <p className={`text-xs mt-0.5 ${abnormal > 0 ? "text-rose-500" : "text-emerald-500"}`}>{t("demo.quantumDataEntry.abnormal")}</p>
         </div>
       </div>
 
@@ -243,12 +247,12 @@ export default function QuantumDataEntry() {
             <ListFilter className="h-3.5 w-3.5" />
             <span className="inline-flex items-center">
               {selectedCategories.length === 0 ? (
-                <span>All Categories</span>
+                <span>{t("demo.quantumDataEntry.allCategories")}</span>
               ) : (
                 <span className="inline-flex items-center gap-1">
-                  <span>Filtering</span>
+                  <span>{t("demo.quantumDataEntry.filtering")}</span>
                   <span>{selectedCategories.length}</span>
-                  <span>Categor{selectedCategories.length === 1 ? "y" : "ies"}</span>
+                  <span>{t("demo.quantumDataEntry.categoriesLabel")}</span>
                 </span>
               )}
             </span>
@@ -259,7 +263,7 @@ export default function QuantumDataEntry() {
             <div className="absolute left-0 top-full mt-2 z-30 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-2">
               <div className="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Filter by Category
+                  {t("demo.quantumDataEntry.filterByCategory")}
                 </span>
                 {selectedCategories.length > 0 && (
                   <button
@@ -267,7 +271,7 @@ export default function QuantumDataEntry() {
                     onClick={() => setSelectedCategories([])}
                     className="text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
                   >
-                    Clear ({selectedCategories.length})
+                    {t("demo.quantumDataEntry.clearCount", { count: selectedCategories.length })}
                   </button>
                 )}
               </div>
@@ -281,7 +285,7 @@ export default function QuantumDataEntry() {
                     className="h-3.5 w-3.5 rounded accent-emerald-600"
                   />
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex-1">
-                    All Categories
+                    {t("demo.quantumDataEntry.allCategories")}
                   </span>
                   <span className="text-[10px] font-semibold text-slate-400">{parameters.length}</span>
                 </label>
@@ -316,7 +320,7 @@ export default function QuantumDataEntry() {
                 })}
 
                 {filterCategories.length === 0 && (
-                  <p className="px-2 py-3 text-xs text-slate-400 text-center">No categories available</p>
+                  <p className="px-2 py-3 text-xs text-slate-400 text-center">{t("demo.quantumDataEntry.noCategories")}</p>
                 )}
               </div>
             </div>
@@ -335,7 +339,7 @@ export default function QuantumDataEntry() {
                   type="button"
                   onClick={() => setSelectedCategories((prev) => prev.filter((c) => c !== cat))}
                   className="p-0.5 rounded-full hover:bg-emerald-200 dark:hover:bg-emerald-800 cursor-pointer"
-                  aria-label={`Remove ${cat} filter`}
+                  aria-label={t("demo.quantumDataEntry.removeFilter", { cat })}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -346,17 +350,17 @@ export default function QuantumDataEntry() {
               onClick={() => setSelectedCategories([])}
               className="text-[11px] font-semibold text-slate-500 hover:text-rose-600 hover:underline cursor-pointer"
             >
-              Clear all
+              {t("demo.quantumDataEntry.clearAll")}
             </button>
           </div>
         )}
 
         <p className="ml-auto text-xs text-slate-400 dark:text-slate-500">
-          <span>Showing</span>{" "}
+          <span>{t("demo.quantumDataEntry.showing")}</span>{" "}
           <span className="font-semibold text-slate-600 dark:text-slate-400">{filteredParams.length}</span>
-          <span>of</span>{" "}
+          <span>{t("demo.quantumDataEntry.of")}</span>{" "}
           <span className="font-semibold text-slate-600 dark:text-slate-400">{parameters.length}</span>
-          <span>parameters</span>
+          <span>{t("demo.quantumDataEntry.parameters")}</span>
         </p>
       </div>
 
@@ -365,7 +369,7 @@ export default function QuantumDataEntry() {
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
         <input
           type="text"
-          placeholder="Search by code, name or category..."
+          placeholder={t("demo.quantumDataEntry.searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -387,11 +391,10 @@ export default function QuantumDataEntry() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800 text-xs uppercase font-semibold text-slate-500 sticky top-0">
                 <tr>
-                  <th className="px-4 py-3 text-left w-20">Code</th>
-                  <th className="px-4 py-3 text-left">Parameter</th>
-                  <th className="px-4 py-3 text-left">Normal Range</th>
-                  <th className="px-4 py-3 w-40">Value</th>
-                  <th className="px-4 py-3 text-center w-32">Status</th>
+                  <th className="px-4 py-3 text-left">{t("demo.quantumDataEntry.colParameter")}</th>
+                  <th className="px-4 py-3 text-left">{t("demo.quantumDataEntry.colNormalRange")}</th>
+                  <th className="px-4 py-3 w-40">{t("demo.quantumDataEntry.colValue")}</th>
+                  <th className="px-4 py-3 text-center w-32">{t("demo.quantumDataEntry.colStatus")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -405,12 +408,11 @@ export default function QuantumDataEntry() {
                         status === "LOW" ? "bg-amber-50/40 dark:bg-amber-950/10" : ""
                         }`}
                     >
-                      <td className="px-4 py-2.5 font-mono text-xs font-bold text-emerald-600">{p.code}</td>
                       <td className="px-4 py-2.5">
                         <div className="font-medium text-slate-800 dark:text-white">
-                          {p.name_en}
+                          <LocalizedText value={p.name_en} />
                         </div>
-                        <div className="text-xs text-slate-400">{p.category}</div>
+                        <div className="text-xs text-slate-400"><LocalizedText value={p.category} /></div>
                       </td>
                       <td className="px-4 py-2.5 text-xs text-slate-500">
                         <span>{p.normal_min}</span>
@@ -434,16 +436,16 @@ export default function QuantumDataEntry() {
                       </td>
                       <td className="px-4 py-2.5 text-center">
                         {status === "NORMAL" && (
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">NORMAL</span>
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">{t("demo.quantumDataEntry.statusNormal")}</span>
                         )}
                         {status === "HIGH" && (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">
-                            <ChevronUp className="h-3 w-3" /> HIGH
+                            <ChevronUp className="h-3 w-3" /> {t("demo.quantumDataEntry.statusHigh")}
                           </span>
                         )}
                         {status === "LOW" && (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
-                            <ChevronDown className="h-3 w-3" /> LOW
+                            <ChevronDown className="h-3 w-3" /> {t("demo.quantumDataEntry.statusLow")}
                           </span>
                         )}
                         {!status && <span className="text-slate-300">—</span>}
@@ -461,11 +463,11 @@ export default function QuantumDataEntry() {
       {showCsvModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold">Bulk CSV Import</h3>
+            <h3 className="text-lg font-bold">{t("demo.quantumDataEntry.csvModalTitle")}</h3>
             <p className="text-xs text-slate-500">
-              Paste your machine's data. Each line: <code className="bg-slate-100 px-1 rounded">PARAMETER_CODE, VALUE</code>
+              {t("demo.quantumDataEntry.csvModalDesc")} <code className="bg-slate-100 px-1 rounded">PARAMETER_CODE, VALUE</code>
             </p>
-            <p className="text-xs text-slate-400">Example: <code>P001, 5.8</code></p>
+            <p className="text-xs text-slate-400">{t("demo.quantumDataEntry.csvModalExample")} <code>P001, 5.8</code></p>
             <textarea
               rows={8}
               placeholder={"P001, 5.8\nP002, 2.9\nP003, 0.6"}
@@ -474,9 +476,9 @@ export default function QuantumDataEntry() {
               className="w-full rounded-lg border px-3 py-2 font-mono text-xs dark:bg-slate-800 dark:border-slate-700"
             />
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowCsvModal(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setShowCsvModal(false)}>{t("common.cancel")}</Button>
               <Button onClick={handleCSVImport} className="bg-emerald-600 hover:bg-emerald-700">
-                Import Values
+                {t("demo.quantumDataEntry.csvImportBtn")}
               </Button>
             </div>
           </div>

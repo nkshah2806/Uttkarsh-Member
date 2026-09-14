@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -17,13 +18,14 @@ export default function DeleteDialog({
   handleToggleChange,
   disabled,
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [checkedState, setCheckedState] = React.useState(false); // state to manage switch
   const [pendingState, setPendingState] = React.useState(null); // temp state to apply after confirm
 
   const handleSwitchChange = (checked) => {
     if (disabled) {
-      toast.error("This action is disabled for this user.");
+      toast.error(t("demo.shared.deleteDialog.disabledForUser"));
       return; // If disabled, do nothing
     }
     setPendingState(checked);
@@ -59,10 +61,10 @@ export default function DeleteDialog({
           </DialogHeader>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={cancelDialog}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button variant="destructive" onClick={confirmChange}>
-              Confirm
+              {t("common.confirm")}
             </Button>
           </div>
         </DialogContent>

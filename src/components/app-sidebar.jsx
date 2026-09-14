@@ -24,8 +24,10 @@ import {
 } from "@/components/ui/sidebar";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import { Config } from "@/lib/Config";
+import { useTranslation } from "react-i18next";
 
 export function AppSidebar({ ...props }) {
+  const { t } = useTranslation();
   const [userDetails, setUserDetails] = React.useState(() => {
     const data = localStorage.getItem("UserDetails");
     return data ? JSON.parse(data) : null;
@@ -70,22 +72,22 @@ export function AppSidebar({ ...props }) {
 
   // Full navigation available only after the profile is complete AND approved.
   const fullNav = [
-    { title: "Dashboard", url: "/dashboard", icon: DashboardIcon },
-    { title: "Personal Details", url: "/member/profile", icon: UserCheck },
+    { title: t("demo.sidebar.dashboard"), url: "/dashboard", icon: DashboardIcon },
+    { title: t("demo.sidebar.personalDetails"), url: "/member/profile", icon: UserCheck },
     {
-      title: "Quantum Health Analysis",
+      title: t("demo.sidebar.quantumHealthAnalysis"),
       url: "#",
       icon: Stethoscope,
       items: [
-        { title: "Client Registration", url: "/patients", icon: Users },
-        { title: "Report History", url: "/clients", icon: ClipboardList },
+        { title: t("demo.sidebar.clientRegistration"), url: "/patients", icon: Users },
+        { title: t("demo.sidebar.reportHistory"), url: "/clients", icon: ClipboardList },
       ],
     },
   ];
 
   // Restricted mode: only the profile page remains reachable (logout is in the footer).
   const restrictedNav = [
-    { title: "Personal Details", url: "/member/profile", icon: UserCheck },
+    { title: t("demo.sidebar.personalDetails"), url: "/member/profile", icon: UserCheck },
   ];
 
   const data = {
@@ -108,11 +110,11 @@ export function AppSidebar({ ...props }) {
           <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
             <ShieldAlert className="h-4 w-4" />
             <span className="text-xs font-bold uppercase tracking-wide">
-              Account Inactive
+              {t("demo.sidebar.accountInactive")}
             </span>
           </div>
           <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed">
-            Your account has been deactivated by the administrator. Please contact support for assistance.
+            {t("demo.sidebar.accountInactiveDesc")}
           </p>
         </div>
       );
@@ -124,11 +126,11 @@ export function AppSidebar({ ...props }) {
           <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-xs font-bold uppercase tracking-wide">
-              Profile Rejected
+              {t("demo.sidebar.profileRejected")}
             </span>
           </div>
           <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed">
-            Your profile was rejected. Please review the reason and update your details.
+            {t("demo.sidebar.profileRejectedDesc")}
           </p>
         </div>
       );
@@ -140,11 +142,11 @@ export function AppSidebar({ ...props }) {
           <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
             <Info className="h-4 w-4" />
             <span className="text-xs font-bold uppercase tracking-wide">
-              Profile Incomplete
+              {t("demo.sidebar.profileIncomplete")}
             </span>
           </div>
           <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed">
-            Please complete your profile before accessing the portal.
+            {t("demo.sidebar.profileIncompleteDesc")}
           </p>
         </div>
       );
@@ -155,11 +157,11 @@ export function AppSidebar({ ...props }) {
         <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
           <ShieldAlert className="h-4 w-4" />
           <span className="text-xs font-bold uppercase tracking-wide">
-            Account Under Review
+            {t("demo.sidebar.accountUnderReview")}
           </span>
         </div>
         <p className="mt-1.5 text-xs text-foreground/80 leading-relaxed">
-          Your profile has been submitted and is under review. You will get access once approved.
+          {t("demo.sidebar.accountUnderReviewDesc")}
         </p>
       </div>
     );

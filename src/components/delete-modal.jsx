@@ -1,5 +1,6 @@
 // components/delete-modal.jsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ export function DeleteButton({
   payload,
   invalidateKey,
 }) {
+  const { t } = useTranslation();
   const userDetails = JSON.parse(localStorage.getItem("UserDetails"));
 
   const handleDelete = async () => {
@@ -33,10 +35,10 @@ export function DeleteButton({
       } else {
         await axiosInstance.delete(url);
       }
-      toast.success(`${title} deleted successfully`);
+      toast.success(t("demo.shared.deleteModal.deletedSuccess", { title }));
       onClose();
     } catch (error) {
-      toast.error("Failed to delete");
+      toast.error(t("demo.shared.deleteModal.deleteFailed"));
     }
   };
 
@@ -46,7 +48,9 @@ export function DeleteButton({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete <strong>{text}</strong>?
+            {t("demo.shared.deleteModal.confirmBefore")}{" "}
+            <strong>{text}</strong>
+            {t("demo.shared.deleteModal.confirmAfter")}
           </DialogDescription>
           {/* <h2 className="text-lg font-semibold">{title}</h2>
           <p>
@@ -55,10 +59,10 @@ export function DeleteButton({
         </DialogHeader>
         <DialogFooter className="mt-4 flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
-            Delete
+            {t("common.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>

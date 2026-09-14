@@ -1,7 +1,9 @@
 import { LoginForm } from "@/components/login-form";
+import { useTranslation } from "react-i18next";
 import login from "../../assets/login.jpg";
 
 export default function Login() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-svh bg-slate-50 lg:grid lg:grid-cols-2">
       {/* Left - Login Section */}
@@ -15,10 +17,10 @@ export default function Login() {
 
             <div>
               <h1 className="text-lg font-bold leading-tight text-slate-900">
-                Utkarsh Corporation
+                {t("demo.brand.company")}
               </h1>
               <p className="text-xs font-medium text-slate-500">
-                Member Portal
+                {t("demo.loginPage.memberPortal")}
               </p>
             </div>
           </div>
@@ -50,14 +52,14 @@ export default function Login() {
               href="#"
               className="font-medium text-primary hover:underline"
             >
-              Terms of Service
+              {t("demo.loginPage.termsOfService")}
             </a>{" "}
             and{" "}
             <a
               href="#"
               className="font-medium text-primary hover:underline"
             >
-              Privacy Policy
+              {t("demo.loginPage.privacyPolicy")}
             </a>
             .
           </p>
@@ -68,16 +70,16 @@ export default function Login() {
           <span className="inline-flex items-center gap-1">
             <span aria-hidden="true">©</span>
             <span>{new Date().getFullYear()}</span>
-            <span>Utkarsh Corporation</span>
+            <span>{t("demo.brand.company")}</span>
           </span>
 
           <span>
-            Need help?{" "}
+            {t("demo.loginPage.needHelp")}{" "}
             <a
               href="#"
               className="font-medium text-slate-600 hover:text-primary"
             >
-              Contact Support
+              {t("demo.loginPage.contactSupport")}
             </a>
           </span>
         </div>
@@ -99,7 +101,7 @@ export default function Login() {
           {/* Top */}
           <div className="flex justify-end">
             <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium backdrop-blur-md">
-              Secure Member Portal
+              {t("demo.loginPage.securePortal")}
             </span>
           </div>
 
@@ -110,26 +112,26 @@ export default function Login() {
             </div>
 
             <h2 className="text-4xl font-bold leading-tight xl:text-5xl">
-              Your membership, your journey.
+              {t("demo.loginPage.tagline")}
             </h2>
 
             <p className="mt-5 max-w-lg text-sm leading-7 text-white/75 xl:text-base">
-              Access your personal profile, membership information, activities, documents and other member services from one secure dashboard.
+              {t("demo.loginPage.description")}
             </p>
 
             {/* Feature Cards */}
             <div className="mt-8 grid max-w-lg grid-cols-2 gap-3">
               <div className="rounded-xl border border-white/10 bg-white/10 p-4 backdrop-blur-md">
-                <p className="text-sm font-semibold">Member Profile</p>
+                <p className="text-sm font-semibold">{t("demo.loginPage.memberProfile")}</p>
                 <p className="mt-1 text-xs text-white/60">
-                  Manage your information
+                  {t("demo.loginPage.manageInfo")}
                 </p>
               </div>
 
               <div className="rounded-xl border border-white/10 bg-white/10 p-4 backdrop-blur-md">
-                <p className="text-sm font-semibold">Secure Access</p>
+                <p className="text-sm font-semibold">{t("demo.loginPage.secureAccess")}</p>
                 <p className="mt-1 text-xs text-white/60">
-                  Your data stays protected
+                  {t("demo.loginPage.dataProtected")}
                 </p>
               </div>
             </div>
@@ -137,7 +139,7 @@ export default function Login() {
 
           {/* Bottom */}
           <div className="text-xs text-white/50">
-            Trusted access for Utkarsh Corporation members
+            {t("demo.loginPage.trusted")}
           </div>
         </div>
       </div>

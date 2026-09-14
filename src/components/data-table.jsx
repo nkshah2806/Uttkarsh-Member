@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useReactTable,
   getCoreRowModel,
@@ -33,6 +34,7 @@ export function DataTable({
   handleDelete,
   handleView,
 }) {
+  const { t } = useTranslation();
   const [globalFilter, setGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState([]);
@@ -59,7 +61,7 @@ export function DataTable({
     ...columns,
     {
       id: "actions",
-      header: "Actions",
+      header: t("demo.table.actions"),
       cell: ({ row }) => {
         const rowData = row.original;
         const { action = {} } = rowData;
@@ -111,7 +113,7 @@ export function DataTable({
         type="text"
         value={globalFilter}
         onChange={(e) => setGlobalFilter(e.target.value)}
-        placeholder="Search..."
+        placeholder={t("demo.table.searchPlaceholder")}
         className="border px-3 py-2 rounded-md w-full md:w-1/3"
       />
 
@@ -166,9 +168,9 @@ export function DataTable({
                   className="h-24 text-center text-muted-foreground"
                 >
                   <div className="flex flex-col items-center justify-center gap-2">
-                    <span>No results found.</span>
+                    <span>{t("demo.table.noResults")}</span>
                     <span className="text-xs">
-                      Try adjusting your search or filters.
+                      {t("demo.table.tryAdjusting")}
                     </span>
                   </div>
                 </TableCell>
@@ -181,14 +183,14 @@ export function DataTable({
       <div className="flex flex-col md:flex-row md:items-center gap-4">
         <div className="flex items-center gap-2">
           <label htmlFor="pageSize" className="text-sm flex-none">
-            Rows per page :
+            {t("demo.table.rowsPerPage")}
           </label>
           <Select
             onValueChange={(value) => table.setPageSize(Number(value))}
             value={String(table.getState().pagination.pageSize)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select Size" />
+              <SelectValue placeholder={t("demo.table.selectSize")} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -203,18 +205,18 @@ export function DataTable({
         </div>
 
         <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
-          <span>Page</span>
+          <span>{t("demo.table.page")}</span>
           <span className="font-medium">{table.getState().pagination.pageIndex + 1}</span>
-          <span>of</span>
+          <span>{t("demo.table.of")}</span>
           <span className="font-medium">{table.getPageCount()}</span>
         </div>
 
         <div className="text-sm text-muted-foreground inline-flex items-center gap-1">
-          <span>Showing</span>
+          <span>{t("demo.table.showing")}</span>
           <span className="font-medium">{table.getRowModel().rows.length}</span>
-          <span>of</span>
+          <span>{t("demo.table.of")}</span>
           <span className="font-medium">{table.getFilteredRowModel().rows.length}</span>
-          <span>entries</span>
+          <span>{t("demo.table.entries")}</span>
         </div>
 
         <div className="ms-auto space-x-2">
@@ -224,7 +226,7 @@ export function DataTable({
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Prev
+            {t("demo.table.prev")}
           </Button>
           <Button
             className="px-3 py-2 text-sm border"
@@ -232,7 +234,7 @@ export function DataTable({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            {t("demo.table.next")}
           </Button>
         </div>
       </div>
