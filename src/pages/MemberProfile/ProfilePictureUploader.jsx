@@ -15,7 +15,10 @@ import user from "@/assets/user.png";
  * error state so a failed upload can never leave the UI stuck.
  */
 const MAX_FILE_SIZE_MB = 5;
-const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
+// Must stay in sync with MEDIA_TYPES.image in Uttkarsh-Backend/middleware/multer.js
+// (image/jpeg, image/png, image/webp) — otherwise the client would allow a file
+// the server rejects with 415.
+const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export default function ProfilePictureUploader({
@@ -27,6 +30,10 @@ export default function ProfilePictureUploader({
     const { t } = useTranslation();
     const inputRef = useRef(null);
     const localPreviewRef = useRef("");
+    // Guards against duplicate/concurrent uploads. State updates are async, so a
+    // rapid double-selection could otherwise fire two requests before the
+    // "uploading" state re-renders and disables the button.
+    const uploadingRef = useRef(false);
     const [preview, setPreview] = useState(value || "");
     const [uploading, setUploading] = useState(false);
 
@@ -64,6 +71,7 @@ export default function ProfilePictureUploader({
 
     const handleFile = async (file) => {
         if (!file) return;
+        if (uploadingRef.current) return; // already uploading — ignore duplicates
 
         if (!ALLOWED_TYPES.includes(file.type)) {
             toast.error(t("demo.memberProfile.pictureInvalidType"));
@@ -80,6 +88,7 @@ export default function ProfilePictureUploader({
         localPreviewRef.current = blobUrl;
         setPreview(blobUrl);
 
+        uploadingRef.current = true;
         setUploading(true);
         try {
             const res = await memberProfileService.uploadProfilePicture(file);
@@ -98,6 +107,9 @@ export default function ProfilePictureUploader({
                 t("demo.memberProfile.pictureUploadFailed")
             );
         } finally {
+            // ALWAYS clear both flags, so a failed/aborted request can never
+            // leave the loader stuck.
+            uploadingRef.current = false;
             setUploading(false);
             if (inputRef.current) inputRef.current.value = "";
         }
@@ -108,7 +120,8 @@ export default function ProfilePictureUploader({
     };
 
     const handleRemove = async () => {
-        if (uploading) return;
+        if (uploadingRef.current) return;
+        uploadingRef.current = true;
         setUploading(true);
         try {
             await persistReference("", t("demo.memberProfile.pictureRemoved"));
@@ -124,6 +137,7 @@ export default function ProfilePictureUploader({
                 t("demo.memberProfile.pictureRemoveFailed")
             );
         } finally {
+            uploadingRef.current = false;
             setUploading(false);
         }
     };
@@ -203,7 +217,7 @@ export default function ProfilePictureUploader({
             <input
                 ref={inputRef}
                 type="file"
-                accept="image/jpeg,image/jpg,image/png"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
                 className="hidden"
                 onChange={handleInputChange}
             />

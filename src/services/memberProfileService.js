@@ -27,10 +27,15 @@ export const memberProfileService = {
    */
   uploadProfilePicture: async (file) => {
     const formData = new FormData();
+    // The field name MUST match `uploadSingle("profileImage", { folder: "users" })`
+    // in Uttkarsh-Backend/routes/userRoutes.js — otherwise multer reports
+    // LIMIT_UNEXPECTED_FILE / no file.
     formData.append("profileImage", file);
-    const response = await axiosInstance.post("user/uploadProfileImage", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+
+    // Do NOT set "Content-Type" manually. Axios/browser must generate the
+    // multipart boundary itself; hardcoding "multipart/form-data" produces a
+    // header WITHOUT a boundary, so the server cannot parse the body.
+    const response = await axiosInstance.post("user/uploadProfileImage", formData);
     return response.data;
   },
 
