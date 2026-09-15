@@ -29,6 +29,7 @@ import {
 } from "@/schemas/memberProfileSchema";
 import { PageLoader } from "@/components/Loader";
 import { memberProfileService } from "@/services/memberProfileService";
+import ProfilePictureUploader from "./ProfilePictureUploader";
 
 export default function MemberProfilePage() {
   const { t } = useTranslation();
@@ -36,6 +37,8 @@ export default function MemberProfilePage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  // Stored server-relative reference of the member's profile picture.
+  const [profilePicture, setProfilePicture] = useState("");
 
   const {
     register,
@@ -79,6 +82,7 @@ export default function MemberProfilePage() {
       const res = await memberProfileService.getProfile();
       if (res.success && res.data) {
         setProfileData(res.data);
+        setProfilePicture(res.data.profile_picture || "");
         reset({
           distributor_id: res.data.distributor_id || "",
           franchise_code: res.data.franchise_code || "",
@@ -135,7 +139,13 @@ export default function MemberProfilePage() {
   const onSubmit = async (data) => {
     try {
       setSubmitting(true);
-      const res = await memberProfileService.saveProfile(data);
+      // Send the current picture reference alongside the form fields so the
+      // profile document stays in sync even if the dedicated picture endpoint
+      // was skipped (e.g. offline sync or an older client).
+      const res = await memberProfileService.saveProfile({
+        ...data,
+        profile_picture: profilePicture,
+      });
       if (res.success) {
         const saved = res.data || {};
         const completed = !!saved.profile_completed;
@@ -149,6 +159,9 @@ export default function MemberProfilePage() {
         localStorage.setItem("memberApprovalReason", saved.rejection_reason || "");
 
         setProfileData(saved);
+        if (saved.profile_picture !== undefined) {
+          setProfilePicture(saved.profile_picture || "");
+        }
 
         if (completed) {
           window.dispatchEvent(new Event("profileCompleted"));
@@ -315,6 +328,14 @@ export default function MemberProfilePage() {
 
       {/* Main Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* PROFILE PICTURE */}
+        <ProfilePictureUploader
+          value={profilePicture}
+          onChange={setProfilePicture}
+          name={profileData?.member_name || ""}
+          disabled={submitting}
+        />
+
         {/* SECTION A: FRANCHISE DETAILS */}
         <div className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-6 shadow-xs">
           <div className="flex items-center gap-3 border-b border-border pb-4">

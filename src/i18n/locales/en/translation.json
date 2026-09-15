@@ -386,6 +386,18 @@
             "wfFollowUpDesc": "Next visit"
         },
         "memberProfile": {
+            "profilePicture": "Profile Picture",
+            "profilePictureDesc": "Upload a clear photo of yourself or your store. JPG or PNG, up to 5 MB.",
+            "uploadPhoto": "Upload Photo",
+            "changePhoto": "Change Photo",
+            "removePhoto": "Remove",
+            "pictureInvalidType": "Only JPG or PNG image files are allowed.",
+            "pictureTooLarge": "Image is too large. Maximum allowed size is 5 MB.",
+            "pictureUploaded": "Profile picture updated successfully.",
+            "pictureUploadFailed": "Failed to upload profile picture. Please try again.",
+            "pictureRemoved": "Profile picture removed.",
+            "pictureRemoveFailed": "Failed to remove profile picture. Please try again.",
+            "pictureHint": "Your picture is shown here and to the admin during profile review.",
             "loadFailed": "Failed to load member profile details",
             "successApproved": "✅ Profile approved! Redirecting to your dashboard...",
             "successSubmitted": "✅ Profile submitted for admin approval!",

@@ -1,5 +1,9 @@
 import React, { useSyncExternalStore } from "react";
 import { subscribe, getSnapshot } from "@/lib/globalLoading";
+import {
+    subscribe as subscribeTranslation,
+    getSnapshot as getTranslationSnapshot,
+} from "@/lib/translationLoading";
 
 const INDIGO = "#4f46e5";
 const MUTED = "#64748b";
@@ -175,6 +179,61 @@ export function GlobalLoader() {
                     animation: "uc-global-loading 1.2s linear infinite",
                 }}
             />
+        </div>
+    );
+}
+
+/**
+ * "Translating content…" indicator.
+ *
+ * Mounted once in `main.jsx`. Appears whenever any Google-Translate batch is in
+ * flight (see `@/lib/translationLoading`), starts immediately and disappears
+ * only after the request settles — success OR failure. Any failure is surfaced
+ * as a small, non-blocking notice so existing content is never hidden.
+ */
+export function TranslationLoader() {
+    const state = useSyncExternalStore(
+        subscribeTranslation,
+        getTranslationSnapshot,
+        getTranslationSnapshot
+    );
+    const visible = state.visible;
+    const failed = Boolean(state.error);
+
+    return (
+        <div
+            role="status"
+            aria-live="polite"
+            aria-busy={visible}
+            style={{
+                position: "fixed",
+                right: 16,
+                bottom: 16,
+                zIndex: 99998,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: visible ? "10px 14px" : "0 14px",
+                borderRadius: 9999,
+                background: failed ? "#7f1d1d" : "#1e1b4b",
+                color: "#f8fafc",
+                boxShadow: "0 10px 30px -10px rgba(15,23,42,0.55)",
+                fontSize: 13,
+                fontWeight: 500,
+                pointerEvents: "none",
+                opacity: visible ? 1 : 0,
+                transform: visible ? "translateY(0)" : "translateY(12px)",
+                maxHeight: visible ? 60 : 0,
+                overflow: "hidden",
+                transition: "opacity 200ms ease, transform 200ms ease, max-height 200ms ease, padding 200ms ease",
+            }}
+        >
+            {visible && !failed ? (
+                <span style={{ display: "inline-flex", color: "#c7d2fe" }}>
+                    <Spinner size={16} strokeWidth={4} />
+                </span>
+            ) : null}
+            <span>{failed ? state.error : "Translating content…"}</span>
         </div>
     );
 }

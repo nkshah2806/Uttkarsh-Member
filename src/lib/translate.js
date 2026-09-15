@@ -1,5 +1,10 @@
 import axiosInstance from "@/lib/axios";
 import { DEFAULT_LANGUAGE } from "@/i18n/config";
+import {
+    startTranslation,
+    stopTranslation,
+    markTranslationError,
+} from "@/lib/translationLoading";
 
 /**
  * Dynamic-content translation client (Member / Franchise Panel).
@@ -195,6 +200,10 @@ async function flushQueue() {
     for (const [target, map] of snapshot) {
         const texts = [...map.keys()];
         if (!texts.length) continue;
+
+        // Centralized translation loader: starts the moment a batch begins and
+        // is torn down in `finally`, so it always stops — on success OR failure.
+        startTranslation();
         try {
             const { data } = await axiosInstance.post(
                 "translate",
@@ -203,7 +212,8 @@ async function flushQueue() {
                     target,
                     source: DEFAULT_LANGUAGE,
                 },
-                // Background call — must not trigger the global loader.
+                // Background call — must not trigger the *global* loader, but
+                // it *is* tracked by the dedicated translation loader above.
                 { silent: true }
             );
             const translations = (data && data.translations) || [];
@@ -227,7 +237,12 @@ async function flushQueue() {
         } catch (err) {
             // Never block the UI on failure — fall back to the original text.
             console.error("[Translation ERROR] batch request failed:", err?.message || err);
+            markTranslationError("Translation service is unavailable. Showing original text.");
             texts.forEach((text) => (map.get(text) || []).forEach((resolve) => resolve(text)));
+        } finally {
+            // Guaranteed teardown: the "Translating content…" indicator can
+            // never get stuck, regardless of success or failure.
+            stopTranslation();
         }
     }
 }
