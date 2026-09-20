@@ -26,6 +26,13 @@ export const memberProfileService = {
    * @returns {Promise<{ image: string }>} server-relative image reference
    */
   uploadProfilePicture: async (file) => {
+    // Guard: the browser File object is required. Passing anything else (e.g.
+    // a plain object) would be JSON-stringified by axios and reach the backend
+    // as `profileImage: {}` -> 400 NO_FILE.
+    if (!(file instanceof File)) {
+      throw new Error("No image file selected.");
+    }
+
     const formData = new FormData();
     // The field name MUST match `uploadSingle("profileImage", { folder: "users" })`
     // in Uttkarsh-Backend/routes/userRoutes.js — otherwise multer reports
@@ -34,7 +41,10 @@ export const memberProfileService = {
 
     // Do NOT set "Content-Type" manually. Axios/browser must generate the
     // multipart boundary itself; hardcoding "multipart/form-data" produces a
-    // header WITHOUT a boundary, so the server cannot parse the body.
+    // header WITHOUT a boundary, so the server cannot parse the body. The
+    // axios instance no longer sets a default application/json Content-Type
+    // (see src/lib/axios.js), which is what previously turned this FormData
+    // into JSON and made the file arrive as `{}`.
     const response = await axiosInstance.post("user/uploadProfileImage", formData);
     return response.data;
   },

@@ -108,40 +108,23 @@ export default function UserEdit() {
     setGender(value);
   };
 
-  // const handleUploadProfile = async (file) => {
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("userId", id);
-  //     formData.append("profileImage", file);
-
-  //     const response = await axiosInstance.post(
-  //       `user/uploadProfileImage`,
-  //       formData,
-  //       {
-  //         headers: { "Content-Type": "multipart/form-data" },
-  //       }
-  //     );
-  //     toast.success(response.data.meta.message);
-  //   } catch (error) {
-  //     console.error("Upload error:", error);
-  //     toast.error("Upload failed. Try again.");
-  //   }
-  // };
-
-  // ...existing code...
   const handleUploadProfile = async (file) => {
     try {
-      const formData = new FormData();
-      formData.append("userId", id);
+      if (!file) return;
 
+      const formData = new FormData();
+      // NOTE: do NOT hardcode "Content-Type: multipart/form-data" here. A header
+      // without a boundary makes the backend's multer middleware unable to parse
+      // the body, which surfaced as an empty payload (`profileImage: {}`) and a
+      // 400 NO_FILE response. Axios/the browser now generate the header (with
+      // boundary) automatically; the axios request interceptor also strips any
+      // Content-Type set for FormData bodies.
+      formData.append("userId", id);
       formData.append("profileImage", file);
 
       const response = await axiosInstance.post(
         `user/uploadProfileImage`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        formData
       );
       toast.success(
         response.data.message || t("demo.userEdit.imageUpdated")
