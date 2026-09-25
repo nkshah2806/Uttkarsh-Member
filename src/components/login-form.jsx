@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, CheckCircle2, MessageCircle } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosInstance from "@/lib/axios";
@@ -132,7 +132,6 @@ function RegisterSection({ onRegistered }) {
   const [passVisible, setPassVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [whatsappConsent, setWhatsappConsent] = useState(true);
 
   const password = watch("password");
 
@@ -153,8 +152,6 @@ function RegisterSection({ onRegistered }) {
       // Notify parent to show success screen
       onRegistered({
         memberName: userData?.fullName || `${data.firstName} ${data.lastName}`,
-        mobileNumber: data.mobileNumber,
-        whatsappConsent,
       });
     } catch (error) {
       const msg = error?.response?.data?.message || "Registration failed. Please try again.";
@@ -202,7 +199,7 @@ function RegisterSection({ onRegistered }) {
       {/* Mobile number */}
       <div className="grid gap-2">
         <Label htmlFor="reg-mobile">
-          Mobile / WhatsApp Number <span className="text-destructive">*</span>
+          Mobile Number <span className="text-destructive">*</span>
         </Label>
         <Input
           id="reg-mobile"
@@ -274,27 +271,6 @@ function RegisterSection({ onRegistered }) {
         {errors.confirmPassword && <p className="text-destructive text-xs">{errors.confirmPassword.message}</p>}
       </div>
 
-      {/* WhatsApp consent checkbox */}
-      <label
-        htmlFor="whatsapp-consent"
-        className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800 p-3 cursor-pointer select-none"
-      >
-        <input
-          id="whatsapp-consent"
-          type="checkbox"
-          checked={whatsappConsent}
-          onChange={(e) => setWhatsappConsent(e.target.checked)}
-          className="mt-0.5 h-4 w-4 rounded accent-emerald-600 cursor-pointer shrink-0"
-        />
-        <span className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-          <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-400">
-            <MessageCircle size={13} />
-            WhatsApp Welcome Message
-          </span>
-          {" "}— I consent to receive an automatic welcome message on my registered mobile number via WhatsApp after successful registration.
-        </span>
-      </label>
-
       <Button
         id="register-submit-btn"
         type="submit"
@@ -311,7 +287,7 @@ function RegisterSection({ onRegistered }) {
 // ---------------------------------------------------------------------------
 // REGISTRATION SUCCESS screen
 // ---------------------------------------------------------------------------
-function RegistrationSuccess({ memberName, mobileNumber, whatsappConsent, onBackToLogin }) {
+function RegistrationSuccess({ memberName, onBackToLogin }) {
   return (
     <div className="flex flex-col items-center gap-5 text-center py-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Icon */}
@@ -327,20 +303,6 @@ function RegistrationSuccess({ memberName, mobileNumber, whatsappConsent, onBack
 
       {/* Info cards */}
       <div className="w-full space-y-3 text-left">
-        {/* WhatsApp notice */}
-        {whatsappConsent && mobileNumber && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800 p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <MessageCircle size={16} className="text-emerald-600 shrink-0" />
-              <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">WhatsApp Welcome Message</span>
-            </div>
-            <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
-              A welcome message will be sent to your registered WhatsApp number{" "}
-              <span className="font-medium">({mobileNumber})</span>, if available. Delivery depends on your WhatsApp availability.
-            </p>
-          </div>
-        )}
-
         {/* Next steps */}
         <div className="rounded-xl border bg-muted/40 p-4 space-y-2">
           <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Next Steps</p>
@@ -388,8 +350,6 @@ export function LoginForm({ className, ...props }) {
       <div className={cn("w-full", className)} {...props}>
         <RegistrationSuccess
           memberName={registrationResult.memberName}
-          mobileNumber={registrationResult.mobileNumber}
-          whatsappConsent={registrationResult.whatsappConsent}
           onBackToLogin={handleBackToLogin}
         />
       </div>
